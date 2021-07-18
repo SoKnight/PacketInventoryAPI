@@ -1,0 +1,15 @@
+name: PacketInventoryAPI
+main: ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin
+author: SoKnight
+version: ${project.version}
+depend: [ProtocolLib]
+description: ${project.description}
+api-version: 1.13
+
+commands:
+  packetinvdebug:
+    description: Just a debug command
+
+permissions:
+  packetinventoryapi.command.debug:
+    default: op
