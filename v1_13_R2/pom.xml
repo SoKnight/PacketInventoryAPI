@@ -14,7 +14,6 @@
     <name>PacketInventoryAPI - NMS 1.13.R2</name>
 
     <properties>
-        <basedir>${basedir}/../</basedir>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
@@ -24,6 +23,8 @@
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>core</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.spigotmc</groupId>
@@ -35,7 +36,15 @@
         <!-- Spigot full 1.13.2 -->
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-1_13_2</artifactId>
+            <artifactId>spigot</artifactId>
+            <version>1.13.2-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.spigotmc</groupId>
+                    <artifactId>minecraft-server</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Lombok -->
@@ -50,6 +59,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

@@ -24,6 +24,8 @@
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>core</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.spigotmc</groupId>
@@ -35,7 +37,15 @@
         <!-- Spigot full 1.16.5 -->
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-1_16_5</artifactId>
+            <artifactId>spigot</artifactId>
+            <version>1.16.5-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.spigotmc</groupId>
+                    <artifactId>minecraft-server</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Lombok -->
@@ -50,6 +60,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

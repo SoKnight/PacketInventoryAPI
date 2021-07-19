@@ -15,7 +15,6 @@
     <packaging>jar</packaging>
 
     <properties>
-        <basedir>${basedir}/../</basedir>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>

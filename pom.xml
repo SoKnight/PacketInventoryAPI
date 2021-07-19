@@ -8,6 +8,16 @@
 
     <modules>
         <module>core</module>
+        <module>magenta</module>
+        <module>purple</module>
+        <module>v1_13_R1</module>
+        <module>v1_13_R2</module>
+        <module>v1_14_R1</module>
+        <module>v1_15_R1</module>
+        <module>v1_16_R1</module>
+        <module>v1_16_R2</module>
+        <module>v1_16_R3</module>
+        <module>v1_17_R1</module>
     </modules>
 
     <name>PacketInventoryAPI</name>
@@ -68,40 +78,8 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <profiles>
-        <!-- Purple: MC 1.17+ -->
-        <profile>
-            <id>purple</id>
-            <modules>
-                <module>v1_17_R1</module>
-                <module>purple</module>
-            </modules>
-        </profile>
-        <!-- Magenta: MC 1.13 -> 1.16.5 -->
-        <profile>
-            <id>magenta</id>
-            <modules>
-                <module>v1_13_R1</module>
-                <module>v1_13_R2</module>
-                <module>v1_14_R1</module>
-                <module>v1_15_R1</module>
-                <module>v1_16_R1</module>
-                <module>v1_16_R2</module>
-                <module>v1_16_R3</module>
-                <module>magenta</module>
-            </modules>
-        </profile>
-    </profiles>
-
     <dependencyManagement>
         <dependencies>
-            <!-- Core module -->
-            <dependency>
-                <groupId>ru.soknight.packetinventoryapi</groupId>
-                <artifactId>core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- Spigot API -->
             <dependency>
                 <groupId>org.spigotmc</groupId>
@@ -131,212 +109,6 @@
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
                 <scope>provided</scope>
-            </dependency>
-
-            <!-- Spigot FULL Dependencies from 1.13 to 1.17.1 -->
-
-            <!-- Spigot 1.13 -->
-            <dependency>
-                <groupId>org.spigotmc</groupId>
-                <artifactId>spigot-1_13</artifactId>
-                <version>1.13</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>minecraft-server</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- Spigot 1.13.2 -->
-            <dependency>
-                <groupId>org.spigotmc</groupId>
-                <artifactId>spigot-1_13_2</artifactId>
-                <version>1.13.2</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>minecraft-server</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- Spigot 1.14.4 -->
-            <dependency>
-                <groupId>org.spigotmc</groupId>
-                <artifactId>spigot-1_14_4</artifactId>
-                <version>1.14.4</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>minecraft-server</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- Spigot 1.15.2 -->
-            <dependency>
-                <groupId>org.spigotmc</groupId>
-                <artifactId>spigot-1_15_2</artifactId>
-                <version>1.15.2</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>minecraft-server</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- Spigot 1.16.1 -->
-            <dependency>
-                <groupId>org.spigotmc</groupId>
-                <artifactId>spigot-1_16_1</artifactId>
-                <version>1.16.1</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>minecraft-server</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- Spigot 1.16.3 -->
-            <dependency>
-                <groupId>org.spigotmc</groupId>
-                <artifactId>spigot-1_16_3</artifactId>
-                <version>1.16.3</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>minecraft-server</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- Spigot 1.16.5 -->
-            <dependency>
-                <groupId>org.spigotmc</groupId>
-                <artifactId>spigot-1_16_5</artifactId>
-                <version>1.16.5</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>minecraft-server</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- Spigot 1.17.1 -->
-            <dependency>
-                <groupId>org.spigotmc</groupId>
-                <artifactId>spigot-1_17_1</artifactId>
-                <version>1.17.1</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>minecraft-server</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- All NMS implementations from 1.13.R1 to 1.17.R1 -->
-            
-            <!-- NMS 1.13.R1 -->
-            <dependency>
-                <groupId>ru.soknight.packetinventoryapi</groupId>
-                <artifactId>v1_13_R1</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>spigot-1_13_2</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- NMS 1.13.R2 -->
-            <dependency>
-                <groupId>ru.soknight.packetinventoryapi</groupId>
-                <artifactId>v1_13_R2</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>spigot-1_13_2</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- NMS 1.14.R1 -->
-            <dependency>
-                <groupId>ru.soknight.packetinventoryapi</groupId>
-                <artifactId>v1_14_R1</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>spigot-1_14_4</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- NMS 1.15.R1 -->
-            <dependency>
-                <groupId>ru.soknight.packetinventoryapi</groupId>
-                <artifactId>v1_15_R1</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>spigot-1_15_2</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- NMS 1.16.R1 -->
-            <dependency>
-                <groupId>ru.soknight.packetinventoryapi</groupId>
-                <artifactId>v1_16_R1</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>spigot-1_16_1</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- NMS 1.16.R2 -->
-            <dependency>
-                <groupId>ru.soknight.packetinventoryapi</groupId>
-                <artifactId>v1_16_R2</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>spigot-1_16_3</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- NMS 1.16.R3 -->
-            <dependency>
-                <groupId>ru.soknight.packetinventoryapi</groupId>
-                <artifactId>v1_16_R3</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>spigot-1_16_5</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- NMS 1.17.R1 -->
-            <dependency>
-                <groupId>ru.soknight.packetinventoryapi</groupId>
-                <artifactId>v1_17_R1</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spigotmc</groupId>
-                        <artifactId>spigot-1_17_1</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
