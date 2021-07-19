@@ -3,7 +3,7 @@
     
     <groupId>ru.soknight.packetinventoryapi</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -33,10 +33,23 @@
         <shade.maven.plugin.version>3.2.4</shade.maven.plugin.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <name>Releases</name>
+            <url>http://compobox.sytes.net:8081/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus</id>
+            <name>Snapshot</name>
+            <url>http://compobox.sytes.net:8081/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <repositories>
         <repository>
-            <id>local-maven-repo</id>
-            <url>file:///${project.basedir}/local-maven-repo</url>
+            <id>soknight-repo</id>
+            <url>http://compobox.sytes.net:8081/repository/maven-public</url>
         </repository>
         <repository>
             <id>spigot-repo</id>
@@ -126,7 +139,7 @@
             <dependency>
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-1_13</artifactId>
-                <version>1.13-SNAPSHOT</version>
+                <version>1.13</version>
                 <scope>provided</scope>
                 <exclusions>
                     <exclusion>
@@ -139,7 +152,7 @@
             <dependency>
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-1_13_2</artifactId>
-                <version>1.13.2-SNAPSHOT</version>
+                <version>1.13.2</version>
                 <scope>provided</scope>
                 <exclusions>
                     <exclusion>
@@ -152,7 +165,7 @@
             <dependency>
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-1_14_4</artifactId>
-                <version>1.14.4-SNAPSHOT</version>
+                <version>1.14.4</version>
                 <scope>provided</scope>
                 <exclusions>
                     <exclusion>
@@ -165,7 +178,7 @@
             <dependency>
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-1_15_2</artifactId>
-                <version>1.15.2-SNAPSHOT</version>
+                <version>1.15.2</version>
                 <scope>provided</scope>
                 <exclusions>
                     <exclusion>
@@ -178,7 +191,7 @@
             <dependency>
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-1_16_1</artifactId>
-                <version>1.16.1-SNAPSHOT</version>
+                <version>1.16.1</version>
                 <scope>provided</scope>
                 <exclusions>
                     <exclusion>
@@ -191,7 +204,7 @@
             <dependency>
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-1_16_3</artifactId>
-                <version>1.16.3-SNAPSHOT</version>
+                <version>1.16.3</version>
                 <scope>provided</scope>
                 <exclusions>
                     <exclusion>
@@ -204,7 +217,7 @@
             <dependency>
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-1_16_5</artifactId>
-                <version>1.16.5-SNAPSHOT</version>
+                <version>1.16.5</version>
                 <scope>provided</scope>
                 <exclusions>
                     <exclusion>
@@ -217,7 +230,7 @@
             <dependency>
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-1_17_1</artifactId>
-                <version>1.17.1-SNAPSHOT</version>
+                <version>1.17.1</version>
                 <scope>provided</scope>
                 <exclusions>
                     <exclusion>
