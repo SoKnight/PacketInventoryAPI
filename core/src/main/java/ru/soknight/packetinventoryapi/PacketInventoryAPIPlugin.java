@@ -12,6 +12,8 @@ import ru.soknight.packetinventoryapi.menu.registry.MenuRegistry;
 import ru.soknight.packetinventoryapi.menu.registry.SimpleMenuRegistry;
 import ru.soknight.packetinventoryapi.nms.NMSAssistant;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
+import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
+import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacerPAPI;
 import ru.soknight.packetinventoryapi.plugin.command.CommandDebug;
 import ru.soknight.packetinventoryapi.storage.ContainerStorage;
 import ru.soknight.packetinventoryapi.storage.SimpleContainerStorage;
@@ -24,6 +26,8 @@ public class PacketInventoryAPIPlugin extends JavaPlugin {
     private SimpleContainerStorage containerStorage;
     private SimpleMenuRegistry menuRegistry;
     private PacketsListener packetsListener;
+
+    private PlaceholderReplacer papiPlaceholderReplacer;
     
     @Override
     public void onEnable() {
@@ -47,11 +51,13 @@ public class PacketInventoryAPIPlugin extends JavaPlugin {
         this.menuRegistry = new SimpleMenuRegistry();
         this.packetsListener = new PacketsListener(this, containerStorage);
 
+        resolvePlaceholderReplacer();
+
         API_INSTANCE = new SimplePacketInventoryAPI(containerStorage, menuRegistry);
         
         new CommandDebug(this);
         
-        getLogger().info("I was successfully enabled!");
+        getLogger().info("Ready to provide packet inventories management!");
     }
     
     @Override
@@ -69,9 +75,22 @@ public class PacketInventoryAPIPlugin extends JavaPlugin {
         if(packetsListener != null)
             packetsListener.unregister();
     }
+
+    private void resolvePlaceholderReplacer() {
+        // PlaceholderAPI placeholder replacer
+        if(getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            this.papiPlaceholderReplacer = new PlaceholderReplacerPAPI();
+        } else {
+            this.papiPlaceholderReplacer = PlaceholderReplacer.DEFAULT;
+        }
+    }
     
     public static PacketInventoryAPI getApiInstance() {
         return API_INSTANCE;
+    }
+
+    public static PlaceholderReplacer getPlaceholderReplacerPAPI() {
+        return INSTANCE.papiPlaceholderReplacer;
     }
 
     public static void info(String format, Object... args) {

@@ -10,7 +10,7 @@
 #   - slot                (integer)           an index of slot where this item will be displayed
 #   - slots               (integers list)     an array of slot indexes where this item will be displayed
 #                         (string)            a list of slot ranges separated with ', ' part (e.g.: '0-12, 14-26')
-#   - player-head         (string)            a name of player which head will be displayed as item icon
+#   - player-head         (string)            a name of player which head will be displayed as item icon (you can use %player_name% placeholder)
 #   - base64-head         (string)            a base64 encoded value of the head texture to display
 #   - custom-model-data   (integer)           a custom model data ID (useful for custom items with resource packs)
 #   - pattern             (string)            a filling pattern for this item (actual for @filler): 'full' or 'frame'
@@ -32,7 +32,18 @@ content:
     - ' &7Click to change gamemode to creative '
     - ' '
     material: orange_dye
-    slot: 13
+    slot: 11
+
+  stats:
+    name: '&eYour stats'
+    lore:
+    - '&8/super-unique-stats-command'
+    - ' '
+    - ' &7Your name: &b%player_name% '
+    - ' &7Server uptime: &b%server_uptime% '
+    - ' '
+    material: orange_dye
+    slot: 15
 
   $filler:
     name: ' '

@@ -6,6 +6,7 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
 import ru.soknight.packetinventoryapi.container.Container;
+import ru.soknight.packetinventoryapi.container.type.GenericContainer;
 import ru.soknight.packetinventoryapi.exception.configuration.*;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.Menu;
@@ -79,9 +80,17 @@ public class MenuLoader {
         Configuration configuration = loadConfiguration(plugin, resourcePath, outputFile);
         ParsedDataBundle parsedDataBundle = MenuParser.parse(plugin, outputFile, configuration);
 
-        // --- reset existing container content
         PublicWrapper<C, R> wrapper = instance.getContainer();
-        R updateContent = wrapper.getOriginal().updateContent();
+        C original = wrapper.getOriginal();
+
+        // --- update rows amount
+        parsedDataBundle.getRowsAmount().ifPresent(rowsAmount -> {
+            if(original instanceof GenericContainer)
+                ((GenericContainer) original).setRowsAmount(rowsAmount);
+        });
+
+        // --- reset existing container content
+        R updateContent = original.updateContent();
 
         if(resetContent)
             updateContent.resetItemMatrix();

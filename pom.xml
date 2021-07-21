@@ -33,6 +33,7 @@
         <!-- Additional libs versions -->
         <spigot.api.version>1.16.5-R0.1-SNAPSHOT</spigot.api.version>
         <protocollib.version>4.7.0-SNAPSHOT</protocollib.version>
+        <placeholderapi.version>2.10.10</placeholderapi.version>
         <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
         <lombok.version>1.18.20</lombok.version>
 
@@ -93,6 +94,14 @@
                 <groupId>com.comphenix.protocol</groupId>
                 <artifactId>ProtocolLib</artifactId>
                 <version>${protocollib.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- PlaceholderAPI -->
+            <dependency>
+                <groupId>me.clip</groupId>
+                <artifactId>placeholderapi</artifactId>
+                <version>${placeholderapi.version}</version>
                 <scope>provided</scope>
             </dependency>
 

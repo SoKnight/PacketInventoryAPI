@@ -27,4 +27,5 @@ public abstract class AbstractMenuItem<I extends AbstractMenuItem<I, B>, B exten
             return getThis();
         }
     }
+
 }

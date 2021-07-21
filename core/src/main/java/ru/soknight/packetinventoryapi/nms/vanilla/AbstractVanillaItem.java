@@ -8,8 +8,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
 
     public static final Enchantment GLOWING_ENCHANTMENT = Enchantment.DURABILITY;
 
-    protected final ItemStack bukkitItem;
+    protected final WrappedItemStack bukkitItem;
     protected boolean itemRemapRequired;
 
     @Getter protected boolean enchanted;
@@ -25,7 +25,7 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
     @Getter protected String base64Head;
 
     protected AbstractVanillaItem() {
-        this.bukkitItem = new ItemStack(Material.AIR);
+        this.bukkitItem = new WrappedItemStack(Material.AIR, this);
     }
 
     protected void addItemFlags() {
@@ -43,7 +43,7 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
     }
 
     @Override
-    public ItemStack asBukkitItem() {
+    public WrappedItemStack asBukkitItem() {
         return bukkitItem;
     }
 
@@ -161,6 +161,18 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
 
             menuItem.bukkitItem.setAmount(amount);
             menuItem.requireItemRemap();
+            return getThis();
+        }
+
+        @Override
+        public B playerHead(String value) {
+            if(value == null || value.isEmpty() || value.length() > 16)
+                return getThis();
+
+            if(menuItem.getMaterial() != Material.PLAYER_HEAD)
+                material(Material.PLAYER_HEAD);
+
+            menuItem.playerHead = value;
             return getThis();
         }
 

@@ -11,8 +11,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import ru.soknight.packetinventoryapi.animation.Animation;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.Property;
-import ru.soknight.packetinventoryapi.container.type.*;
-import ru.soknight.packetinventoryapi.item.ItemStackBuilder;
+import ru.soknight.packetinventoryapi.container.type.BrewingStandContainer;
+import ru.soknight.packetinventoryapi.container.type.FurnaceContainer;
+import ru.soknight.packetinventoryapi.container.type.HopperContainer;
 import ru.soknight.packetinventoryapi.plugin.menu.ExampleMenu;
 
 public class CommandDebug implements CommandExecutor {
@@ -33,12 +34,6 @@ public class CommandDebug implements CommandExecutor {
             return true;
         
         Player player = (Player) sender;
-        
-        ItemStack item = new ItemStack(Material.DIAMOND);
-        ItemStack item2 = ItemStackBuilder.newBuilder(Material.LIME_STAINED_GLASS_PANE)
-                .displayname("&aLime backpane :D")
-                .build();
-
         menu.open(player);
         return true;
     }

@@ -20,6 +20,7 @@ import ru.soknight.packetinventoryapi.exception.menu.RegistrationDeniedException
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.container.PublicWrapper;
 import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
+import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
 
 @Getter
 public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> implements Menu<C, R> {
@@ -36,6 +37,8 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
         container.setEventListener(event -> PacketInventoryAPIPlugin.getApiInstance()
                 .menuRegistry()
                 .fireEvent(this, event));
+
+        container.getOriginal().appendReplacerFirst(PlaceholderReplacer.PLAYER_NAME);
     }
 
     protected AbstractMenu(C container, String name, Plugin providingPlugin) {

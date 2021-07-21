@@ -1,5 +1,7 @@
 package ru.soknight.packetinventoryapi.storage;
 
+import lombok.SneakyThrows;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import ru.soknight.packetinventoryapi.container.Container;
@@ -105,6 +107,7 @@ public final class SimpleContainerStorage implements ContainerStorage {
         return true;
     }
 
+    @SneakyThrows
     public void cancelClick(Player player, Container<?, ?> container, int slot, ItemStack clickedItem) {
         if(slot < 0)
             return;
@@ -115,7 +118,7 @@ public final class SimpleContainerStorage implements ContainerStorage {
                 .item(EMPTY_ITEM)
                 .send(player);
 
-        if(clickedItem != null && !clickedItem.getType().isAir())
+        if(clickedItem != null && clickedItem.getType() != Material.AIR)
             PacketAssistant.createServerPacket(PacketServerSetSlot.class)
                     .windowID(container.getInventoryId())
                     .slot(slot)

@@ -23,7 +23,7 @@ public class SimplePacketServerSetSlot extends WrappedServerPacket implements Pa
 
     @Override
     public PacketServerSetSlot slot(int value) {
-        handle.getIntegers().write(1, value);
+        handle.getIntegers().write(2, value);
         return this;
     }
 

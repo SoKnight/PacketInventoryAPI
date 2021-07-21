@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
 import ru.soknight.packetinventoryapi.animation.Animation;
 import ru.soknight.packetinventoryapi.api.PacketInventoryAPI;
 import ru.soknight.packetinventoryapi.container.data.Property;
@@ -24,14 +25,13 @@ import ru.soknight.packetinventoryapi.menu.container.CloneableContainer;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerWindowProperty;
-import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
+import ru.soknight.packetinventoryapi.placeholder.LitePlaceholderReplacer;
+import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
 import ru.soknight.packetinventoryapi.storage.SimpleContainerStorage;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -46,6 +46,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     protected final Player inventoryHolder;
     protected final ContainerType containerType;
     protected final DataHolder dataHolder;
+    protected List<PlaceholderReplacer> placeholderReplacers;
     protected BaseComponent title;
     protected MenuItem<?, ?> filler;
     
@@ -74,6 +75,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         this.inventoryHolder = inventoryHolder;
         this.containerType = containerType;
         this.dataHolder = DataHolder.create();
+        this.placeholderReplacers = new ArrayList<>();
         this.title = title;
     }
 
@@ -88,6 +90,8 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         C clone = copy(holder);
 
         clone.contentData.putAll(contentData);
+        clone.placeholderReplacers = placeholderReplacers;
+
         clone.viewingPlayerInventory = viewingPlayerInventory;
         clone.viewingHotbarContent = viewingHotbarContent;
         clone.finishAnimationsOnClose = finishAnimationsOnClose;
@@ -212,6 +216,72 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     // --- window reopening
     public C reopen() {
         return close().open();
+    }
+
+    /***************************
+     *  Placeholder replacers  *
+     **************************/
+
+    public C appendReplacerFirst(LitePlaceholderReplacer replacer) {
+        return appendReplacerFirst((PlaceholderReplacer) replacer);
+    }
+
+    public C appendReplacerFirst(PlaceholderReplacer replacer) {
+        Validate.notNull(replacer, "replacer");
+        this.placeholderReplacers.add(0, replacer);
+        return getThis();
+    }
+
+    public C appendReplacer(LitePlaceholderReplacer replacer) {
+        return appendReplacer((PlaceholderReplacer) replacer);
+    }
+
+    public C appendReplacer(PlaceholderReplacer replacer) {
+        Validate.notNull(replacer, "replacer");
+        this.placeholderReplacers.add(replacer);
+        return getThis();
+    }
+
+    public C appendPAPIReplacerFirst() {
+        return appendReplacerFirst(PacketInventoryAPIPlugin.getPlaceholderReplacerPAPI());
+    }
+
+    public C appendPAPIReplacer() {
+        return appendReplacer(PacketInventoryAPIPlugin.getPlaceholderReplacerPAPI());
+    }
+
+    public C removeReplacer(PlaceholderReplacer replacer) {
+        Validate.notNull(replacer, "replacer");
+        this.placeholderReplacers.remove(replacer);
+        return getThis();
+    }
+
+    public String replacePlaceholders(String original) {
+        if(inventoryHolder == null || placeholderReplacers.isEmpty())
+            return original;
+
+        if(original == null || original.isEmpty())
+            return original;
+
+        String output = original;
+        for(PlaceholderReplacer replacer : placeholderReplacers)
+            output = replacer.replace(inventoryHolder, output);
+
+        return output;
+    }
+
+    public List<String> replacePlaceholders(List<String> original) {
+        if(inventoryHolder == null || placeholderReplacers.isEmpty())
+            return original;
+
+        if(original == null || original.isEmpty())
+            return original;
+
+        List<String> output = original;
+        for(PlaceholderReplacer replacer : placeholderReplacers)
+            output = replacer.replace(inventoryHolder, output);
+
+        return output;
     }
 
     /**********************

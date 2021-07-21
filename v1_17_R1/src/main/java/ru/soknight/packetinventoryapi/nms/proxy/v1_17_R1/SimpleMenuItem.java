@@ -51,24 +51,28 @@ public final class SimpleMenuItem extends AbstractMenuItem<SimpleMenuItem, Simpl
             return this;
         }
 
-        @Override
-        public Builder playerHead(String value) {
-            Validate.notEmpty(value, "player name");
-            Validate.isTrue(value.length() <= 16, "player name cannot be longer than 16!");
-
-            if(menuItem.getMaterial() != Material.PLAYER_HEAD)
-                super.material(Material.PLAYER_HEAD);
-
-            GameProfile profile = new GameProfile(null, value);
-            NBTTagCompound serialized = GameProfileSerializer.serialize(new NBTTagCompound(), profile);
-
-            ItemStack itemStack = menuItem.asVanillaItem();
-            NBTTagCompound tag = itemStack.getOrCreateTag();
-            tag.set("SkullOwner", serialized);
-            itemStack.setTag(tag);
-
-            return getThis();
-        }
+//        @Override
+//        public Builder playerHead(String value) {
+//            Validate.notEmpty(value, "player name");
+//            Validate.isTrue(value.length() <= 16, "player name cannot be longer than 16!");
+//
+//            if(menuItem.getMaterial() != Material.PLAYER_HEAD)
+//                super.material(Material.PLAYER_HEAD);
+//
+//            OfflinePlayer owningPlayer = Bukkit.getOfflinePlayer(value);
+//            SkullMeta itemMeta = (SkullMeta) menuItem.asBukkitItem().getItemMeta();
+//            itemMeta.setOwningPlayer(owningPlayer);
+//            menuItem.asBukkitItem().setItemMeta(itemMeta);
+//
+//            NBTTagCompound serialized = GameProfileSerializer.serialize(new NBTTagCompound(), profile);
+//
+//            ItemStack itemStack = menuItem.asVanillaItem();
+//            NBTTagCompound tag = itemStack.getOrCreateTag();
+//            tag.set("SkullOwner", serialized);
+//            itemStack.setTag(tag);
+//
+//            return getThis();
+//        }
 
         @Override
         public Builder base64Head(String value) {

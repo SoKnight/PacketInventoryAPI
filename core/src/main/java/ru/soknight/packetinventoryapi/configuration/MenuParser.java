@@ -130,7 +130,7 @@ public class MenuParser {
         Set<Integer> slots = new LinkedHashSet<>();
 
         if(configuration.isInt("slot")) {
-            int slot = configuration.getInt("slots");
+            int slot = configuration.getInt("slot");
             if(slot >= 0)
                 slots.add(slot);
         }

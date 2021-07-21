@@ -10,8 +10,10 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,45 +49,27 @@ public class ItemStackBuilder {
     }
     
     public ItemStackBuilder addAttribute(Attribute attribute, AttributeModifier modifier) {
-        return itemMeta(meta -> {
-            meta.addAttributeModifier(attribute, modifier);
-            return meta;
-        });
+        return itemMeta(meta -> meta.addAttributeModifier(attribute, modifier));
     }
     
     public ItemStackBuilder removeAttribute(Attribute attribute) {
-        return itemMeta(meta -> {
-            meta.removeAttributeModifier(attribute);
-            return meta;
-        });
+        return itemMeta(meta -> meta.removeAttributeModifier(attribute));
     }
     
     public ItemStackBuilder removeAttribute(EquipmentSlot equipmentSlot) {
-        return itemMeta(meta -> {
-            meta.removeAttributeModifier(equipmentSlot);
-            return meta;
-        });
+        return itemMeta(meta -> meta.removeAttributeModifier(equipmentSlot));
     }
     
     public ItemStackBuilder addItemFlags(ItemFlag... itemFlags) {
-        return itemMeta(meta -> {
-            meta.addItemFlags(itemFlags);
-            return meta;
-        });
+        return itemMeta(meta -> meta.addItemFlags(itemFlags));
     }
     
     public ItemStackBuilder removeItemFlags(ItemFlag... itemFlags) {
-        return itemMeta(meta -> {
-            meta.removeItemFlags(itemFlags);
-            return meta;
-        });
+        return itemMeta(meta -> meta.removeItemFlags(itemFlags));
     }
     
     public ItemStackBuilder displayname(String displayname) {
-        return itemMeta(meta -> {
-            meta.setDisplayName(colorize(displayname));
-            return meta;
-        });
+        return itemMeta(meta -> meta.setDisplayName(colorize(displayname)));
     }
     
     public ItemStackBuilder displayname(String displaynameFormat, Object... arguments) {
@@ -93,19 +77,14 @@ public class ItemStackBuilder {
     }
     
     public ItemStackBuilder localizedName(String localizedName) {
-        return itemMeta(meta -> {
-            meta.setLocalizedName(localizedName);
-            return meta;
-        });
+        return itemMeta(meta -> meta.setLocalizedName(localizedName));
     }
     
     public ItemStackBuilder lore(List<String> lore) {
-        List<String> colored = map(lore, ItemStackBuilder::colorize);
+        List<String> newLore = new ArrayList<>(lore);
+        newLore.replaceAll(ItemStackBuilder::colorize);
         
-        return itemMeta(meta -> {
-            meta.setLore(colored);
-            return meta;
-        });
+        return itemMeta(meta -> meta.setLore(newLore));
     }
     
     public ItemStackBuilder lore(String... lore) {
@@ -115,32 +94,28 @@ public class ItemStackBuilder {
                 .map(ItemStackBuilder::colorize)
                 .collect(Collectors.toList());
         
-        return itemMeta(meta -> {
-            meta.setLore(colored);
-            return meta;
-        });
+        return itemMeta(meta -> meta.setLore(colored));
     }
     
     public ItemStackBuilder lore(List<String> lore, Object... arguments) {
+        List<String> newLore = new ArrayList<>(lore);
+        newLore.replaceAll(ItemStackBuilder::colorize);
+
         List<String> colored = map(lore, ItemStackBuilder::colorize);
         List<String> formatted = map(colored, l -> String.format(l, arguments));
         
-        return itemMeta(meta -> {
-            meta.setLore(formatted);
-            return meta;
-        });
+        return itemMeta(meta -> meta.setLore(formatted));
     }
     
     public ItemStackBuilder makeUnbreakable() {
-        return itemMeta(meta -> {
-            meta.setUnbreakable(true);
-            return meta;
-        });
+        return itemMeta(meta -> meta.setUnbreakable(true));
     }
 
     @SuppressWarnings("unchecked")
-    public <META extends ItemMeta> ItemStackBuilder itemMeta(Function<META, META> function) {
-        item.setItemMeta(function.apply((META) item.getItemMeta()));
+    public <META extends ItemMeta> ItemStackBuilder itemMeta(Consumer<META> consumer) {
+        META itemMeta = (META) item.getItemMeta();
+        consumer.accept(itemMeta);
+        item.setItemMeta(itemMeta);
         return this;
     }
     
@@ -149,7 +124,9 @@ public class ItemStackBuilder {
     }
     
     private static String colorize(String source) {
-        return ChatColor.translateAlternateColorCodes('&', source);
+        return source != null && !source.isEmpty()
+                ? ChatColor.translateAlternateColorCodes('&', source)
+                : source;
     }
     
 }

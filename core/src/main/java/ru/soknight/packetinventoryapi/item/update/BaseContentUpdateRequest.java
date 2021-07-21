@@ -4,13 +4,18 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
+import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerWindowItems;
 import ru.soknight.packetinventoryapi.util.IntRange;
@@ -357,6 +362,9 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
 
         itemMatrix.forEach(slotData::set);
 
+        // replacing placeholders to real values
+        slotData.replaceAll(this::replacePlaceholders);
+
         PacketAssistant.createServerPacket(PacketServerWindowItems.class)
                 .windowID(container.getInventoryId())
                 .items(slotData)
@@ -409,6 +417,38 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
             if(item != null && !item.getType().isAir() && slotData.get(index) == EMPTY_ITEM)
                 slotData.set(index, item);
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    protected ItemStack replacePlaceholders(ItemStack item) {
+        if(item == null || !item.hasItemMeta())
+            return item;
+
+        ItemStack clone = item.clone();
+        ItemMeta itemMeta = item.getItemMeta();
+
+        if(itemMeta.hasDisplayName()) {
+            String displayName = itemMeta.getDisplayName();
+            itemMeta.setDisplayName(container.replacePlaceholders(displayName));
+        }
+
+        if(itemMeta.hasLore()) {
+            List<String> lore = itemMeta.getLore();
+            itemMeta.setLore(container.replacePlaceholders(lore));
+        }
+
+        if(item instanceof WrappedItemStack) {
+            WrappedItemStack wrapper = (WrappedItemStack) item;
+            String playerHead = wrapper.getVanillaItem().getPlayerHead();
+            if(playerHead != null && !playerHead.isEmpty() && itemMeta instanceof SkullMeta) {
+                SkullMeta skullMeta = (SkullMeta) itemMeta;
+                OfflinePlayer owningPlayer = Bukkit.getOfflinePlayer(container.replacePlaceholders(playerHead));
+                skullMeta.setOwningPlayer(owningPlayer);
+            }
+        }
+
+        clone.setItemMeta(itemMeta);
+        return clone;
     }
 
 }

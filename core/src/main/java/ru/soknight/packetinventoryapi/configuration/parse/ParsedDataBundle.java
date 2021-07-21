@@ -8,19 +8,24 @@ import ru.soknight.packetinventoryapi.menu.item.MenuItem;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.OptionalInt;
 
 @Getter
 @Setter
 public class ParsedDataBundle {
 
     private BaseComponent title;
-    private int rowsAmount;
+    private Integer rowsAmount;
     private MenuItem<?, ?> filler;
 
     private final Map<String, MenuItem<?, ?>> content;
 
     public ParsedDataBundle() {
         this.content = new HashMap<>();
+    }
+
+    public OptionalInt getRowsAmount() {
+        return rowsAmount != null ? OptionalInt.of(rowsAmount) : OptionalInt.empty();
     }
 
     public Map<String, MenuItem<?, ?>> getContent() {
