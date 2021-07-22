@@ -15,6 +15,7 @@ import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
 import ru.soknight.packetinventoryapi.event.window.WindowClickEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowCloseEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowOpenEvent;
+import ru.soknight.packetinventoryapi.item.ExtraDataProvider;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.AnyEventListener;
 import ru.soknight.packetinventoryapi.listener.event.EventListener;
@@ -48,10 +49,11 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     protected final DataHolder dataHolder;
     protected List<PlaceholderReplacer> placeholderReplacers;
     protected BaseComponent title;
-    protected MenuItem<?, ?> filler;
+    protected MenuItem filler;
     
     protected EventListener<WindowOpenEvent<C, R>> openListener;
     protected EventListener<WindowCloseEvent<C, R>> closeListener;
+    protected ExtraDataProvider<C, R> extraDataProvider;
     private boolean viewing;
 
     protected boolean viewingPlayerInventory;
@@ -100,6 +102,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         clone.interactable = interactable;
         clone.clickOutsideToClose = clickOutsideToClose;
         clone.filler = filler;
+        clone.extraDataProvider = extraDataProvider;
 
         if(listener != null) {
             clone.openListener = listener::handle;
@@ -161,8 +164,13 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         return getThis();
     }
 
-    public C setFiller(MenuItem<?, ?> filler) {
+    public C setFiller(MenuItem filler) {
         this.filler = filler;
+        return getThis();
+    }
+
+    public C setExtraDataProvider(ExtraDataProvider<C, R> extraDataProvider) {
+        this.extraDataProvider = extraDataProvider;
         return getThis();
     }
 

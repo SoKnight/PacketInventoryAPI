@@ -78,7 +78,8 @@ public class MenuLoader {
             throw new IllegalArgumentException("a menu must be provided by anyone plugin!");
 
         Configuration configuration = loadConfiguration(plugin, resourcePath, outputFile);
-        ParsedDataBundle parsedDataBundle = MenuParser.parse(plugin, outputFile, configuration);
+        ParsedDataBundle parsedDataBundle = MenuParser.parse(plugin, outputFile, configuration, instance.configurationStructure());
+        instance.updateParsedData(parsedDataBundle);
 
         PublicWrapper<C, R> wrapper = instance.getContainer();
         C original = wrapper.getOriginal();

@@ -14,7 +14,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.container.Container;
+import ru.soknight.packetinventoryapi.item.ExtraDataProvider;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
+import ru.soknight.packetinventoryapi.menu.item.RegularMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.StateableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerWindowItems;
@@ -61,7 +64,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         return container;
     }
 
-    private MenuItem<?, ?> getFiller() {
+    private MenuItem getFiller() {
         return container.getFiller();
     }
     
@@ -98,16 +101,20 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R fromParsedData(Iterable<? extends MenuItem<?, ?>> items, boolean replace) {
+    public R fromParsedData(Iterable<? extends MenuItem> items, boolean replace) {
         if(items != null)
             items.forEach(item -> {
-                ItemStack bukkitItem = item.asBukkitItem();
+                if(item instanceof StateableMenuItem)
+                    return;
 
-                FillPatternType pattern = item.getFillPattern();
+                RegularMenuItem<?, ?> menuItem = item.asRegularItem();
+                ItemStack bukkitItem = menuItem.asBukkitItem();
+
+                FillPatternType pattern = menuItem.getFillPattern();
                 if(pattern != null)
                     fillPattern(bukkitItem, pattern, replace);
 
-                int[] slots = item.getSlots();
+                int[] slots = menuItem.getSlots();
                 if(slots == null || slots.length == 0)
                     return;
 
@@ -118,7 +125,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R insert(MenuItem<?, ?> item, boolean replace) {
+    public R insert(RegularMenuItem<?, ?> item, boolean replace) {
         ItemStack bukkitItem = item.asBukkitItem();
 
         FillPatternType pattern = item.getFillPattern();
@@ -356,9 +363,13 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         viewPlayerInventory(slotData, content);
         viewHotbarContent(slotData, content);
 
-        MenuItem<?, ?> filler = getFiller();
+        MenuItem filler = getFiller();
         if(filler != null)
-            insert(filler, false);
+            insert(filler.getItemFor(holder), false);
+
+        ExtraDataProvider<C, R> extraDataProvider = container.getExtraDataProvider();
+        if(extraDataProvider != null)
+            extraDataProvider.provideExtraData(this);
 
         itemMatrix.forEach(slotData::set);
 

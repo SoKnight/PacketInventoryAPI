@@ -35,15 +35,30 @@ content:
     slot: 11
 
   stats:
-    name: '&eYour stats'
-    lore:
-    - '&8/super-unique-stats-command'
-    - ' '
-    - ' &7Your name: &b%player_name% '
-    - ' &7Server uptime: &b%server_uptime% '
-    - ' '
-    material: orange_dye
-    slot: 15
+    $default:
+      name: '&eYour stats'
+      material: orange_dye
+      slot: 15
+
+    first:
+      lore:
+      - '&8/super-unique-stats-command'
+      - ' '
+      - ' &7Statistic page: &b#1 '
+      - ' '
+      - ' &7Your name: &b%player_name% '
+      - ' &7Server uptime: &b%server_uptime% '
+      - ' '
+
+    second:
+      lore:
+      - '&8/super-unique-stats-command'
+      - ' '
+      - ' &7Statistic page: &b#2 '
+      - ' '
+      - ' &7Your name: &b%player_name% '
+      - ' &7Server uptime: &b%server_uptime% '
+      - ' '
 
   $filler:
     name: ' '

@@ -8,17 +8,17 @@ import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import ru.soknight.packetinventoryapi.menu.item.AbstractMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.AbstractRegularMenuItem;
 import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.UUID;
 
-public final class SimpleMenuItem extends AbstractMenuItem<SimpleMenuItem, SimpleMenuItem.Builder> {
+public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleRegularMenuItem, SimpleRegularMenuItem.Builder> {
 
     private ItemStack nmsItem;
 
     @Override
-    protected SimpleMenuItem getThis() {
+    protected SimpleRegularMenuItem getThis() {
         return this;
     }
 
@@ -38,11 +38,11 @@ public final class SimpleMenuItem extends AbstractMenuItem<SimpleMenuItem, Simpl
     }
 
     public static Builder build() {
-        return new Builder(new SimpleMenuItem());
+        return new Builder(new SimpleRegularMenuItem());
     }
 
-    protected static final class Builder extends AbstractMenuItem.Builder<SimpleMenuItem, Builder> {
-        private Builder(SimpleMenuItem menuItem) {
+    protected static final class Builder extends AbstractRegularMenuItem.Builder<SimpleRegularMenuItem, Builder> {
+        private Builder(SimpleRegularMenuItem menuItem) {
             super(menuItem);
         }
 
@@ -50,29 +50,6 @@ public final class SimpleMenuItem extends AbstractMenuItem<SimpleMenuItem, Simpl
         protected Builder getThis() {
             return this;
         }
-
-//        @Override
-//        public Builder playerHead(String value) {
-//            Validate.notEmpty(value, "player name");
-//            Validate.isTrue(value.length() <= 16, "player name cannot be longer than 16!");
-//
-//            if(menuItem.getMaterial() != Material.PLAYER_HEAD)
-//                super.material(Material.PLAYER_HEAD);
-//
-//            OfflinePlayer owningPlayer = Bukkit.getOfflinePlayer(value);
-//            SkullMeta itemMeta = (SkullMeta) menuItem.asBukkitItem().getItemMeta();
-//            itemMeta.setOwningPlayer(owningPlayer);
-//            menuItem.asBukkitItem().setItemMeta(itemMeta);
-//
-//            NBTTagCompound serialized = GameProfileSerializer.serialize(new NBTTagCompound(), profile);
-//
-//            ItemStack itemStack = menuItem.asVanillaItem();
-//            NBTTagCompound tag = itemStack.getOrCreateTag();
-//            tag.set("SkullOwner", serialized);
-//            itemStack.setTag(tag);
-//
-//            return getThis();
-//        }
 
         @Override
         public Builder base64Head(String value) {

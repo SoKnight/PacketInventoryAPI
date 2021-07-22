@@ -22,11 +22,11 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
     private final Map<Player, C> views;
     private AnyEventListener eventListener;
 
-    public SimplePublicWrapper(C original) {
+    SimplePublicWrapper(C original) {
         this(original, null);
     }
 
-    public SimplePublicWrapper(C original, AnyEventListener eventListener) {
+    SimplePublicWrapper(C original, AnyEventListener eventListener) {
         this.original = original;
         this.eventListener = eventListener;
         this.views = new ConcurrentHashMap<>();
@@ -80,12 +80,12 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
     }
 
     @Override
-    public MenuItem<?, ?> getFiller() {
+    public MenuItem getFiller() {
         return original.getFiller();
     }
 
     @Override
-    public PublicWrapper<C, R> setFiller(MenuItem<?, ?> filler) {
+    public PublicWrapper<C, R> setFiller(MenuItem filler) {
         original.setFiller(filler);
         return this;
     }

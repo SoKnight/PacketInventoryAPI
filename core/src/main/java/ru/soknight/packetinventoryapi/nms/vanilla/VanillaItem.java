@@ -7,7 +7,7 @@ import ru.soknight.packetinventoryapi.nms.ImplementedAs;
 
 import java.util.List;
 
-@ImplementedAs("SimpleMenuItem")
+@ImplementedAs("SimpleRegularMenuItem")
 public interface VanillaItem<I extends VanillaItem<I, B>, B extends VanillaItem.Builder<I, B>> {
     
     ItemStack asBukkitItem();

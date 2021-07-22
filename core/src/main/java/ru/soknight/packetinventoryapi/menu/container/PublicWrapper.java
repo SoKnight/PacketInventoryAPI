@@ -2,6 +2,7 @@ package ru.soknight.packetinventoryapi.menu.container;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
@@ -13,7 +14,7 @@ import java.util.Set;
 
 public interface PublicWrapper<C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> {
 
-    static <C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> PublicWrapper<C, R> wrap(C container) {
+    static <C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> PublicWrapper<C, R> wrap(@NotNull C container) {
         return new SimplePublicWrapper<>(container);
     }
 
@@ -24,8 +25,8 @@ public interface PublicWrapper<C extends Container<C, R>, R extends ContentUpdat
     int getRowsAmount();
     PublicWrapper<C, R> setRowsAmount(int amount);
 
-    MenuItem<?, ?> getFiller();
-    PublicWrapper<C, R> setFiller(MenuItem<?, ?> filler);
+    MenuItem getFiller();
+    PublicWrapper<C, R> setFiller(MenuItem filler);
 
     C getOriginal();
 

@@ -13,9 +13,9 @@ public interface WindowClickListener<C extends Container<C, R>, R extends Conten
 
     @Override
     default void handle(WindowClickEvent<C, R> event) {
-        handle(event.getActor(), event.getContainer(), event.getClickType(), event.getClickedItem());
+        handle(event.getActor(), event.getContainer(), event.getClickedSlot(), event.getClickType(), event.getClickedItem());
     }
     
-    void handle(Player actor, C container, WindowClickType clickType, ItemStack clickedItem);
+    void handle(Player actor, C container, int clickedSlot, WindowClickType clickType, ItemStack clickedItem);
     
 }

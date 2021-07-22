@@ -6,6 +6,7 @@ import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
+import ru.soknight.packetinventoryapi.menu.item.RegularMenuItem;
 import ru.soknight.packetinventoryapi.util.IntRange;
 
 import java.util.Map;
@@ -44,11 +45,11 @@ public interface ContentUpdateRequest<C extends Container<C, R>, R extends Conte
     boolean isSet(int slot);
 
     // --- using parsed data bundle
-    R fromParsedData(Iterable<? extends MenuItem<?, ?>> items, boolean replace);
+    R fromParsedData(Iterable<? extends MenuItem> items, boolean replace);
     default R fromParsedData(ParsedDataBundle parsedDataBundle, boolean replace) { return fromParsedData(parsedDataBundle.getContent().values(), replace); }
 
     // --- menu item insertion
-    R insert(MenuItem<?, ?> item, boolean replace);
+    R insert(RegularMenuItem<?, ?> item, boolean replace);
 
     // --- setters
     R set(ItemStack item, int slot, boolean replace);

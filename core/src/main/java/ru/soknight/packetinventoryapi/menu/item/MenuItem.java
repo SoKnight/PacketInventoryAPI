@@ -1,20 +1,30 @@
 package ru.soknight.packetinventoryapi.menu.item;
 
-import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
-import ru.soknight.packetinventoryapi.nms.ImplementedAs;
-import ru.soknight.packetinventoryapi.nms.vanilla.VanillaItem;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
-@ImplementedAs("SimpleMenuItem")
-public interface MenuItem<I extends MenuItem<I, B>, B extends MenuItem.Builder<I, B>> extends VanillaItem<I, B> {
+public interface MenuItem {
 
-    int[] getSlots();
+    @NotNull ItemStack asBukkitItemFor(Player viewer);
 
-    FillPatternType getFillPattern();
+    @NotNull RegularMenuItem<?, ?> getItemFor(Player viewer);
 
-    interface Builder<I extends MenuItem<I, B>, B extends Builder<I, B>> extends VanillaItem.Builder<I, B> {
-        B slots(int... value);
+    @SuppressWarnings("unchecked")
+    default <I extends RegularMenuItem<I, B>, B extends RegularMenuItem.Builder<I, B>> RegularMenuItem<I, B> asRegularItem() {
+        return (RegularMenuItem<I, B>) this;
+    }
 
-        B fillPattern(FillPatternType value);
+    default StateableMenuItem asStateableItem() {
+        return (StateableMenuItem) this;
+    }
+
+    default boolean isRegular() {
+        return this instanceof RegularMenuItem;
+    }
+
+    default boolean isStateable() {
+        return this instanceof StateableMenuItem;
     }
 
 }

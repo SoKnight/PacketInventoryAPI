@@ -3,7 +3,7 @@ package ru.soknight.packetinventoryapi.nms;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import ru.soknight.packetinventoryapi.exception.UnsupportedVersionException;
-import ru.soknight.packetinventoryapi.menu.item.MenuItem;
+import ru.soknight.packetinventoryapi.menu.item.RegularMenuItem;
 import ru.soknight.packetinventoryapi.nms.vanilla.VanillaItem;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,7 +17,7 @@ public class NMSAssistant {
     public static final String PACKAGE;
 
     private static Supplier<VanillaItem.Builder> vanillaItemBuilderSupplier;
-    private static Supplier<MenuItem.Builder> menuItemBuilderSupplier;
+    private static Supplier<RegularMenuItem.Builder> menuItemBuilderSupplier;
 
     static {
         NMS_VERSION = getNMSVersion();
@@ -28,7 +28,7 @@ public class NMSAssistant {
         plugin.getLogger().info("Detected NMS version: " + NMS_VERSION);
 
         vanillaItemBuilderSupplier = loadBuilder(VanillaItem.class, VanillaItem.Builder.class);
-        menuItemBuilderSupplier = loadBuilder(MenuItem.class, MenuItem.Builder.class);
+        menuItemBuilderSupplier = loadBuilder(RegularMenuItem.class, RegularMenuItem.Builder.class);
     }
 
     private static <T, B> Supplier<B> loadBuilder(Class<T> clazz, Class<B> builderClass) throws UnsupportedVersionException {
@@ -67,7 +67,7 @@ public class NMSAssistant {
         return vanillaItemBuilderSupplier.get();
     }
 
-    public static MenuItem.Builder<?, ?> newMenuItem() {
+    public static RegularMenuItem.Builder<?, ?> newMenuItem() {
         if(menuItemBuilderSupplier == null)
             throw new IllegalStateException("menu item creation is unavailable now!");
 

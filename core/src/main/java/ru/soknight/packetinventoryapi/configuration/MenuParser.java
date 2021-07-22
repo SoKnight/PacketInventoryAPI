@@ -3,15 +3,20 @@ package ru.soknight.packetinventoryapi.configuration;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import ru.soknight.packetinventoryapi.configuration.item.ConfigurationItemStructure;
+import ru.soknight.packetinventoryapi.configuration.item.ConfigurationItemType;
 import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
+import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataRaw;
 import ru.soknight.packetinventoryapi.exception.configuration.*;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
-import ru.soknight.packetinventoryapi.nms.NMSAssistant;
+import ru.soknight.packetinventoryapi.menu.item.RegularMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.StateableMenuItem;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,9 +24,15 @@ import java.util.stream.IntStream;
 
 public class MenuParser {
 
+    public static final String DEFAULT_STATE_KEY = "$default";
     public static final String FILLER_KEY = "$filler";
 
-    public static ParsedDataBundle parse(Plugin plugin, String fileName, Configuration configuration) throws
+    public static ParsedDataBundle parse(
+            @NotNull Plugin plugin,
+            @NotNull String fileName,
+            @NotNull Configuration configuration,
+            @Nullable ConfigurationItemStructure<?> itemStructure
+    ) throws
             InvalidRowsAmountException,
             NoContentProvidedException,
             NoSlotsToDisplayException,
@@ -45,12 +56,12 @@ public class MenuParser {
 
         Set<String> keys = content.getKeys(false);
         if(!keys.isEmpty()) {
-            Map<String, MenuItem<?, ?>> items = new LinkedHashMap<>();
+            Map<String, MenuItem> items = new LinkedHashMap<>();
             for(String key : keys) {
                 if(!content.isConfigurationSection(key))
                     continue;
 
-                MenuItem<?, ?> item = parseItem(content.getConfigurationSection(key), fileName);
+                MenuItem item = parseItem(content.getConfigurationSection(key), fileName, itemStructure);
                 items.put(key, item);
             }
             dataBundle.setFiller(items.remove(FILLER_KEY));
@@ -60,18 +71,112 @@ public class MenuParser {
         return dataBundle;
     }
 
-    public static MenuItem<?, ?> parseItem(ConfigurationSection configuration, String fileName) throws
+    public static MenuItem parseItem(
+            @NotNull ConfigurationSection configuration,
+            @NotNull String fileName,
+            @Nullable ConfigurationItemStructure<?> itemStructure
+    ) throws
             NoMaterialProvidedException,
             NoSlotsToDisplayException,
             UnknownMaterialException,
             UnknownFillingPatternException
     {
+        // --- determining item type
+        String id = configuration.getName();
+        ConfigurationItemType itemType = itemStructure != null
+                ? itemStructure.getItemType(id)
+                : ConfigurationItemType.REGULAR;
+
+        // --- parsing item from configuration
+        switch (itemType) {
+            case REGULAR:
+                return parseRegularItem(configuration, fileName);
+            case STATEABLE:
+                return parseStateableItem(configuration, fileName);
+            default:
+                throw new IllegalStateException("unexpected item type: " + itemType);
+        }
+    }
+
+    public static RegularMenuItem<?, ?> parseRegularItem(
+            @NotNull ConfigurationSection configuration,
+            @NotNull String fileName
+    ) throws
+            NoMaterialProvidedException,
+            UnknownMaterialException,
+            UnknownFillingPatternException,
+            NoSlotsToDisplayException
+    {
+        // parsing raw data
+        ParsedDataRaw parsedDataRaw = parseDataRaw(configuration, fileName);
+
+        // validating overlapped data bundle
+        parsedDataRaw.validateSlots();
+
+        return parsedDataRaw.asMenuItem();
+    }
+
+    public static StateableMenuItem parseStateableItem(
+            @NotNull ConfigurationSection configuration,
+            @NotNull String fileName
+    ) throws
+            NoMaterialProvidedException,
+            UnknownMaterialException,
+            UnknownFillingPatternException,
+            NoSlotsToDisplayException
+    {
+        StateableMenuItem.Builder stateableItem = StateableMenuItem.createNew();
+
+        ConfigurationSection defaultConfiguration = configuration.getConfigurationSection(DEFAULT_STATE_KEY);
+        ParsedDataRaw defaultDataRaw = parseDataRaw(defaultConfiguration, fileName);
+
+        Set<String> keys = configuration.getKeys(false);
+        for(String key : keys) {
+            if(key.equals(DEFAULT_STATE_KEY) || !configuration.isConfigurationSection(key))
+                continue;
+
+            ConfigurationSection section = configuration.getConfigurationSection(key);
+            RegularMenuItem<?, ?> regularItem = parseStateItem(section, fileName, defaultDataRaw);
+            stateableItem.addStateItem(key, regularItem);
+        }
+
+        return stateableItem.build();
+    }
+
+    public static @NotNull RegularMenuItem<?, ?> parseStateItem(
+            @NotNull ConfigurationSection configuration,
+            @NotNull String fileName,
+            @NotNull ParsedDataRaw defaultData
+    ) throws
+            NoMaterialProvidedException,
+            UnknownMaterialException,
+            UnknownFillingPatternException,
+            NoSlotsToDisplayException
+    {
+        // parsing raw data and overlapping the default data with that
+        ParsedDataRaw parsedDataRaw = parseDataRaw(configuration, fileName);
+        ParsedDataRaw overlapped = defaultData.duplicate(configuration, fileName).overlapWith(parsedDataRaw);
+
+        // validating overlapped data bundle
+        overlapped.validateSlots();
+
+        return overlapped.asMenuItem();
+    }
+
+    private static ParsedDataRaw parseDataRaw(
+            @Nullable ConfigurationSection configuration,
+            @NotNull String fileName
+    ) throws UnknownFillingPatternException {
+        if(configuration == null)
+            return ParsedDataRaw.DEFAULT.duplicate(configuration, fileName);
+
         // --- gathering some data
-        BaseComponent name = new TextComponent(colorize(configuration.getString("name", "")));
+        String nameRaw = colorize(configuration.getString("name"));
+        BaseComponent name = nameRaw != null ? new TextComponent(nameRaw) : null;
         List<String> lore = colorize(configuration.getStringList("lore"));
 
         String materialRaw = configuration.getString("material");
-        int amount = configuration.getInt("amount", 1);
+        Integer amount = configuration.isInt("amount") ? configuration.getInt("amount") : null;
         int[] slots = parseSlots(configuration);
 
         String playerHead = configuration.getString("player-head");
@@ -79,54 +184,32 @@ public class MenuParser {
         Integer customModelData = configuration.isInt("custom-model-data") ? configuration.getInt("custom-model-data") : null;
 
         String patternRaw = configuration.getString("pattern");
-        boolean enchanted = configuration.getBoolean("enchanted", false);
+        Boolean enchanted = configuration.isBoolean("enchanted") ? configuration.getBoolean("enchanted") : null;
 
-        // menu item instance creation
-        MenuItem.Builder<?, ?> menuItem = NMSAssistant.newMenuItem();
-
-        // head textures applying or regular material usage
-        if(playerHead != null && !playerHead.isEmpty())
-            menuItem.playerHead(playerHead);
-        else if(base64Head != null && !base64Head.isEmpty())
-            menuItem.base64Head(base64Head);
-        else {
-            if(materialRaw == null || materialRaw.isEmpty())
-                throw new NoMaterialProvidedException(fileName, configuration.getName());
-
-            try {
-                Material material = Material.valueOf(materialRaw.toUpperCase());
-                menuItem.material(material);
-            } catch (IllegalArgumentException ex) {
-                throw new UnknownMaterialException(fileName, configuration.getName(), materialRaw);
-            }
-        }
-
+        // -- parsing fill pattern type
         FillPatternType pattern = null;
         if(patternRaw != null && !patternRaw.isEmpty()) {
             try {
                 pattern = FillPatternType.valueOf(patternRaw.toUpperCase());
-                menuItem.fillPattern(pattern);
             } catch (IllegalArgumentException ex) {
                 throw new UnknownFillingPatternException(fileName, configuration.getName(), patternRaw);
             }
         }
 
-        if(slots.length == 0 && pattern == null)
-            throw new NoSlotsToDisplayException(fileName, configuration.getName());
-
-        // setup other values
-        menuItem
-                .amount(amount)
-                .nameComponent(name)
-                .lore(lore)
-                .slots(slots)
-                .customModelData(customModelData)
-                .enchanted(enchanted);
-
-        return menuItem.build();
+        return new ParsedDataRaw(configuration, fileName)
+                .setName(name)
+                .setLore(lore)
+                .setMaterialRaw(materialRaw)
+                .setAmount(amount)
+                .setSlots(slots.length > 0 ? slots : null)
+                .setPlayerHead(playerHead)
+                .setBase64Head(base64Head)
+                .setCustomModelData(customModelData)
+                .setPattern(pattern)
+                .setEnchanted(enchanted);
     }
 
-    public static int[] parseSlots(ConfigurationSection configuration) {
+    public static int[] parseSlots(@NotNull ConfigurationSection configuration) {
         Set<Integer> slots = new LinkedHashSet<>();
 
         if(configuration.isInt("slot")) {
@@ -167,7 +250,9 @@ public class MenuParser {
             }
         }
 
-        return slots.stream().mapToInt(Integer::intValue).toArray();
+        return slots.stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
     }
 
     private static Integer asInt(String source) {
