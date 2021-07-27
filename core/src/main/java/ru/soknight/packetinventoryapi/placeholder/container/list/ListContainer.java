@@ -14,6 +14,10 @@ public interface ListContainer {
 
     @Nullable List<String> getList();
 
+    boolean isEmpty();
+
+    boolean contains(String element);
+
     ListContainer loadContentFrom(@NotNull  Collection<String> collection);
 
     ListContainer replaceAll(@NotNull String placeholder, @Nullable Object value);

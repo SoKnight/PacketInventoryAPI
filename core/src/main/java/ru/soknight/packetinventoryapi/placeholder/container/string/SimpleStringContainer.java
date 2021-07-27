@@ -14,6 +14,16 @@ final class SimpleStringContainer implements StringContainer {
     private String string;
 
     @Override
+    public boolean isEmpty() {
+        return string == null || string.isEmpty();
+    }
+
+    @Override
+    public boolean contains(String string) {
+        return !isEmpty() && string.contains(string);
+    }
+
+    @Override
     public StringContainer setString(String string) {
         synchronized (this) {
             this.string = string;

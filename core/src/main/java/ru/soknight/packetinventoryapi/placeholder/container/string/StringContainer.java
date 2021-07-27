@@ -11,6 +11,10 @@ public interface StringContainer {
 
     @Nullable String getString();
 
+    boolean isEmpty();
+
+    boolean contains(String string);
+
     StringContainer replace(@NotNull String placeholder, @Nullable Object value);
 
     StringContainer setString(@Nullable String string);

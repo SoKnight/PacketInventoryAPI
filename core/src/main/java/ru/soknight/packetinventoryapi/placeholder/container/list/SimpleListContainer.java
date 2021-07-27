@@ -17,6 +17,16 @@ final class SimpleListContainer implements ListContainer {
     private final List<String> list;
 
     @Override
+    public boolean isEmpty() {
+        return list == null || list.isEmpty();
+    }
+
+    @Override
+    public boolean contains(String element) {
+        return !isEmpty() && list.contains(element);
+    }
+
+    @Override
     public ListContainer loadContentFrom(@NotNull Collection<String> collection) {
         Validate.notNull(collection, "collection");
 
