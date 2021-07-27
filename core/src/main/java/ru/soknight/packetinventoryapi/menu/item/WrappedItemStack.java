@@ -16,4 +16,15 @@ public final class WrappedItemStack extends ItemStack {
         this.vanillaItem = vanillaItem;
     }
 
+    private WrappedItemStack(@NotNull ItemStack itemStack, @NotNull VanillaItem<?, ?> vanillaItem) {
+        super(itemStack);
+        this.vanillaItem = vanillaItem;
+    }
+
+    @Override
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    public @NotNull WrappedItemStack clone() {
+        return new WrappedItemStack(this, vanillaItem);
+    }
+
 }

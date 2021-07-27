@@ -23,11 +23,14 @@ import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowCloseListener;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowOpenListener;
 import ru.soknight.packetinventoryapi.menu.container.CloneableContainer;
-import ru.soknight.packetinventoryapi.menu.item.MenuItem;
+import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerWindowProperty;
 import ru.soknight.packetinventoryapi.placeholder.LitePlaceholderReplacer;
 import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
+import ru.soknight.packetinventoryapi.placeholder.container.list.ListContainer;
+import ru.soknight.packetinventoryapi.placeholder.container.string.StringContainer;
+import ru.soknight.packetinventoryapi.storage.ContainerStorage;
 import ru.soknight.packetinventoryapi.storage.SimpleContainerStorage;
 import ru.soknight.packetinventoryapi.util.IntRange;
 import ru.soknight.packetinventoryapi.util.Validate;
@@ -49,7 +52,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     protected final DataHolder dataHolder;
     protected List<PlaceholderReplacer> placeholderReplacers;
     protected BaseComponent title;
-    protected MenuItem filler;
+    protected DisplayableMenuItem filler;
     
     protected EventListener<WindowOpenEvent<C, R>> openListener;
     protected EventListener<WindowCloseEvent<C, R>> closeListener;
@@ -73,7 +76,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         this.rangesClickListeners = new HashMap<>();
 
         this.contentData = new LinkedHashMap<>();
-        this.inventoryId = SimpleContainerStorage.INVENTORY_ID;
+        this.inventoryId = ContainerStorage.INVENTORY_ID;
         this.inventoryHolder = inventoryHolder;
         this.containerType = containerType;
         this.dataHolder = DataHolder.create();
@@ -164,7 +167,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         return getThis();
     }
 
-    public C setFiller(MenuItem filler) {
+    public C setFiller(DisplayableMenuItem filler) {
         this.filler = filler;
         return getThis();
     }
@@ -271,11 +274,11 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         if(original == null || original.isEmpty())
             return original;
 
-        String output = original;
+        StringContainer wrapper = StringContainer.wrap(original);
         for(PlaceholderReplacer replacer : placeholderReplacers)
-            output = replacer.replace(inventoryHolder, output);
+            replacer.replace(inventoryHolder, wrapper);
 
-        return output;
+        return wrapper.getString();
     }
 
     public List<String> replacePlaceholders(List<String> original) {
@@ -285,11 +288,11 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         if(original == null || original.isEmpty())
             return original;
 
-        List<String> output = original;
+        ListContainer wrapper = ListContainer.wrap(original);
         for(PlaceholderReplacer replacer : placeholderReplacers)
-            output = replacer.replace(inventoryHolder, output);
+            replacer.replace(inventoryHolder, wrapper);
 
-        return output;
+        return wrapper.getList();
     }
 
     /**********************

@@ -3,6 +3,7 @@ package ru.soknight.packetinventoryapi.configuration.parse;
 import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.chat.BaseComponent;
+import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
 
 import java.util.Collections;
@@ -16,7 +17,7 @@ public final class ParsedDataBundle {
 
     private BaseComponent title;
     private Integer rowsAmount;
-    private MenuItem filler;
+    private DisplayableMenuItem filler;
 
     private final Map<String, MenuItem> content;
 

@@ -7,7 +7,7 @@ import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.AnyEventListener;
-import ru.soknight.packetinventoryapi.menu.item.MenuItem;
+import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 
 import java.util.Map;
 import java.util.Set;
@@ -25,8 +25,8 @@ public interface PublicWrapper<C extends Container<C, R>, R extends ContentUpdat
     int getRowsAmount();
     PublicWrapper<C, R> setRowsAmount(int amount);
 
-    MenuItem getFiller();
-    PublicWrapper<C, R> setFiller(MenuItem filler);
+    DisplayableMenuItem getFiller();
+    PublicWrapper<C, R> setFiller(DisplayableMenuItem filler);
 
     C getOriginal();
 

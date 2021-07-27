@@ -31,13 +31,13 @@ content:
     - ' '
     - ' &7Click to change gamemode to creative '
     - ' '
-    material: orange_dye
+    material: red_dye
     slot: 11
 
   stats:
     $default:
       name: '&eYour stats'
-      material: orange_dye
+      material: red_dye
       slot: 15
 
     first:
@@ -59,6 +59,32 @@ content:
       - ' &7Your name: &b%player_name% '
       - ' &7Server uptime: &b%server_uptime% '
       - ' '
+
+  page-element:
+    $default:
+      name: '&eSomeone page element'
+      slots: '28-34'
+
+    second:
+      lore:
+      - '&8/super-unique-stats-command'
+      - ' '
+      - ' &7Statistic page: &b#1 '
+      - ' '
+      - ' &7Your name: &b%player_name% '
+      - ' &7Server uptime: &b%server_uptime% '
+      - ' '
+      material: yellow_dye
+
+    third:
+      lore:
+      - ' '
+      - ' &7Person data: '
+      - '   &fID: &b#%id% '
+      - '   &fName: &b%real_name% &7(%nickname%) '
+      - '   &fAge: &b%age% y.o.'
+      - ' '
+      material: player_head
 
   $filler:
     name: ' '

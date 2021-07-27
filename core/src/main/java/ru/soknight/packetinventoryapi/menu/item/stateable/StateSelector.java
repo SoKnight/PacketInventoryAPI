@@ -1,8 +1,9 @@
-package ru.soknight.packetinventoryapi.menu.item;
+package ru.soknight.packetinventoryapi.menu.item.stateable;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 
 @FunctionalInterface
 public interface StateSelector {

@@ -1,16 +1,19 @@
-package ru.soknight.packetinventoryapi.menu.item;
+package ru.soknight.packetinventoryapi.menu.item.stateable;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 
 import java.util.Map;
 import java.util.Set;
 
-public interface StateableMenuItem extends MenuItem {
+public interface StateableMenuItem extends DisplayableMenuItem {
 
-    static StateableMenuItem.Builder createNew() {
-        return SimpleStateableMenuItem.build();
+    static @NotNull StateableMenuItem.Builder create(@NotNull ConfigurationSection configuration) {
+        return SimpleStateableMenuItem.build(configuration);
     }
 
     @NotNull Map<String, RegularMenuItem<?, ?>> getStateItems();
@@ -18,6 +21,8 @@ public interface StateableMenuItem extends MenuItem {
     @NotNull Set<String> getStates();
 
     @Nullable RegularMenuItem<?, ?> getStateItem(String id);
+
+    boolean hasStateItem(String id);
 
     @Nullable StateSelector getStateSelector();
 

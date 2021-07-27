@@ -1,6 +1,7 @@
-package ru.soknight.packetinventoryapi.menu.item;
+package ru.soknight.packetinventoryapi.menu.item.regular;
 
 import lombok.Getter;
+import org.bukkit.configuration.ConfigurationSection;
 import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
@@ -10,9 +11,14 @@ import ru.soknight.packetinventoryapi.nms.vanilla.AbstractVanillaItem;
 @Getter
 public abstract class AbstractRegularMenuItem<I extends AbstractRegularMenuItem<I, B>, B extends AbstractRegularMenuItem.Builder<I, B>> extends AbstractVanillaItem<I, B> implements RegularMenuItem<I, B> {
 
+    protected final ConfigurationSection configuration;
     protected int[] slots;
     protected FillPatternType fillPattern;
     protected WindowClickListener<?, ?> clickListener;
+
+    protected AbstractRegularMenuItem(ConfigurationSection configuration) {
+        this.configuration = configuration;
+    }
 
     @SuppressWarnings("unchecked")
     public <C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> WindowClickListener<C, R> getClickListener() {

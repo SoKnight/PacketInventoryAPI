@@ -10,13 +10,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.configuration.item.ConfigurationItemStructure;
 import ru.soknight.packetinventoryapi.configuration.item.ConfigurationItemType;
+import ru.soknight.packetinventoryapi.configuration.item.meta.ConfigurationItemMeta;
 import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataRaw;
 import ru.soknight.packetinventoryapi.exception.configuration.*;
+import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
-import ru.soknight.packetinventoryapi.menu.item.RegularMenuItem;
-import ru.soknight.packetinventoryapi.menu.item.StateableMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.page.element.PageElementMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.stateable.StateableMenuItem;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,7 +41,9 @@ public class MenuParser {
             NoSlotsToDisplayException,
             UnknownFillingPatternException,
             UnknownMaterialException,
-            NoMaterialProvidedException
+            NoMaterialProvidedException,
+            UnexpectedPatternItemType,
+            RequiredStatesNotFoundException
     {
         BaseComponent title = new TextComponent(colorize(configuration.getString("title", "")));
 
@@ -64,7 +69,11 @@ public class MenuParser {
                 MenuItem item = parseItem(content.getConfigurationSection(key), fileName, itemStructure);
                 items.put(key, item);
             }
-            dataBundle.setFiller(items.remove(FILLER_KEY));
+
+            MenuItem filler = items.remove(FILLER_KEY);
+            if(filler instanceof DisplayableMenuItem)
+                dataBundle.setFiller((DisplayableMenuItem) filler);
+
             dataBundle.addMenuItems(items);
         }
 
@@ -79,7 +88,9 @@ public class MenuParser {
             NoMaterialProvidedException,
             NoSlotsToDisplayException,
             UnknownMaterialException,
-            UnknownFillingPatternException
+            UnknownFillingPatternException,
+            UnexpectedPatternItemType,
+            RequiredStatesNotFoundException
     {
         // --- determining item type
         String id = configuration.getName();
@@ -92,7 +103,9 @@ public class MenuParser {
             case REGULAR:
                 return parseRegularItem(configuration, fileName);
             case STATEABLE:
-                return parseStateableItem(configuration, fileName);
+                return parseStateableItem(configuration, fileName, itemStructure);
+            case PAGE_ELEMENT:
+                return parsePageElementItem(configuration, fileName, itemStructure);
             default:
                 throw new IllegalStateException("unexpected item type: " + itemType);
         }
@@ -118,14 +131,22 @@ public class MenuParser {
 
     public static StateableMenuItem parseStateableItem(
             @NotNull ConfigurationSection configuration,
-            @NotNull String fileName
+            @NotNull String fileName,
+            @Nullable ConfigurationItemStructure<?> itemStructure
     ) throws
             NoMaterialProvidedException,
             UnknownMaterialException,
             UnknownFillingPatternException,
-            NoSlotsToDisplayException
+            NoSlotsToDisplayException,
+            RequiredStatesNotFoundException
     {
-        StateableMenuItem.Builder stateableItem = StateableMenuItem.createNew();
+        String id = configuration.getName();
+        ConfigurationItemMeta itemMeta = itemStructure.getItemMeta(id);
+        String[] requiredStates = itemMeta != null
+                ? itemMeta.resolveRequiredStates()
+                : new String[0];
+
+        StateableMenuItem.Builder stateableItem = StateableMenuItem.create(configuration);
 
         ConfigurationSection defaultConfiguration = configuration.getConfigurationSection(DEFAULT_STATE_KEY);
         ParsedDataRaw defaultDataRaw = parseDataRaw(defaultConfiguration, fileName);
@@ -140,7 +161,18 @@ public class MenuParser {
             stateableItem.addStateItem(key, regularItem);
         }
 
-        return stateableItem.build();
+        StateableMenuItem menuItem = stateableItem.build();
+        List<String> notFoundStates = new ArrayList<>();
+
+        if(requiredStates.length > 0)
+            for(String requiredState : requiredStates)
+                if(!menuItem.hasStateItem(requiredState))
+                    notFoundStates.add(requiredState);
+
+        if(!notFoundStates.isEmpty())
+            throw new RequiredStatesNotFoundException(fileName, id, notFoundStates);
+
+        return menuItem;
     }
 
     public static @NotNull RegularMenuItem<?, ?> parseStateItem(
@@ -161,6 +193,41 @@ public class MenuParser {
         overlapped.validateSlots();
 
         return overlapped.asMenuItem();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <I extends DisplayableMenuItem> PageElementMenuItem<I> parsePageElementItem(
+            @NotNull ConfigurationSection configuration,
+            @NotNull String fileName,
+            @NotNull ConfigurationItemStructure<?> itemStructure
+    ) throws
+            NoMaterialProvidedException,
+            UnknownMaterialException,
+            UnknownFillingPatternException,
+            NoSlotsToDisplayException,
+            UnexpectedPatternItemType,
+            RequiredStatesNotFoundException
+    {
+        String id = configuration.getName();
+        ConfigurationItemMeta itemMeta = itemStructure.getItemMeta(id);
+        ConfigurationItemType elementPatternType = itemMeta != null
+                ? itemMeta.resolveElementPatternType()
+                : ConfigurationItemType.REGULAR;
+
+        // --- parsing item from configuration
+        I elementPattern;
+        switch (elementPatternType) {
+            case REGULAR:
+                elementPattern = (I) parseRegularItem(configuration, fileName);
+                break;
+            case STATEABLE:
+                elementPattern = (I) parseStateableItem(configuration, fileName, itemStructure);
+                break;
+            default:
+                throw new UnexpectedPatternItemType(fileName, configuration.getName(), elementPatternType);
+        }
+
+        return PageElementMenuItem.create(configuration, elementPattern);
     }
 
     private static ParsedDataRaw parseDataRaw(

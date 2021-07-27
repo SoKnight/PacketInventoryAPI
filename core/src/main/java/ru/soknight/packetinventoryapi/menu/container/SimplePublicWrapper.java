@@ -8,7 +8,7 @@ import ru.soknight.packetinventoryapi.container.RowableContainer;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.AnyEventListener;
-import ru.soknight.packetinventoryapi.menu.item.MenuItem;
+import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 
 import java.util.Collections;
 import java.util.Map;
@@ -80,12 +80,12 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
     }
 
     @Override
-    public MenuItem getFiller() {
+    public DisplayableMenuItem getFiller() {
         return original.getFiller();
     }
 
     @Override
-    public PublicWrapper<C, R> setFiller(MenuItem filler) {
+    public PublicWrapper<C, R> setFiller(DisplayableMenuItem filler) {
         original.setFiller(filler);
         return this;
     }

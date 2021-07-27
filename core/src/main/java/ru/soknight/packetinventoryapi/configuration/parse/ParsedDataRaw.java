@@ -10,7 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import ru.soknight.packetinventoryapi.exception.configuration.NoMaterialProvidedException;
 import ru.soknight.packetinventoryapi.exception.configuration.NoSlotsToDisplayException;
 import ru.soknight.packetinventoryapi.exception.configuration.UnknownMaterialException;
-import ru.soknight.packetinventoryapi.menu.item.RegularMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 import ru.soknight.packetinventoryapi.nms.NMSAssistant;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public final class ParsedDataRaw {
             NoSlotsToDisplayException
     {
         // menu item instance creation
-        RegularMenuItem.Builder<?, ?> menuItem = NMSAssistant.newMenuItem();
+        RegularMenuItem.Builder<?, ?> menuItem = NMSAssistant.newMenuItem(configuration);
 
         // head textures applying or regular material usage
         if(playerHead != null && !playerHead.isEmpty())

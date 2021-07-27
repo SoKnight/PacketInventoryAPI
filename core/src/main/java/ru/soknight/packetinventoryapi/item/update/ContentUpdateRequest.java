@@ -6,7 +6,7 @@ import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
-import ru.soknight.packetinventoryapi.menu.item.RegularMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 import ru.soknight.packetinventoryapi.util.IntRange;
 
 import java.util.Map;

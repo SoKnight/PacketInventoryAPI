@@ -15,10 +15,10 @@ import org.bukkit.inventory.meta.SkullMeta;
 import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.item.ExtraDataProvider;
+import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
-import ru.soknight.packetinventoryapi.menu.item.RegularMenuItem;
-import ru.soknight.packetinventoryapi.menu.item.StateableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
+import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerWindowItems;
 import ru.soknight.packetinventoryapi.util.IntRange;
@@ -64,7 +64,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         return container;
     }
 
-    private MenuItem getFiller() {
+    private DisplayableMenuItem getFiller() {
         return container.getFiller();
     }
     
@@ -104,7 +104,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     public R fromParsedData(Iterable<? extends MenuItem> items, boolean replace) {
         if(items != null)
             items.forEach(item -> {
-                if(item instanceof StateableMenuItem)
+                if(!(item instanceof RegularMenuItem<?, ?>))
                     return;
 
                 RegularMenuItem<?, ?> menuItem = item.asRegularItem();
@@ -363,7 +363,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         viewPlayerInventory(slotData, content);
         viewHotbarContent(slotData, content);
 
-        MenuItem filler = getFiller();
+        DisplayableMenuItem filler = getFiller();
         if(filler != null)
             insert(filler.getItemFor(holder), false);
 
@@ -431,7 +431,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @SuppressWarnings("deprecation")
-    protected ItemStack replacePlaceholders(ItemStack item) {
+    private ItemStack replacePlaceholders(ItemStack item) {
         if(item == null || !item.hasItemMeta())
             return item;
 

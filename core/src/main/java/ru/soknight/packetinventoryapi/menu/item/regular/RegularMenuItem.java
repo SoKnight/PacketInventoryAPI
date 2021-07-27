@@ -1,4 +1,4 @@
-package ru.soknight.packetinventoryapi.menu.item;
+package ru.soknight.packetinventoryapi.menu.item.regular;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -8,11 +8,12 @@ import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
+import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.nms.ImplementedAs;
 import ru.soknight.packetinventoryapi.nms.vanilla.VanillaItem;
 
 @ImplementedAs("SimpleRegularMenuItem")
-public interface RegularMenuItem<I extends RegularMenuItem<I, B>, B extends RegularMenuItem.Builder<I, B>> extends VanillaItem<I, B>, MenuItem {
+public interface RegularMenuItem<I extends RegularMenuItem<I, B>, B extends RegularMenuItem.Builder<I, B>> extends VanillaItem<I, B>, DisplayableMenuItem {
 
     @Override
     default @NotNull ItemStack asBukkitItemFor(Player viewer) {

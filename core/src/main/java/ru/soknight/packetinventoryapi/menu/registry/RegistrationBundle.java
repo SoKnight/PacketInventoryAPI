@@ -80,13 +80,14 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
     }
 
     void fireEvent(Event<?, ?> event) {
-        event.setContainer(menu.getContainer().getOriginal());
+        event.setContainer(menu.getContainer().getView(event.getActor()));
 
-        if(event instanceof WindowCloseEvent<?, ?>)
+        if(event instanceof WindowCloseEvent<?, ?>) {
             if(menu.isViewing(event.getActor()))
                 menu.close(event.getActor());
             else
                 return;
+        }
 
         // --- general window events
         if(event instanceof WindowOpenEvent<?, ?>)
@@ -172,7 +173,7 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
             Class<A> annotationClass,
             Class<E> eventClass
     ) throws InvalidMethodStructureException {
-        A annotation = method.getAnnotation(annotationClass);
+        A annotation = method.getDeclaredAnnotation(annotationClass);
         if(annotation == null)
             return annotation;
 

@@ -34,7 +34,9 @@ public class MenuLoader {
             UnknownMaterialException,
             NoMaterialProvidedException,
             NoContentProvidedException,
-            NoMenuIOException
+            NoMenuIOException,
+            RequiredStatesNotFoundException,
+            UnexpectedPatternItemType
     {
         Validate.notNull(instance, "instance");
 
@@ -67,7 +69,9 @@ public class MenuLoader {
             UnknownFillingPatternException,
             UnknownMaterialException,
             NoMaterialProvidedException,
-            NoContentProvidedException
+            NoContentProvidedException,
+            RequiredStatesNotFoundException,
+            UnexpectedPatternItemType
     {
         Validate.notNull(instance, "instance");
         Validate.notEmpty(resourcePath, "resourcePath");

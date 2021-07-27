@@ -100,8 +100,13 @@ public final class SimpleContainerStorage implements ContainerStorage {
         if(container == null)
             return false;
 
-        if(!container.isInteractable())
-            cancelClick(actor, container, clickedSlot, clickedItem);
+        if(!container.isInteractable()) {
+            int modeId = clickType.getModeId();
+            if(modeId == 1 || modeId == 2 || modeId == 4)
+                container.updateContent().pushSync();
+            else
+                cancelClick(actor, container, clickedSlot, clickedItem);
+        }
 
         container.onClick(new WindowClickEvent<>(actor, container, clickedSlot, clickType, clickedItem));
         return true;

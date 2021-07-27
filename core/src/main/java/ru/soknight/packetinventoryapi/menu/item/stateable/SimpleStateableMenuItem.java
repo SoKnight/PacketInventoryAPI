@@ -1,9 +1,11 @@
-package ru.soknight.packetinventoryapi.menu.item;
+package ru.soknight.packetinventoryapi.menu.item.stateable;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -12,8 +14,14 @@ import java.util.Set;
 
 final class SimpleStateableMenuItem implements StateableMenuItem {
 
-    private final Map<String, RegularMenuItem<?, ?>> stateItems = new LinkedHashMap<>();
+    private final ConfigurationSection configuration;
+    private final Map<String, RegularMenuItem<?, ?>> stateItems;
     private StateSelector stateSelector;
+
+    public SimpleStateableMenuItem(ConfigurationSection configuration) {
+        this.configuration = configuration;
+        this.stateItems = new LinkedHashMap<>();
+    }
 
     @Override
     public @NotNull ItemStack asBukkitItemFor(Player viewer) {
@@ -27,6 +35,11 @@ final class SimpleStateableMenuItem implements StateableMenuItem {
     }
 
     @Override
+    public @Nullable ConfigurationSection getConfiguration() {
+        return configuration;
+    }
+
+    @Override
     public @NotNull Set<String> getStates() {
         return Collections.unmodifiableSet(stateItems.keySet());
     }
@@ -34,6 +47,11 @@ final class SimpleStateableMenuItem implements StateableMenuItem {
     @Override
     public @Nullable RegularMenuItem<?, ?> getStateItem(String id) {
         return stateItems.get(id);
+    }
+
+    @Override
+    public boolean hasStateItem(String id) {
+        return stateItems.containsKey(id);
     }
 
     @Override
@@ -52,8 +70,8 @@ final class SimpleStateableMenuItem implements StateableMenuItem {
         return stateSelector != null ? stateSelector.selectState(this, player) : null;
     }
 
-    static Builder build() {
-        return new Builder(new SimpleStateableMenuItem());
+    static Builder build(ConfigurationSection configuration) {
+        return new Builder(new SimpleStateableMenuItem(configuration));
     }
 
     static final class Builder implements StateableMenuItem.Builder {

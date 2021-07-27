@@ -10,8 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import ru.soknight.packetinventoryapi.event.type.WindowClickType;
-import ru.soknight.packetinventoryapi.lib.packetwrapper.play.server.WrapperPlayServerOpenWindow;
-import ru.soknight.packetinventoryapi.lib.packetwrapper.play.server.WrapperPlayServerWindowProperty;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.client.*;
 import ru.soknight.packetinventoryapi.storage.SimpleContainerStorage;
@@ -30,9 +28,7 @@ public class PacketsListener extends PacketAdapter {
                 PacketType.Play.Client.CLOSE_WINDOW,    // close window
                 PacketType.Play.Client.ITEM_NAME,       // anvil rename
                 PacketType.Play.Client.TR_SEL,          // trade select
-                PacketType.Play.Client.BEACON,          // beacon effect change
-                PacketType.Play.Server.OPEN_WINDOW,     // open window
-                PacketType.Play.Server.WINDOW_DATA      // window properties
+                PacketType.Play.Client.BEACON          // beacon effect change
         );
 
         this.storage = storage;
@@ -81,31 +77,6 @@ public class PacketsListener extends PacketAdapter {
             cancelled = onBeacon(PacketAssistant.createClientPacket(PacketClientSetBeaconEffect.class, packet, player));
         
         event.setCancelled(cancelled);
-    }
-
-    @Override
-    public void onPacketSending(PacketEvent event) {
-        PacketType type = event.getPacketType();
-
-        if(type == PacketType.Play.Server.OPEN_WINDOW) {
-            WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow(event.getPacket());
-            System.out.printf(
-                    "Opening window #%d type #%d with title: %s%n",
-                    packet.getWindowId(),
-                    packet.getWindowType(),
-                    packet.getWindowTitle().getJson()
-            );
-        }
-
-        if(type == PacketType.Play.Server.WINDOW_DATA) {
-            WrapperPlayServerWindowProperty packet = new WrapperPlayServerWindowProperty(event.getPacket());
-            System.out.printf(
-                    "Sending window property #%d with value %d for window #%d%n",
-                    packet.getProperty(),
-                    packet.getValue(),
-                    packet.getWindowId()
-            );
-        }
     }
 
     private boolean onClickWindow(PacketClientClickWindow packet) {
