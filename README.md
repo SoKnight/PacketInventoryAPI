@@ -17,7 +17,6 @@ An Inventory API implementation based on the Minecraft packets system.
   - 1.16.R2 (planned)
   - 1.16.R3 (planned)
   - 1.17.R1 (supported)
-- Pageable menus API support
 - Bukkit ItemStack instances pre-convertion to NMS ItemStack instances
 - ProtocolLib wrappers for vanilla recipes (e.g. for stonecutter)
 - Stonecutter container recipes update request
