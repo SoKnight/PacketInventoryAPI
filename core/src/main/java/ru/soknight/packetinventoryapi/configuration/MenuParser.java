@@ -339,7 +339,7 @@ public class MenuParser {
     private static List<String> colorize(List<String> original) {
         return original != null && !original.isEmpty()
                 ? original.stream().map(MenuParser::colorizeWithoutCheck).collect(Collectors.toList())
-                : original;
+                : null;
     }
 
     private static String colorizeWithoutCheck(String original) {
