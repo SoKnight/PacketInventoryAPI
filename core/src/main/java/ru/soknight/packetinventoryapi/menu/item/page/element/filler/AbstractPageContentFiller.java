@@ -41,17 +41,28 @@ public abstract class AbstractPageContentFiller<I extends DisplayableMenuItem> i
         if(slotItemRenderer == null)
             return;
 
-        RegularMenuItem<?, ?> item = menuItem.getItemFor(viewer);
-        if(item == null)
-            return;
-
-        int[] slots = item.getSlots();
-        if(slots == null || slots.length == 0)
-            return;
-
-        for(int pageIndex = 0; pageIndex < slots.length; pageIndex++) {
-            int slot = slots[pageIndex];
+        for(int pageIndex = 0; pageIndex < 90; pageIndex++) {
             int totalIndex = startIndex + pageIndex;
+
+            RegularMenuItem<?, ?> item;
+            if(menuItem.isRegular())
+                item = menuItem.asRegularItem();
+            else if(menuItem.isStateable())
+                item = menuItem.asStateableItem().getItemFor(viewer, -1, pageIndex, totalIndex);
+            else
+                throw new IllegalArgumentException("'menuItem' has unexprected displayable menu item type");
+
+            if(item == null)
+                return;
+
+            int[] slots = item.getSlots();
+            if(slots == null || slots.length == 0)
+                return;
+
+            if(pageIndex >= slots.length)
+                break;
+
+            int slot = slots[pageIndex];
 
             ItemStack itemStack = slotItemRenderer.renderItem(viewer, item, slot, pageIndex, totalIndex);
             if(itemStack == null || (!replaceWithEmptyItems && itemStack.getType() == Material.AIR))

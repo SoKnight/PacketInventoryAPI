@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import ru.soknight.packetinventoryapi.annotation.container.*;
 import ru.soknight.packetinventoryapi.annotation.window.ClickListener;
 import ru.soknight.packetinventoryapi.annotation.window.CloseListener;
+import ru.soknight.packetinventoryapi.annotation.window.ContentLoadListener;
 import ru.soknight.packetinventoryapi.annotation.window.OpenListener;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.EnchantmentPosition;
@@ -17,6 +18,7 @@ import ru.soknight.packetinventoryapi.event.Event;
 import ru.soknight.packetinventoryapi.event.container.*;
 import ru.soknight.packetinventoryapi.event.window.WindowClickEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowCloseEvent;
+import ru.soknight.packetinventoryapi.event.window.WindowContentLoadEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowOpenEvent;
 import ru.soknight.packetinventoryapi.exception.menu.InvalidMethodStructureException;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
@@ -38,6 +40,7 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
     private final Menu<C, R> menu;
 
     private final List<Listener> windowOpenListeners;
+    private final List<Listener> windowContentLoadListeners;
     private final List<Listener> windowClickListeners;
     private final List<Listener> windowCloseListeners;
 
@@ -54,6 +57,7 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
         this.menu = menu;
 
         this.windowOpenListeners = new ArrayList<>();
+        this.windowContentLoadListeners = new ArrayList<>();
         this.windowClickListeners = new ArrayList<>();
         this.windowCloseListeners = new ArrayList<>();
 
@@ -92,6 +96,8 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
         // --- general window events
         if(event instanceof WindowOpenEvent<?, ?>)
             windowOpenListeners.forEach(listener -> listener.invoke(event));
+        else if(event instanceof WindowContentLoadEvent<?, ?>)
+            windowContentLoadListeners.forEach(listener -> listener.invoke(event));
         else if(event instanceof WindowClickEvent<?, ?>)
             windowClickListeners.forEach(listener -> listener.invoke(event));
         else if(event instanceof WindowCloseEvent<?, ?>)
@@ -122,6 +128,7 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
         for(Method method : menu.getClass().getMethods()) {
             // --- window events
             registerListener(method, OpenListener.class, WindowOpenEvent.class, windowOpenListeners);
+            registerListener(method, ContentLoadListener.class, WindowContentLoadEvent.class, windowContentLoadListeners);
             registerListener(method, ClickListener.class, WindowClickEvent.class, windowClickListeners);
             registerListener(method, CloseListener.class, WindowCloseEvent.class, windowCloseListeners);
 

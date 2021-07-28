@@ -11,6 +11,7 @@ import ru.soknight.packetinventoryapi.container.type.GenericContainer;
 import ru.soknight.packetinventoryapi.event.type.WindowClickType;
 import ru.soknight.packetinventoryapi.exception.configuration.AbstractMenuParseException;
 import ru.soknight.packetinventoryapi.exception.configuration.AbstractResourceException;
+import ru.soknight.packetinventoryapi.menu.context.state.selector.StateSelectorContext;
 import ru.soknight.packetinventoryapi.menu.extended.PageableMenu;
 import ru.soknight.packetinventoryapi.menu.item.page.element.PageElementMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.page.element.filler.PageContentFiller;
@@ -76,13 +77,13 @@ public class ExampleMenu extends PageableMenu<Person> {
         return pageElement.getElementPattern().getItemFor(viewer).getSlots().length;
     }
 
-    private RegularMenuItem<?, ?> selectPageElementState(StateableMenuItem item, Player player)  {
-        return item.getStateItem("third");
+    private RegularMenuItem<?, ?> selectPageElementState(StateSelectorContext context)  {
+        return context.getMenuItem().getStateItem("third");
     }
 
-    private RegularMenuItem<?, ?> selectStats(StateableMenuItem item, Player player) {
-        int clickCount = getDataHolder(player).get("click_count", 0);
-        return item.getStateItem(clickCount % 2 == 0 ? "first" : "second");
+    private RegularMenuItem<?, ?> selectStats(StateSelectorContext context) {
+        int clickCount = getDataHolder(context.getViewer()).get("click_count", 0);
+        return context.getMenuItem().getStateItem(clickCount % 2 == 0 ? "first" : "second");
     }
 
     private void handleStatsSecondClick(Player actor, GenericContainer container, int clickedSlot, WindowClickType clickType, ItemStack itemStack) {

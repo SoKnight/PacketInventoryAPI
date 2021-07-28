@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.soknight.packetinventoryapi.menu.context.state.selector.ElementStateSelectorContext;
+import ru.soknight.packetinventoryapi.menu.context.state.selector.StateSelectorContext;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 
 import java.util.Collections;
@@ -16,7 +18,7 @@ final class SimpleStateableMenuItem implements StateableMenuItem {
 
     private final ConfigurationSection configuration;
     private final Map<String, RegularMenuItem<?, ?>> stateItems;
-    private StateSelector stateSelector;
+    private StateSelector<?> stateSelector;
 
     public SimpleStateableMenuItem(ConfigurationSection configuration) {
         this.configuration = configuration;
@@ -55,19 +57,33 @@ final class SimpleStateableMenuItem implements StateableMenuItem {
     }
 
     @Override
-    public @Nullable StateSelector getStateSelector() {
-        return stateSelector;
+    @SuppressWarnings("unchecked")
+    public <CTX extends StateSelectorContext> @Nullable StateSelector<CTX> getStateSelector() {
+        return (StateSelector<CTX>) stateSelector;
     }
 
     @Override
-    public SimpleStateableMenuItem setStateSelector(StateSelector stateSelector) {
+    public <CTX extends StateSelectorContext> SimpleStateableMenuItem setStateSelector(StateSelector<CTX> stateSelector) {
         this.stateSelector = stateSelector;
         return this;
     }
 
     @Override
-    public @Nullable RegularMenuItem<?, ?> selectStateItem(Player player) {
-        return stateSelector != null ? stateSelector.selectState(this, player) : null;
+    @SuppressWarnings("unchecked")
+    public <CTX extends StateSelectorContext> @Nullable RegularMenuItem<?, ?> selectStateItem(Player player) {
+        StateSelector<CTX> stateSelector = getStateSelector();
+        return stateSelector != null
+                ? stateSelector.selectState((CTX) StateSelectorContext.create(player, this))
+                : null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <CTX extends StateSelectorContext> @Nullable RegularMenuItem<?, ?> selectStateItem(Player player, int slot, int pageIndex, int totalIndex) {
+        StateSelector<CTX> stateSelector = getStateSelector();
+        return stateSelector != null
+                ? stateSelector.selectState((CTX) ElementStateSelectorContext.create(player, this, slot, pageIndex, totalIndex))
+                : null;
     }
 
     static Builder build(ConfigurationSection configuration) {

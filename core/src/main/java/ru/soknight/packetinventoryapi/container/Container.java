@@ -14,6 +14,7 @@ import ru.soknight.packetinventoryapi.container.data.Property;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
 import ru.soknight.packetinventoryapi.event.window.WindowClickEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowCloseEvent;
+import ru.soknight.packetinventoryapi.event.window.WindowContentLoadEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowOpenEvent;
 import ru.soknight.packetinventoryapi.item.ExtraDataProvider;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
@@ -55,6 +56,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     protected DisplayableMenuItem filler;
     
     protected EventListener<WindowOpenEvent<C, R>> openListener;
+    protected EventListener<WindowContentLoadEvent<C, R>> contentLoadListener;
     protected EventListener<WindowCloseEvent<C, R>> closeListener;
     protected ExtraDataProvider<C, R> extraDataProvider;
     private boolean viewing;
@@ -109,6 +111,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
 
         if(listener != null) {
             clone.openListener = listener::handle;
+            clone.contentLoadListener = listener::handle;
             clone.closeListener = listener::handle;
 
             IntRange range = new IntRange(0, playerHotbarSlots().getMax());
@@ -329,9 +332,11 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     
     public void onOpen(boolean reopened) {
         viewing = true;
-        updateContent().pushSync();
         if(!reopened && openListener != null)
             openListener.handle(new WindowOpenEvent<>(inventoryHolder, getThis(), reopened));
+        updateContent().pushSync();
+        if(contentLoadListener != null)
+            contentLoadListener.handle(new WindowContentLoadEvent<>(inventoryHolder, getThis()));
     }
     
     // --- close listening

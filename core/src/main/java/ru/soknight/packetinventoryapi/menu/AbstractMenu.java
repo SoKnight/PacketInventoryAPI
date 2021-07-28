@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
 import ru.soknight.packetinventoryapi.annotation.window.ClickListener;
 import ru.soknight.packetinventoryapi.annotation.window.CloseListener;
+import ru.soknight.packetinventoryapi.annotation.window.ContentLoadListener;
 import ru.soknight.packetinventoryapi.annotation.window.OpenListener;
 import ru.soknight.packetinventoryapi.configuration.MenuLoader;
 import ru.soknight.packetinventoryapi.configuration.item.ConfigurationItemStructure;
@@ -18,6 +19,7 @@ import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
 import ru.soknight.packetinventoryapi.event.type.WindowClickType;
 import ru.soknight.packetinventoryapi.event.window.WindowClickEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowCloseEvent;
+import ru.soknight.packetinventoryapi.event.window.WindowContentLoadEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowOpenEvent;
 import ru.soknight.packetinventoryapi.exception.configuration.AbstractMenuParseException;
 import ru.soknight.packetinventoryapi.exception.configuration.AbstractResourceException;
@@ -28,10 +30,12 @@ import ru.soknight.packetinventoryapi.exception.menu.RegistrationDeniedException
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
 import ru.soknight.packetinventoryapi.menu.container.PublicWrapper;
+import ru.soknight.packetinventoryapi.menu.context.state.selector.StateSelectorContext;
 import ru.soknight.packetinventoryapi.menu.extended.PageableMenu;
-import ru.soknight.packetinventoryapi.menu.item.*;
-import ru.soknight.packetinventoryapi.menu.item.page.element.filler.PageContentFiller;
+import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.MenuItem;
 import ru.soknight.packetinventoryapi.menu.item.page.element.PageElementMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.page.element.filler.PageContentFiller;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.stateable.StateSelector;
 import ru.soknight.packetinventoryapi.menu.item.stateable.StateableMenuItem;
@@ -153,7 +157,7 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
         return itemStructure;
     }
 
-    protected void setStateSelector(String itemId, StateSelector stateSelector) {
+    protected <CTX extends StateSelectorContext> void setStateSelector(String itemId, StateSelector<CTX> stateSelector) {
         MenuItem menuItem = getMenuItem(itemId);
         if(menuItem == null)
             return;
@@ -230,6 +234,13 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
     }
 
     protected void onOpen(Player actor, C container) {}
+
+    @ContentLoadListener
+    public void onContentLoad(WindowContentLoadEvent<C, R> event) {
+        onContentLoad(event.getActor(), event.getContainer());
+    }
+
+    protected void onContentLoad(Player actor, C container) {}
 
     @ClickListener(includeHotbar = true, includeInventory = true)
     public void onClick(WindowClickEvent<C, R> event) {
