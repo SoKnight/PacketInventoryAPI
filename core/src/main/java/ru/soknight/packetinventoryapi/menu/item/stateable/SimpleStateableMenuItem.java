@@ -71,19 +71,27 @@ final class SimpleStateableMenuItem implements StateableMenuItem {
     @Override
     @SuppressWarnings("unchecked")
     public <CTX extends StateSelectorContext> @Nullable RegularMenuItem<?, ?> selectStateItem(Player player) {
-        StateSelector<CTX> stateSelector = getStateSelector();
-        return stateSelector != null
-                ? stateSelector.selectState((CTX) StateSelectorContext.create(player, this))
-                : null;
+        try {
+            StateSelector<CTX> stateSelector = getStateSelector();
+            return stateSelector != null
+                    ? stateSelector.selectState((CTX) StateSelectorContext.create(player, this))
+                    : null;
+        } catch (ClassCastException ignored) {
+            return null;
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <CTX extends StateSelectorContext> @Nullable RegularMenuItem<?, ?> selectStateItem(Player player, int slot, int pageIndex, int totalIndex) {
-        StateSelector<CTX> stateSelector = getStateSelector();
-        return stateSelector != null
-                ? stateSelector.selectState((CTX) ElementStateSelectorContext.create(player, this, slot, pageIndex, totalIndex))
-                : null;
+        try {
+            StateSelector<CTX> stateSelector = getStateSelector();
+            return stateSelector != null
+                    ? stateSelector.selectState((CTX) ElementStateSelectorContext.create(player, this, slot, pageIndex, totalIndex))
+                    : null;
+        } catch (ClassCastException ignored) {
+            return null;
+        }
     }
 
     static Builder build(ConfigurationSection configuration) {

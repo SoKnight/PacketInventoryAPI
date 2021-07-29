@@ -50,6 +50,7 @@ public interface ContentUpdateRequest<C extends Container<C, R>, R extends Conte
 
     // --- menu item insertion
     R insert(RegularMenuItem<?, ?> item, boolean replace);
+    R remove(RegularMenuItem<?, ?> item);
 
     // --- setters
     R set(ItemStack item, int slot, boolean replace);

@@ -126,6 +126,9 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
 
     @Override
     public R insert(RegularMenuItem<?, ?> item, boolean replace) {
+        if(item == null)
+            return getThis();
+
         ItemStack bukkitItem = item.asBukkitItem();
 
         FillPatternType pattern = item.getFillPattern();
@@ -136,6 +139,19 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         if(slots != null && slots.length != 0)
             for(int slot : slots)
                 set(bukkitItem, slot, replace);
+
+        return getThis();
+    }
+
+    @Override
+    public R remove(RegularMenuItem<?, ?> item) {
+        if(item == null)
+            return getThis();
+
+        int[] slots = item.getSlots();
+        if(slots != null && slots.length != 0)
+            for(int slot : slots)
+                remove(slot);
 
         return getThis();
     }
