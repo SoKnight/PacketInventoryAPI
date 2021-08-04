@@ -46,12 +46,14 @@ public abstract class PageableMenu<T> extends AbstractGenericMenu {
 
     public int getTotalPages(Player viewer) {
         int count = getElementCount(viewer);
+        if(count == 0)
+            return 1;
+
         int pageSize = getPageSize(viewer);
+        if(pageSize == 0)
+            return 1;
 
         int pages = count / pageSize;
-        if(pages == 0)
-            pages++;
-
         return count % pageSize == 0 ? pages : pages + 1;
     }
 
