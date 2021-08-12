@@ -33,11 +33,11 @@ public abstract class AbstractMerchantMenu extends AbstractMenu<MerchantContaine
 
     @TradeSelectListener
     public void onTradeSelect(TradeSelectEvent event) {
-        onTradeSelect(
+        runAsync(() -> onTradeSelect(
                 event.getActor(), 
                 event.getContainer(), 
                 event.getSelectedSlot()
-        );
+        ));
     }
 
     protected void onTradeSelect(

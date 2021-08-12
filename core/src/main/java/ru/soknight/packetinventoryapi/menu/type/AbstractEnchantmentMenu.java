@@ -29,11 +29,11 @@ public abstract class AbstractEnchantmentMenu extends AbstractMenu<EnchantmentTa
 
     @EnchantmentSelectListener
     public void onEnchantmentSelect(EnchantmentSelectEvent event) {
-        onEnchantmentSelect(
+        runAsync(() -> onEnchantmentSelect(
                 event.getActor(), 
                 event.getContainer(), 
                 event.getEnchantmentPosition()
-        );
+        ));
     }
 
     protected void onEnchantmentSelect(

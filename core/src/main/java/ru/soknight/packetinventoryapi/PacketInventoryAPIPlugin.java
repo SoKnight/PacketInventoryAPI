@@ -18,7 +18,10 @@ import ru.soknight.packetinventoryapi.plugin.command.CommandDebug;
 import ru.soknight.packetinventoryapi.storage.ContainerStorage;
 import ru.soknight.packetinventoryapi.storage.SimpleContainerStorage;
 
-public class PacketInventoryAPIPlugin extends JavaPlugin {
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public final class PacketInventoryAPIPlugin extends JavaPlugin {
 
     private static PacketInventoryAPIPlugin INSTANCE;
     private static PacketInventoryAPI API_INSTANCE;
@@ -28,6 +31,7 @@ public class PacketInventoryAPIPlugin extends JavaPlugin {
     private PacketsListener packetsListener;
 
     private PlaceholderReplacer papiPlaceholderReplacer;
+    private ExecutorService asyncExecutorService;
     
     @Override
     public void onEnable() {
@@ -52,6 +56,7 @@ public class PacketInventoryAPIPlugin extends JavaPlugin {
         this.packetsListener = new PacketsListener(this, containerStorage);
 
         resolvePlaceholderReplacer();
+        this.asyncExecutorService = Executors.newCachedThreadPool();
 
         API_INSTANCE = new SimplePacketInventoryAPI(containerStorage, menuRegistry);
         
@@ -91,6 +96,10 @@ public class PacketInventoryAPIPlugin extends JavaPlugin {
 
     public static PlaceholderReplacer getPlaceholderReplacerPAPI() {
         return INSTANCE.papiPlaceholderReplacer;
+    }
+
+    public static ExecutorService getExecutorService() {
+        return INSTANCE.asyncExecutorService;
     }
 
     public static void info(String format, Object... args) {

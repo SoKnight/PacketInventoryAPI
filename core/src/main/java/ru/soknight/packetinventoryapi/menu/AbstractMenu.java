@@ -44,6 +44,11 @@ import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 @Getter
 public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> implements Menu<C, R> {
@@ -54,6 +59,7 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
     protected final PublicWrapper<C, R> container;
     protected final Map<String, MenuItem> menuItems;
     protected final ConfigurationItemStructure<Menu<C, R>> itemStructure;
+    protected final Executor bukkitSchedulerExecutor;
     private DisplayableMenuItem filler;
 
     protected AbstractMenu(PublicWrapper<C, R> container, String name, Plugin providingPlugin) {
@@ -63,6 +69,9 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
         this.container = container;
         this.menuItems = new LinkedHashMap<>();
         this.itemStructure = new ConfigurationItemStructure<>(this);
+        this.bukkitSchedulerExecutor = task -> providingPlugin.getServer()
+                .getScheduler()
+                .scheduleSyncDelayedTask(providingPlugin, task);
 
         container.setEventListener(event -> PacketInventoryAPIPlugin.getApiInstance()
                 .menuRegistry()
@@ -228,16 +237,32 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
         return updateContent(viewer).insert(menuItem, true);
     }
 
+    protected <T> Future<T> callAsync(Callable<T> callable) {
+        return PacketInventoryAPIPlugin.getExecutorService().submit(callable);
+    }
+
+    protected Future<?> runAsync(Runnable runnable) {
+        return PacketInventoryAPIPlugin.getExecutorService().submit(runnable);
+    }
+
+    protected <T> CompletableFuture<T> callSync(Supplier<T> supplier) {
+        return CompletableFuture.supplyAsync(supplier, bukkitSchedulerExecutor);
+    }
+
+    protected CompletableFuture<Void> runSync(Runnable runnable) {
+        return CompletableFuture.runAsync(runnable, bukkitSchedulerExecutor);
+    }
+
     @OpenListener
     public void onOpen(WindowOpenEvent<C, R> event) {
-        onOpen(event.getActor(), event.getContainer());
+        runAsync(() -> onOpen(event.getActor(), event.getContainer()));
     }
 
     protected void onOpen(Player actor, C container) {}
 
     @ContentLoadListener
     public void onContentLoad(WindowContentLoadEvent<C, R> event) {
-        onContentLoad(event.getActor(), event.getContainer());
+        runAsync(() -> onContentLoad(event.getActor(), event.getContainer()));
     }
 
     protected void onContentLoad(Player actor, C container) {}
@@ -268,18 +293,18 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
             if(clickListener == null)
                 continue;
 
-            clickListener.handle(event);
+            runAsync(() -> clickListener.handle(event));
             return;
         }
 
-        onClick(actor, event.getContainer(), clickedSlot, event.getClickType(), event.getClickedItem());
+        runAsync(() -> onClick(actor, event.getContainer(), clickedSlot, event.getClickType(), event.getClickedItem()));
     }
 
     protected void onClick(Player actor, C container, int clickedSlot, WindowClickType clickType, ItemStack clickedItem) {}
 
     @CloseListener
     public void onClose(WindowCloseEvent<C, R> event) {
-        onClose(event.getActor(), event.getContainer());
+        runAsync(() -> onClose(event.getActor(), event.getContainer()));
     }
 
     protected void onClose(Player actor, C container) {}

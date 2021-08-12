@@ -29,12 +29,12 @@ public abstract class AbstractBeaconMenu extends AbstractMenu<BeaconContainer, B
 
     @BeaconEffectChangeListener
     public void onEffectChange(BeaconEffectChangeEvent event) {
-        onEffectChange(
+        runAsync(() -> onEffectChange(
                 event.getActor(),
                 event.getContainer(),
                 event.getPrimaryEffect(),
                 event.getSecondaryEffect()
-        );
+        ));
     }
 
     protected void onEffectChange(

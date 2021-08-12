@@ -28,7 +28,7 @@ public abstract class AbstractAnvilMenu extends AbstractMenu<AnvilContainer, Anv
 
     @AnvilRenameListener
     public void onRename(AnvilRenameEvent event) {
-        onRename(event.getActor(), event.getContainer(), event.getCustomName());
+        runAsync(() -> onRename(event.getActor(), event.getContainer(), event.getCustomName()));
     }
 
     protected void onRename(Player actor, AnvilContainer container, String customName) {}

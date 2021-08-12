@@ -31,11 +31,11 @@ public abstract class AbstractLecternMenu extends AbstractMenu<LecternContainer,
 
     @LecternButtonClickListener
     public void onButtonClick(LecternButtonClickEvent event) {
-        onButtonClick(
+        runAsync(() -> onButtonClick(
                 event.getActor(), 
                 event.getContainer(), 
                 event.getButtonType()
-        );
+        ));
     }
 
     protected void onButtonClick(
@@ -46,11 +46,11 @@ public abstract class AbstractLecternMenu extends AbstractMenu<LecternContainer,
 
     @LecternPageOpenListener
     public void onPageOpen(LecternPageOpenEvent event) {
-        onPageOpen(
+        runAsync(() -> onPageOpen(
                 event.getActor(),
                 event.getContainer(),
                 event.getPage()
-        );
+        ));
     }
 
     protected void onPageOpen(
