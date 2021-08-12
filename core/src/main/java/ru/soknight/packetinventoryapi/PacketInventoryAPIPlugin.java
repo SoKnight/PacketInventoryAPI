@@ -31,7 +31,8 @@ public final class PacketInventoryAPIPlugin extends JavaPlugin {
     private PacketsListener packetsListener;
 
     private PlaceholderReplacer papiPlaceholderReplacer;
-    private ExecutorService asyncExecutorService;
+    private ExecutorService asyncSingleExecutorService;
+    private ExecutorService asyncMultiExecutorService;
     
     @Override
     public void onEnable() {
@@ -56,7 +57,8 @@ public final class PacketInventoryAPIPlugin extends JavaPlugin {
         this.packetsListener = new PacketsListener(this, containerStorage);
 
         resolvePlaceholderReplacer();
-        this.asyncExecutorService = Executors.newCachedThreadPool();
+        this.asyncSingleExecutorService = Executors.newSingleThreadExecutor();
+        this.asyncMultiExecutorService = Executors.newCachedThreadPool();
 
         API_INSTANCE = new SimplePacketInventoryAPI(containerStorage, menuRegistry);
         
@@ -98,8 +100,16 @@ public final class PacketInventoryAPIPlugin extends JavaPlugin {
         return INSTANCE.papiPlaceholderReplacer;
     }
 
-    public static ExecutorService getExecutorService() {
-        return INSTANCE.asyncExecutorService;
+    public static ExecutorService getExecutorService(boolean sequential) {
+        return sequential ? getSingleExecutorService() : getMultiExecutorService();
+    }
+
+    public static ExecutorService getSingleExecutorService() {
+        return INSTANCE.asyncSingleExecutorService;
+    }
+
+    public static ExecutorService getMultiExecutorService() {
+        return INSTANCE.asyncMultiExecutorService;
     }
 
     public static void info(String format, Object... args) {

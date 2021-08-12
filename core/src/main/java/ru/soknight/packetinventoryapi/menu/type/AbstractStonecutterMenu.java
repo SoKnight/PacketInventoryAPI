@@ -28,13 +28,13 @@ public abstract class AbstractStonecutterMenu extends AbstractMenu<StonecutterCo
 
     @RecipeSelectListener
     public void onRecipeSelect(RecipeSelectEvent event) {
-        runAsync(() -> onRecipeSelect(
+        onRecipeSelect(
                 event.getActor(), 
                 event.getContainer(), 
                 event.getSlot(),
                 event.getRow(),
                 event.getColumn()
-        ));
+        );
     }
 
     protected void onRecipeSelect(

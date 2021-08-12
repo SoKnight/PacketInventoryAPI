@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.EnchantmentPosition;
 import ru.soknight.packetinventoryapi.container.data.LecternButtonType;
@@ -19,6 +20,7 @@ import ru.soknight.packetinventoryapi.packet.server.PacketServerSetSlot;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 public final class SimpleContainerStorage implements ContainerStorage {
 
@@ -89,6 +91,10 @@ public final class SimpleContainerStorage implements ContainerStorage {
                     .send(container.getInventoryHolder());
     }
 
+    private Future<?> runAsync(Runnable runnable) {
+        return PacketInventoryAPIPlugin.getSingleExecutorService().submit(runnable);
+    }
+
     @SuppressWarnings("unchecked")
     public <C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> boolean onWindowClick(
             Player actor,
@@ -108,7 +114,7 @@ public final class SimpleContainerStorage implements ContainerStorage {
                 cancelClick(actor, container, clickedSlot, clickedItem);
         }
 
-        container.onClick(new WindowClickEvent<>(actor, container, clickedSlot, clickType, clickedItem));
+        runAsync(() -> container.onClick(new WindowClickEvent<>(actor, container, clickedSlot, clickType, clickedItem)));
         return true;
     }
 
@@ -139,25 +145,25 @@ public final class SimpleContainerStorage implements ContainerStorage {
         if(container instanceof EnchantmentTableContainer) {
             EnchantmentTableContainer table = (EnchantmentTableContainer) container;
             EnchantmentPosition position = EnchantmentPosition.getById(payloadId);
-            table.onEnchantmentSelected(new EnchantmentSelectEvent(player, table, position));
+            runAsync(() -> table.onEnchantmentSelected(new EnchantmentSelectEvent(player, table, position)));
         // lectern
         } else if(container instanceof LecternContainer) {
             LecternContainer lectern = (LecternContainer) container;
             if(payloadId > 100) {
                 int page = payloadId - 100;
-                lectern.onPageOpened(new LecternPageOpenEvent(player, lectern, page));
+                runAsync(() -> lectern.onPageOpened(new LecternPageOpenEvent(player, lectern, page)));
             } else {
                 LecternButtonType buttonType = LecternButtonType.getById(payloadId);
-                lectern.onButtonClicked(new LecternButtonClickEvent(player, lectern, buttonType));
+                runAsync(() -> lectern.onButtonClicked(new LecternButtonClickEvent(player, lectern, buttonType)));
             }
         // stonecutter
         } else if(container instanceof StonecutterContainer) {
             StonecutterContainer stonecutter = (StonecutterContainer) container;
-            stonecutter.onRecipeSelected(new RecipeSelectEvent(player, stonecutter, payloadId));
+            runAsync(() -> stonecutter.onRecipeSelected(new RecipeSelectEvent(player, stonecutter, payloadId)));
         // loom
         } else if(container instanceof LoomContainer) {
             LoomContainer loom = (LoomContainer) container;
-            loom.onPatternSelected(new PatternSelectEvent(player, loom, payloadId));
+            runAsync(() -> loom.onPatternSelected(new PatternSelectEvent(player, loom, payloadId)));
         // anything else - close this inventory
         } else {
             close(container, false);
@@ -172,7 +178,7 @@ public final class SimpleContainerStorage implements ContainerStorage {
         
         if(container instanceof AnvilContainer) {
             AnvilContainer anvil = (AnvilContainer) container;
-            anvil.onItemRename(new AnvilRenameEvent(player, anvil, customName));
+            runAsync(() -> anvil.onItemRename(new AnvilRenameEvent(player, anvil, customName)));
         } else {
             close(container, false);
         }
@@ -186,7 +192,7 @@ public final class SimpleContainerStorage implements ContainerStorage {
         
         if(container instanceof BeaconContainer) {
             BeaconContainer beacon = (BeaconContainer) container;
-            beacon.onEffectChanged(new BeaconEffectChangeEvent(player, beacon, primary, secondary));
+            runAsync(() -> beacon.onEffectChanged(new BeaconEffectChangeEvent(player, beacon, primary, secondary)));
         } else {
             close(container, false);
         }
@@ -200,7 +206,7 @@ public final class SimpleContainerStorage implements ContainerStorage {
         
         if(container instanceof MerchantContainer) {
             MerchantContainer merchant = (MerchantContainer) container;
-            merchant.onTradeSelected(new TradeSelectEvent(player, merchant, slot));
+            runAsync(() -> merchant.onTradeSelected(new TradeSelectEvent(player, merchant, slot)));
         } else {
             close(container, false);
         }

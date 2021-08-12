@@ -28,13 +28,13 @@ public abstract class AbstractLoomMenu extends AbstractMenu<LoomContainer, LoomC
 
     @PatternSelectListener
     public void onPatternSelect(PatternSelectEvent event) {
-        runAsync(() -> onPatternSelect(
+        onPatternSelect(
                 event.getActor(), 
                 event.getContainer(), 
                 event.getSlot(),
                 event.getRow(),
                 event.getColumn()
-        ));
+        );
     }
 
     protected void onPatternSelect(

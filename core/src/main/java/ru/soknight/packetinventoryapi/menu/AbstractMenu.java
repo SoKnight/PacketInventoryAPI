@@ -237,12 +237,12 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
         return updateContent(viewer).insert(menuItem, true);
     }
 
-    protected <T> Future<T> callAsync(Callable<T> callable) {
-        return PacketInventoryAPIPlugin.getExecutorService().submit(callable);
+    protected <T> Future<T> callAsync(Callable<T> callable, boolean sequential) {
+        return PacketInventoryAPIPlugin.getExecutorService(sequential).submit(callable);
     }
 
-    protected Future<?> runAsync(Runnable runnable) {
-        return PacketInventoryAPIPlugin.getExecutorService().submit(runnable);
+    protected Future<?> runAsync(Runnable runnable, boolean sequential) {
+        return PacketInventoryAPIPlugin.getExecutorService(sequential).submit(runnable);
     }
 
     protected <T> CompletableFuture<T> callSync(Supplier<T> supplier) {
@@ -255,14 +255,14 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
 
     @OpenListener
     public void onOpen(WindowOpenEvent<C, R> event) {
-        runAsync(() -> onOpen(event.getActor(), event.getContainer()));
+        onOpen(event.getActor(), event.getContainer());
     }
 
     protected void onOpen(Player actor, C container) {}
 
     @ContentLoadListener
     public void onContentLoad(WindowContentLoadEvent<C, R> event) {
-        runAsync(() -> onContentLoad(event.getActor(), event.getContainer()));
+        onContentLoad(event.getActor(), event.getContainer());
     }
 
     protected void onContentLoad(Player actor, C container) {}
@@ -293,18 +293,18 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
             if(clickListener == null)
                 continue;
 
-            runAsync(() -> clickListener.handle(event));
+            clickListener.handle(event);
             return;
         }
 
-        runAsync(() -> onClick(actor, event.getContainer(), clickedSlot, event.getClickType(), event.getClickedItem()));
+        onClick(actor, event.getContainer(), clickedSlot, event.getClickType(), event.getClickedItem());
     }
 
     protected void onClick(Player actor, C container, int clickedSlot, WindowClickType clickType, ItemStack clickedItem) {}
 
     @CloseListener
     public void onClose(WindowCloseEvent<C, R> event) {
-        runAsync(() -> onClose(event.getActor(), event.getContainer()));
+        onClose(event.getActor(), event.getContainer());
     }
 
     protected void onClose(Player actor, C container) {}
