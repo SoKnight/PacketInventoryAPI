@@ -122,6 +122,8 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
 
                 for(int slot : slots)
                     set(bukkitItem, slot, replace);
+
+                // TODO is custom item renderer support actually needed here?
             });
         return getThis();
     }
@@ -132,7 +134,6 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
             return getThis();
 
         ItemStack bukkitItem = item.asBukkitItem();
-
 
         FillPatternType pattern = item.getFillPattern();
         if(pattern != null)

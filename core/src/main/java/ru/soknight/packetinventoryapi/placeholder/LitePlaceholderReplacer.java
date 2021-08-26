@@ -13,9 +13,11 @@ public interface LitePlaceholderReplacer extends PlaceholderReplacer {
     @Override
     default void replace(@NotNull Player player, @NotNull ListContainer container) {
         List<String> list = container.getList();
+        Integer slot = container.hasSlot() ? container.getSlot().getAsInt() : null;
+
         if(list != null && !list.isEmpty()) {
             list.replaceAll(line -> {
-                StringContainer wrapper = StringContainer.wrap(line);
+                StringContainer wrapper = StringContainer.wrap(line, slot);
                 replace(player, wrapper);
                 return wrapper.getString();
             });

@@ -24,6 +24,11 @@ final class SimpleListContainer implements ListContainer {
     }
 
     @Override
+    public boolean hasSlot() {
+        return slot != null;
+    }
+
+    @Override
     public boolean isEmpty() {
         return list == null || list.isEmpty();
     }

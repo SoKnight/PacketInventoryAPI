@@ -15,6 +15,8 @@ public interface StringContainer {
 
     OptionalInt getSlot();
 
+    boolean hasSlot();
+
     boolean isEmpty();
 
     boolean contains(String string);

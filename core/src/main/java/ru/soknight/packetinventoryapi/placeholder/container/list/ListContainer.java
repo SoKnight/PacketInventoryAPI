@@ -17,6 +17,8 @@ public interface ListContainer {
 
     OptionalInt getSlot();
 
+    boolean hasSlot();
+
     boolean isEmpty();
 
     boolean contains(String element);

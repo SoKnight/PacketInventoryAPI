@@ -15,7 +15,7 @@ public interface LiteElementPlaceholderReplacer extends ElementPlaceholderReplac
         List<String> list = container.getList();
         if(list != null && !list.isEmpty()) {
             list.replaceAll(line -> {
-                StringContainer wrapper = StringContainer.wrap(line);
+                StringContainer wrapper = StringContainer.wrap(line, slot);
                 replace(player, wrapper, slot, pageIndex, totalIndex);
                 return wrapper.getString();
             });

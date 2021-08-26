@@ -22,6 +22,11 @@ final class SimpleStringContainer implements StringContainer {
     }
 
     @Override
+    public boolean hasSlot() {
+        return slot != null;
+    }
+
+    @Override
     public boolean isEmpty() {
         return string == null || string.isEmpty();
     }

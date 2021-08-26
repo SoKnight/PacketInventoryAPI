@@ -80,7 +80,7 @@ public abstract class AbstractPageContentFiller<I extends DisplayableMenuItem> i
         if(original == null || original.isEmpty())
             return original;
 
-        StringContainer wrapper = StringContainer.wrap(original);
+        StringContainer wrapper = StringContainer.wrap(original, slot);
         for(ElementPlaceholderReplacer replacer : placeholderReplacers)
             replacer.replace(viewer, wrapper, slot, pageIndex, totalIndex);
 
@@ -94,7 +94,7 @@ public abstract class AbstractPageContentFiller<I extends DisplayableMenuItem> i
         if(original == null || original.isEmpty())
             return original;
 
-        ListContainer wrapper = ListContainer.wrap(original);
+        ListContainer wrapper = ListContainer.wrap(original, slot);
         for(ElementPlaceholderReplacer replacer : placeholderReplacers)
             replacer.replace(viewer, wrapper, slot, pageIndex, totalIndex);
 
