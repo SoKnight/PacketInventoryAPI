@@ -7,11 +7,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.util.Validate;
 
+import java.util.OptionalInt;
+
 @Getter
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 final class SimpleStringContainer implements StringContainer {
 
     private String string;
+    private final Integer slot;
+
+    @Override
+    public OptionalInt getSlot() {
+        return slot != null ? OptionalInt.of(slot) : OptionalInt.empty();
+    }
 
     @Override
     public boolean isEmpty() {

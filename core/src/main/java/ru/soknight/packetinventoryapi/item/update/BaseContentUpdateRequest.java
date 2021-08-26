@@ -19,6 +19,8 @@ import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.regular.renderer.RegularItemRenderer;
+import ru.soknight.packetinventoryapi.nms.vanilla.VanillaItem;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerWindowItems;
 import ru.soknight.packetinventoryapi.util.IntRange;
@@ -131,14 +133,34 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
 
         ItemStack bukkitItem = item.asBukkitItem();
 
+
         FillPatternType pattern = item.getFillPattern();
         if(pattern != null)
             fillPattern(bukkitItem, pattern, replace);
 
         int[] slots = item.getSlots();
         if(slots != null && slots.length != 0)
-            for(int slot : slots)
-                set(bukkitItem, slot, replace);
+            for(int slotIndex = 0; slotIndex < slots.length; slotIndex++) {
+                int slot = slots[slotIndex];
+                ItemStack mappedItem = bukkitItem;
+
+                // custom item renderer support
+                if(bukkitItem instanceof WrappedItemStack) {
+                    VanillaItem<?, ?> vanillaItem = ((WrappedItemStack) bukkitItem).getVanillaItem();
+                    if(vanillaItem instanceof RegularMenuItem) {
+                        RegularMenuItem<?, ?> menuItem = (RegularMenuItem<?, ?>) vanillaItem;
+                        RegularItemRenderer itemRenderer = menuItem.getItemRenderer();
+                        if(itemRenderer != null) {
+                            mappedItem = itemRenderer.renderItem(container.getInventoryHolder(), mappedItem, slot, slotIndex);
+                            if(mappedItem == null) {
+                                throw new IllegalArgumentException("custom 'itemRenderer' was return a null ItemStack!");
+                            }
+                        }
+                    }
+                }
+
+                set(mappedItem, slot, replace);
+            }
 
         return getThis();
     }
@@ -390,7 +412,8 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         itemMatrix.forEach(slotData::set);
 
         // replacing placeholders to real values
-        slotData.replaceAll(this::replacePlaceholders);
+        for(int slot = 0; slot < slotData.size(); slot++)
+            slotData.set(slot, replacePlaceholders(slotData.get(slot), slot));
 
         PacketAssistant.createServerPacket(PacketServerWindowItems.class)
                 .windowID(container.getInventoryId())
@@ -447,7 +470,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @SuppressWarnings("deprecation")
-    private ItemStack replacePlaceholders(ItemStack item) {
+    private ItemStack replacePlaceholders(ItemStack item, int slot) {
         if(item == null || !item.hasItemMeta())
             return item;
 
@@ -456,12 +479,12 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
 
         if(itemMeta.hasDisplayName()) {
             String displayName = itemMeta.getDisplayName();
-            itemMeta.setDisplayName(container.replacePlaceholders(displayName));
+            itemMeta.setDisplayName(container.replacePlaceholders(displayName, slot));
         }
 
         if(itemMeta.hasLore()) {
             List<String> lore = itemMeta.getLore();
-            itemMeta.setLore(container.replacePlaceholders(lore));
+            itemMeta.setLore(container.replacePlaceholders(lore, slot));
         }
 
         if(item instanceof WrappedItemStack) {
@@ -469,7 +492,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
             String playerHead = wrapper.getVanillaItem().getPlayerHead();
             if(playerHead != null && !playerHead.isEmpty() && itemMeta instanceof SkullMeta) {
                 SkullMeta skullMeta = (SkullMeta) itemMeta;
-                OfflinePlayer owningPlayer = Bukkit.getOfflinePlayer(container.replacePlaceholders(playerHead));
+                OfflinePlayer owningPlayer = Bukkit.getOfflinePlayer(container.replacePlaceholders(playerHead, slot));
                 skullMeta.setOwningPlayer(owningPlayer);
             }
         }

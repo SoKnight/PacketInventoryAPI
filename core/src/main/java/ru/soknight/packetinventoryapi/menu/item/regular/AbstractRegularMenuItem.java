@@ -6,6 +6,7 @@ import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
+import ru.soknight.packetinventoryapi.menu.item.regular.renderer.RegularItemRenderer;
 import ru.soknight.packetinventoryapi.nms.vanilla.AbstractVanillaItem;
 
 @Getter
@@ -15,9 +16,11 @@ public abstract class AbstractRegularMenuItem<I extends AbstractRegularMenuItem<
     protected int[] slots;
     protected FillPatternType fillPattern;
     protected WindowClickListener<?, ?> clickListener;
+    protected RegularItemRenderer itemRenderer;
 
     protected AbstractRegularMenuItem(ConfigurationSection configuration) {
         this.configuration = configuration;
+        this.itemRenderer = RegularItemRenderer.DEFAULT;
     }
 
     @SuppressWarnings("unchecked")
@@ -28,6 +31,12 @@ public abstract class AbstractRegularMenuItem<I extends AbstractRegularMenuItem<
     @Override
     public I setClickListener(WindowClickListener<?, ?> clickListener) {
         this.clickListener = clickListener;
+        return getThis();
+    }
+
+    @Override
+    public I setItemRenderer(RegularItemRenderer itemRenderer) {
+        this.itemRenderer = itemRenderer;
         return getThis();
     }
 

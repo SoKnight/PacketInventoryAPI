@@ -270,28 +270,28 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         return getThis();
     }
 
-    public String replacePlaceholders(String original) {
+    public String replacePlaceholders(String original, Integer slot) {
         if(inventoryHolder == null || placeholderReplacers.isEmpty())
             return original;
 
         if(original == null || original.isEmpty())
             return original;
 
-        StringContainer wrapper = StringContainer.wrap(original);
+        StringContainer wrapper = StringContainer.wrap(original, slot);
         for(PlaceholderReplacer replacer : placeholderReplacers)
             replacer.replace(inventoryHolder, wrapper);
 
         return wrapper.getString();
     }
 
-    public List<String> replacePlaceholders(List<String> original) {
+    public List<String> replacePlaceholders(List<String> original, Integer slot) {
         if(inventoryHolder == null || placeholderReplacers.isEmpty())
             return original;
 
         if(original == null || original.isEmpty())
             return original;
 
-        ListContainer wrapper = ListContainer.wrap(original);
+        ListContainer wrapper = ListContainer.wrap(original, slot);
         for(PlaceholderReplacer replacer : placeholderReplacers)
             replacer.replace(inventoryHolder, wrapper);
 

@@ -5,14 +5,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.OptionalInt;
 
 public interface ListContainer {
 
-    static ListContainer wrap(List<String> list) {
-        return new SimpleListContainer(list);
+    static ListContainer wrap(List<String> list, int slot) {
+        return new SimpleListContainer(list, slot);
     }
 
     @Nullable List<String> getList();
+
+    OptionalInt getSlot();
 
     boolean isEmpty();
 

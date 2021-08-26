@@ -9,6 +9,7 @@ import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
 import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.regular.renderer.RegularItemRenderer;
 import ru.soknight.packetinventoryapi.nms.ImplementedAs;
 import ru.soknight.packetinventoryapi.nms.vanilla.VanillaItem;
 
@@ -32,6 +33,10 @@ public interface RegularMenuItem<I extends RegularMenuItem<I, B>, B extends Regu
     <C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> WindowClickListener<C, R> getClickListener();
 
     I setClickListener(WindowClickListener<?, ?> clickListener);
+
+    RegularItemRenderer getItemRenderer();
+
+    I setItemRenderer(RegularItemRenderer itemRenderer);
 
     default boolean isSetAt(int targetSlot) {
         for(int slot : getSlots())

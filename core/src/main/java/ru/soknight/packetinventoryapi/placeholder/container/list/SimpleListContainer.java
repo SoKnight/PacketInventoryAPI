@@ -9,12 +9,19 @@ import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.OptionalInt;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 final class SimpleListContainer implements ListContainer {
 
     private final List<String> list;
+    private final Integer slot;
+
+    @Override
+    public OptionalInt getSlot() {
+        return slot != null ? OptionalInt.of(slot) : OptionalInt.empty();
+    }
 
     @Override
     public boolean isEmpty() {

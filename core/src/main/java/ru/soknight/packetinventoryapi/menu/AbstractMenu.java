@@ -37,6 +37,7 @@ import ru.soknight.packetinventoryapi.menu.item.MenuItem;
 import ru.soknight.packetinventoryapi.menu.item.page.element.PageElementMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.page.element.filler.PageContentFiller;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
+import ru.soknight.packetinventoryapi.menu.item.regular.renderer.RegularItemRenderer;
 import ru.soknight.packetinventoryapi.menu.item.stateable.StateSelector;
 import ru.soknight.packetinventoryapi.menu.item.stateable.StateableMenuItem;
 import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
@@ -217,6 +218,44 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
                 RegularMenuItem<?, ?> stateItem = elementPattern.asStateableItem().getStateItem(stateId);
                 if(stateItem != null)
                     stateItem.setClickListener(clickListener);
+            }
+        }
+    }
+
+    protected void setItemRenderer(String itemId, RegularItemRenderer itemRenderer) {
+        MenuItem menuItem = getMenuItem(itemId);
+        if(menuItem == null)
+            return;
+
+        if(menuItem.isRegular()) {
+            menuItem.asRegularItem().setItemRenderer(itemRenderer);
+            return;
+        }
+
+        if(menuItem.isPageElement()) {
+            DisplayableMenuItem elementPattern = menuItem.asPageElementItem().getElementPattern();
+            if(elementPattern.isRegular())
+                elementPattern.asRegularItem().setItemRenderer(itemRenderer);
+        }
+    }
+
+    protected void setItemRenderer(String itemId, String stateId, RegularItemRenderer itemRenderer) {
+        MenuItem menuItem = getMenuItem(itemId);
+        if(menuItem == null)
+            return;
+
+        if(menuItem.isStateable()) {
+            RegularMenuItem<?, ?> stateItem = menuItem.asStateableItem().getStateItem(stateId);
+            if(stateItem != null)
+                stateItem.setItemRenderer(itemRenderer);
+        }
+
+        if(menuItem.isPageElement()) {
+            DisplayableMenuItem elementPattern = menuItem.asPageElementItem().getElementPattern();
+            if(elementPattern.isStateable()) {
+                RegularMenuItem<?, ?> stateItem = elementPattern.asStateableItem().getStateItem(stateId);
+                if(stateItem != null)
+                    stateItem.setItemRenderer(itemRenderer);
             }
         }
     }
