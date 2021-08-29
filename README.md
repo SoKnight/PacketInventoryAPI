@@ -1,6 +1,11 @@
 # PacketInventoryAPI
 An Inventory API implementation based on the Minecraft packets system.
 
+## For interested in this project
+Currently this library actively developed only by me.
+A public release and WiKi will be published when all basic features will be completed (see below).
+Contribution doesn't make sense before public release, so just await :)
+
 ## Why? For what purpose?
 1) That should be faster and more lightweight that Bukkit based Menu APIs.
 2) That gives you more opportunities and customization features.
