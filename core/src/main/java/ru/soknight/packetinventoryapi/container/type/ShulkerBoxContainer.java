@@ -7,7 +7,7 @@ import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
 import ru.soknight.packetinventoryapi.container.ContainerStub;
 import ru.soknight.packetinventoryapi.container.ContainerType;
 import ru.soknight.packetinventoryapi.container.RowableContainerStub;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequestStub;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequestStub;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
 import ru.soknight.packetinventoryapi.util.IntRange;
 

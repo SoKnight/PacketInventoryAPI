@@ -2,7 +2,7 @@ package ru.soknight.packetinventoryapi.menu.input.validate;
 
 import org.bukkit.entity.Player;
 import ru.soknight.packetinventoryapi.container.Container;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.input.predicate.FloatPredicate;
 
 import java.util.function.*;

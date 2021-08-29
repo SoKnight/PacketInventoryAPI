@@ -9,8 +9,6 @@ public interface ElementStateSelectorContext extends StateSelectorContext {
         return new SimpleElementStateSelectorContext(viewer, menuItem, slot, pageIndex, totalIndex);
     }
 
-    int getSlot();
-
     int getPageIndex();
 
     int getTotalIndex();

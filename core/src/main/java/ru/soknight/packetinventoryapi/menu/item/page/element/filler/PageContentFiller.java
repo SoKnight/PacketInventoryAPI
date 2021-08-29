@@ -3,7 +3,7 @@ package ru.soknight.packetinventoryapi.menu.item.page.element.filler;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.page.element.renderer.SlotItemRenderer;
 import ru.soknight.packetinventoryapi.placeholder.element.ElementPlaceholderReplacer;

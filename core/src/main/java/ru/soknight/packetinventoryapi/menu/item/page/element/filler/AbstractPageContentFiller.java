@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 import ru.soknight.packetinventoryapi.menu.item.page.element.renderer.SlotItemRenderer;

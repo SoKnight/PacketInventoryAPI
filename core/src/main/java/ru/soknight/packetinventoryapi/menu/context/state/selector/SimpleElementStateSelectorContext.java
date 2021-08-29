@@ -7,13 +7,11 @@ import ru.soknight.packetinventoryapi.menu.item.stateable.StateableMenuItem;
 @Getter
 final class SimpleElementStateSelectorContext extends AbstractStateSelectorContext implements ElementStateSelectorContext {
 
-    private final int slot;
     private final int pageIndex;
     private final int totalIndex;
 
     SimpleElementStateSelectorContext(Player viewer, StateableMenuItem menuItem, int slot, int pageIndex, int totalIndex) {
-        super(viewer, menuItem);
-        this.slot = slot;
+        super(viewer, menuItem, slot);
         this.pageIndex = pageIndex;
         this.totalIndex = totalIndex;
     }

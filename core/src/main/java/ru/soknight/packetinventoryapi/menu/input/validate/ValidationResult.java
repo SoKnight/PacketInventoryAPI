@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.container.Container;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.util.Validate;
 
 @Getter

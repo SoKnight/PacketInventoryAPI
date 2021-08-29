@@ -8,7 +8,7 @@ final class SimpleSlotItemRenderer implements SlotItemRenderer {
 
     @Override
     public ItemStack renderItem(Player viewer, RegularMenuItem<?, ?> menuItem, int slot, int pageIndex, int totalIndex) {
-        return menuItem.asBukkitItemFor(viewer).clone();
+        return menuItem.asBukkitItemFor(viewer, slot).clone();
     }
 
 }

@@ -1,10 +1,12 @@
 package ru.soknight.packetinventoryapi.menu.item.stateable;
 
+import lombok.Getter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.menu.context.state.selector.ElementStateSelectorContext;
 import ru.soknight.packetinventoryapi.menu.context.state.selector.StateSelectorContext;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
@@ -14,10 +16,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+@Getter
 final class SimpleStateableMenuItem implements StateableMenuItem {
 
     private final ConfigurationSection configuration;
     private final Map<String, RegularMenuItem<?, ?>> stateItems;
+
+    private int[] slots;
+    private FillPatternType fillPattern;
     private StateSelector<?> stateSelector;
 
     public SimpleStateableMenuItem(ConfigurationSection configuration) {
@@ -26,9 +32,9 @@ final class SimpleStateableMenuItem implements StateableMenuItem {
     }
 
     @Override
-    public @NotNull ItemStack asBukkitItemFor(Player viewer) {
-        RegularMenuItem<?, ?> stateItem = selectStateItem(viewer);
-        return stateItem != null ? stateItem.asBukkitItemFor(viewer) : StateSelector.EMPTY_ITEM;
+    public @NotNull ItemStack asBukkitItemFor(Player viewer, int slot) {
+        RegularMenuItem<?, ?> stateItem = selectStateItem(viewer, slot);
+        return stateItem != null ? stateItem.asBukkitItemFor(viewer, slot) : StateSelector.EMPTY_ITEM;
     }
 
     @Override
@@ -70,11 +76,11 @@ final class SimpleStateableMenuItem implements StateableMenuItem {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <CTX extends StateSelectorContext> @Nullable RegularMenuItem<?, ?> selectStateItem(Player player) {
+    public <CTX extends StateSelectorContext> @Nullable RegularMenuItem<?, ?> selectStateItem(Player player, int slot) {
         try {
             StateSelector<CTX> stateSelector = getStateSelector();
             return stateSelector != null
-                    ? stateSelector.selectState((CTX) StateSelectorContext.create(player, this))
+                    ? stateSelector.selectState((CTX) StateSelectorContext.create(player, this, slot))
                     : null;
         } catch (ClassCastException ignored) {
             return null;
@@ -119,6 +125,18 @@ final class SimpleStateableMenuItem implements StateableMenuItem {
         @Override
         public Builder addStateItems(Map<String, RegularMenuItem<?, ?>> stateItems) {
             stateableItem.stateItems.putAll(stateItems);
+            return this;
+        }
+
+        @Override
+        public Builder slots(int... value) {
+            stateableItem.slots = value;
+            return this;
+        }
+
+        @Override
+        public Builder fillPattern(FillPatternType value) {
+            stateableItem.fillPattern = value;
             return this;
         }
     }

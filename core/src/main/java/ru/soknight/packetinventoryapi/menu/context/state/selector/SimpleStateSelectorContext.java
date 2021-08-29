@@ -5,8 +5,8 @@ import ru.soknight.packetinventoryapi.menu.item.stateable.StateableMenuItem;
 
 final class SimpleStateSelectorContext extends AbstractStateSelectorContext {
 
-    SimpleStateSelectorContext(Player viewer, StateableMenuItem menuItem) {
-        super(viewer, menuItem);
+    SimpleStateSelectorContext(Player viewer, StateableMenuItem menuItem, int slot) {
+        super(viewer, menuItem, slot);
     }
 
 }

@@ -17,7 +17,7 @@ import ru.soknight.packetinventoryapi.event.window.WindowCloseEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowContentLoadEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowOpenEvent;
 import ru.soknight.packetinventoryapi.item.ExtraDataProvider;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.AnyEventListener;
 import ru.soknight.packetinventoryapi.listener.event.EventListener;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
@@ -27,16 +27,15 @@ import ru.soknight.packetinventoryapi.menu.container.CloneableContainer;
 import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerWindowProperty;
-import ru.soknight.packetinventoryapi.placeholder.LitePlaceholderReplacer;
-import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
-import ru.soknight.packetinventoryapi.placeholder.container.list.ListContainer;
-import ru.soknight.packetinventoryapi.placeholder.container.string.StringContainer;
+import ru.soknight.packetinventoryapi.placeholder.context.PlaceholderContext;
 import ru.soknight.packetinventoryapi.storage.ContainerStorage;
 import ru.soknight.packetinventoryapi.storage.SimpleContainerStorage;
 import ru.soknight.packetinventoryapi.util.IntRange;
-import ru.soknight.packetinventoryapi.util.Validate;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -51,7 +50,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     protected final Player inventoryHolder;
     protected final ContainerType containerType;
     protected final DataHolder dataHolder;
-    protected List<PlaceholderReplacer> placeholderReplacers;
+    protected PlaceholderContext placeholderContext;
     protected BaseComponent title;
     protected DisplayableMenuItem filler;
     
@@ -82,7 +81,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         this.inventoryHolder = inventoryHolder;
         this.containerType = containerType;
         this.dataHolder = DataHolder.create();
-        this.placeholderReplacers = new ArrayList<>();
+        this.placeholderContext = PlaceholderContext.create(inventoryHolder);
         this.title = title;
     }
 
@@ -97,7 +96,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         C clone = copy(holder);
 
         clone.contentData.putAll(contentData);
-        clone.placeholderReplacers = placeholderReplacers;
+        clone.placeholderContext = placeholderContext.duplicateFor(holder);
 
         clone.viewingPlayerInventory = viewingPlayerInventory;
         clone.viewingHotbarContent = viewingHotbarContent;
@@ -123,7 +122,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         return clone;
     }
 
-    public void sync(Runnable task) {
+    public void sync(@NotNull Runnable task) {
         synchronized (this) {
             task.run();
         }
@@ -230,72 +229,6 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     // --- window reopening
     public C reopen() {
         return close().open();
-    }
-
-    /***************************
-     *  Placeholder replacers  *
-     **************************/
-
-    public C appendReplacerFirst(LitePlaceholderReplacer replacer) {
-        return appendReplacerFirst((PlaceholderReplacer) replacer);
-    }
-
-    public C appendReplacerFirst(PlaceholderReplacer replacer) {
-        Validate.notNull(replacer, "replacer");
-        this.placeholderReplacers.add(0, replacer);
-        return getThis();
-    }
-
-    public C appendReplacer(LitePlaceholderReplacer replacer) {
-        return appendReplacer((PlaceholderReplacer) replacer);
-    }
-
-    public C appendReplacer(PlaceholderReplacer replacer) {
-        Validate.notNull(replacer, "replacer");
-        this.placeholderReplacers.add(replacer);
-        return getThis();
-    }
-
-    public C appendPAPIReplacerFirst() {
-        return appendReplacerFirst(PacketInventoryAPIPlugin.getPlaceholderReplacerPAPI());
-    }
-
-    public C appendPAPIReplacer() {
-        return appendReplacer(PacketInventoryAPIPlugin.getPlaceholderReplacerPAPI());
-    }
-
-    public C removeReplacer(PlaceholderReplacer replacer) {
-        Validate.notNull(replacer, "replacer");
-        this.placeholderReplacers.remove(replacer);
-        return getThis();
-    }
-
-    public String replacePlaceholders(String original, Integer slot) {
-        if(inventoryHolder == null || placeholderReplacers.isEmpty())
-            return original;
-
-        if(original == null || original.isEmpty())
-            return original;
-
-        StringContainer wrapper = StringContainer.wrap(original, slot);
-        for(PlaceholderReplacer replacer : placeholderReplacers)
-            replacer.replace(inventoryHolder, wrapper);
-
-        return wrapper.getString();
-    }
-
-    public List<String> replacePlaceholders(List<String> original, Integer slot) {
-        if(inventoryHolder == null || placeholderReplacers.isEmpty())
-            return original;
-
-        if(original == null || original.isEmpty())
-            return original;
-
-        ListContainer wrapper = ListContainer.wrap(original, slot);
-        for(PlaceholderReplacer replacer : placeholderReplacers)
-            replacer.replace(inventoryHolder, wrapper);
-
-        return wrapper.getList();
     }
 
     /**********************
@@ -441,10 +374,10 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     /**
      * Gets the player's inventory slots offset of first slot indexed as 0
      * <br>
-     * Some inventories has custom clots (ex. Anvil has own 0-2 slots) and
+     * Some inventories have custom clots (ex. Anvil has own 0-2 slots) and
      * player's inventory starts with other slot (not 0), in this case we need
      * to know about this slots offset to use some fill methods in the
-     * {@link ContentUpdateRequest}, for example: {@link ContentUpdateRequest#fillAt(ItemStack, int, int, int, int, boolean)}
+     * {@link ContentUpdateRequest}
      */
     public int playerInventoryOffset() {
         return playerInventorySlots().getMin();
@@ -455,15 +388,14 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
      * @param propertyType - known inventory property
      * @param value - new value for this property
      */
-    public void updateProperty(Property propertyType, int value) {
+    public void updateProperty(@NotNull Property propertyType, int value) {
         ContainerType propertyContainerType = propertyType.getContainerType();
         if(propertyContainerType != containerType && !propertyContainerType.isFurnace())
             throw new IllegalStateException(
                     "this property requires container '" + propertyContainerType
                     + "', current container is '" + containerType + "'"
             );
-        
-        System.out.println("Updating property #" + propertyType.getPropertyId() + " with value " + value);
+
         updatePropertyRaw(propertyType.getPropertyId(), value);
     }
     

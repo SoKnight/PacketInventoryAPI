@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.event.Event;
 import ru.soknight.packetinventoryapi.event.type.WindowClickType;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 
 @Getter
 public class WindowClickEvent<C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> extends Event<C, R> {

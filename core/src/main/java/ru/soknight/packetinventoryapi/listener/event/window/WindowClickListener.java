@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.event.type.WindowClickType;
 import ru.soknight.packetinventoryapi.event.window.WindowClickEvent;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.EventListener;
 
 @FunctionalInterface

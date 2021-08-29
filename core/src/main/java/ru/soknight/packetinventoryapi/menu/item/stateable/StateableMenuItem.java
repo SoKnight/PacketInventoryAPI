@@ -4,6 +4,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.menu.context.state.selector.StateSelectorContext;
 import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
@@ -30,15 +31,15 @@ public interface StateableMenuItem extends DisplayableMenuItem {
     <CTX extends StateSelectorContext> StateableMenuItem setStateSelector(StateSelector<CTX> stateSelector);
 
     @Override
-    default @NotNull RegularMenuItem<?, ?> getItemFor(Player viewer) {
-        return selectStateItem(viewer);
+    default @NotNull RegularMenuItem<?, ?> getItemFor(Player viewer, int slot) {
+        return selectStateItem(viewer, slot);
     }
 
     default @NotNull RegularMenuItem<?, ?> getItemFor(Player viewer, int slot, int pageIndex, int totalIndex) {
         return selectStateItem(viewer, slot, pageIndex, totalIndex);
     }
 
-    <CTX extends StateSelectorContext> @Nullable RegularMenuItem<?, ?> selectStateItem(Player player);
+    <CTX extends StateSelectorContext> @Nullable RegularMenuItem<?, ?> selectStateItem(Player player, int slot);
 
     <CTX extends StateSelectorContext> @Nullable RegularMenuItem<?, ?> selectStateItem(Player player, int slot, int pageIndex, int totalIndex);
 
@@ -48,6 +49,10 @@ public interface StateableMenuItem extends DisplayableMenuItem {
         Builder addStateItem(String id, RegularMenuItem<?, ?> regularItem);
 
         Builder addStateItems(Map<String, RegularMenuItem<?, ?>> stateItems);
+
+        Builder slots(int... slots);
+
+        Builder fillPattern(FillPatternType fillPattern);
     }
 
 }

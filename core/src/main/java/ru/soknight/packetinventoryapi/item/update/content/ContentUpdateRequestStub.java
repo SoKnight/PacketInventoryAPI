@@ -1,4 +1,4 @@
-package ru.soknight.packetinventoryapi.item.update;
+package ru.soknight.packetinventoryapi.item.update.content;
 
 import org.bukkit.inventory.ItemStack;
 import ru.soknight.packetinventoryapi.container.Container;

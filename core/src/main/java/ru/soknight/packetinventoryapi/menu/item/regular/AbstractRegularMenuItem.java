@@ -2,11 +2,14 @@ package ru.soknight.packetinventoryapi.menu.item.regular;
 
 import lombok.Getter;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.container.Container;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
-import ru.soknight.packetinventoryapi.menu.item.regular.renderer.RegularItemRenderer;
+import ru.soknight.packetinventoryapi.menu.item.mapper.ItemMapper;
 import ru.soknight.packetinventoryapi.nms.vanilla.AbstractVanillaItem;
 
 @Getter
@@ -16,11 +19,18 @@ public abstract class AbstractRegularMenuItem<I extends AbstractRegularMenuItem<
     protected int[] slots;
     protected FillPatternType fillPattern;
     protected WindowClickListener<?, ?> clickListener;
-    protected RegularItemRenderer itemRenderer;
+    protected ItemMapper itemMapper;
 
     protected AbstractRegularMenuItem(ConfigurationSection configuration) {
         this.configuration = configuration;
-        this.itemRenderer = RegularItemRenderer.DEFAULT;
+    }
+
+    @Override
+    public @NotNull ItemStack asBukkitItemFor(Player viewer, int slot) {
+        ItemStack itemStack = asBukkitItem();
+        if(itemStack != null && itemMapper != null)
+            itemStack = itemMapper.apply(itemStack, viewer, slot);
+        return itemStack;
     }
 
     @SuppressWarnings("unchecked")
@@ -35,8 +45,8 @@ public abstract class AbstractRegularMenuItem<I extends AbstractRegularMenuItem<
     }
 
     @Override
-    public I setItemRenderer(RegularItemRenderer itemRenderer) {
-        this.itemRenderer = itemRenderer;
+    public I setItemMapper(ItemMapper itemMapper) {
+        this.itemMapper = itemMapper;
         return getThis();
     }
 

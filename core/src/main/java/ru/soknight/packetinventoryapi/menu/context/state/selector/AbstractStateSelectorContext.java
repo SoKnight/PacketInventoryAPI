@@ -9,10 +9,12 @@ public abstract class AbstractStateSelectorContext implements StateSelectorConte
 
     protected final Player viewer;
     protected final StateableMenuItem menuItem;
+    protected final int slot;
 
-    protected AbstractStateSelectorContext(Player viewer, StateableMenuItem menuItem) {
+    protected AbstractStateSelectorContext(Player viewer, StateableMenuItem menuItem, int slot) {
         this.viewer = viewer;
         this.menuItem = menuItem;
+        this.slot = slot;
     }
 
 }

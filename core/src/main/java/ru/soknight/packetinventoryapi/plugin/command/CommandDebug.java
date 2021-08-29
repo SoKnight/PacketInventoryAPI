@@ -8,12 +8,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.animation.Animation;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.Property;
 import ru.soknight.packetinventoryapi.container.type.BrewingStandContainer;
 import ru.soknight.packetinventoryapi.container.type.FurnaceContainer;
 import ru.soknight.packetinventoryapi.container.type.HopperContainer;
+import ru.soknight.packetinventoryapi.item.update.content.filler.column.ColumnFiller;
 import ru.soknight.packetinventoryapi.plugin.menu.ExampleMenu;
 
 public class CommandDebug implements CommandExecutor {
@@ -31,6 +33,9 @@ public class CommandDebug implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(!(sender instanceof Player))
+            return true;
+
+        if(!sender.hasPermission("packetinventoryapi.command.debug"))
             return true;
         
         Player player = (Player) sender;
@@ -127,14 +132,15 @@ public class CommandDebug implements CommandExecutor {
 
         @Override
         protected void tick(int cycle, int step) throws InterruptedException {
+            int offset = 0;
             container.updateContent()
-                    .column(RED, 1 + circleIndex(step, 0), true)
-                    .column(ORANGE, 1 + circleIndex(step, 1), true)
-                    .column(YELLOW, 1 + circleIndex(step, 2), true)
-                    .column(LIME, 1 + circleIndex(step, 3), true)
-                    .column(LIGHT_BLUE, 1 + circleIndex(step, 4), true)
-                    .column(BLUE, 1 + circleIndex(step, 5), true)
-                    .column(PURPLE, 1 + circleIndex(step, 6), true)
+                    .fillColumn(buildFiller(RED, step, offset++))
+                    .fillColumn(buildFiller(ORANGE, step, offset++))
+                    .fillColumn(buildFiller(YELLOW, step, offset++))
+                    .fillColumn(buildFiller(LIME, step, offset++))
+                    .fillColumn(buildFiller(LIGHT_BLUE, step, offset++))
+                    .fillColumn(buildFiller(BLUE, step, offset++))
+                    .fillColumn(buildFiller(PURPLE, step, offset))
                     .pushSync();
 
             Thread.sleep(100);
@@ -143,6 +149,14 @@ public class CommandDebug implements CommandExecutor {
         private int circleIndex(int step, int index) {
             int result = index - step - 1;
             return result >= 0 ? result : result + 7;
+        }
+
+        private @NotNull ColumnFiller buildFiller(ItemStack item, int step, int indexOffset) {
+            return ColumnFiller.builder()
+                    .withItemStack(item)
+                    .withColumn(1 + circleIndex(step, indexOffset))
+                    .useForceReplace()
+                    .build();
         }
 
     }

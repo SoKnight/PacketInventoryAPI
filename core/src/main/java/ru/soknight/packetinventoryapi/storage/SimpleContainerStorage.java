@@ -12,7 +12,7 @@ import ru.soknight.packetinventoryapi.container.type.*;
 import ru.soknight.packetinventoryapi.event.container.*;
 import ru.soknight.packetinventoryapi.event.type.WindowClickType;
 import ru.soknight.packetinventoryapi.event.window.WindowClickEvent;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerCloseWindow;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerOpenWindow;

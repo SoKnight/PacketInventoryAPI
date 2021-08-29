@@ -21,7 +21,7 @@ import ru.soknight.packetinventoryapi.event.window.WindowCloseEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowContentLoadEvent;
 import ru.soknight.packetinventoryapi.event.window.WindowOpenEvent;
 import ru.soknight.packetinventoryapi.exception.menu.InvalidMethodStructureException;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.Menu;
 import ru.soknight.packetinventoryapi.util.IntRange;
 

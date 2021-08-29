@@ -7,10 +7,12 @@ import ru.soknight.packetinventoryapi.menu.item.stateable.StateableMenuItem;
 
 public interface StateSelectorContext extends Context {
 
-    static StateSelectorContext create(Player viewer, StateableMenuItem menuItem) {
-        return new SimpleStateSelectorContext(viewer, menuItem);
+    static StateSelectorContext create(Player viewer, StateableMenuItem menuItem, int slot) {
+        return new SimpleStateSelectorContext(viewer, menuItem, slot);
     }
 
     @NotNull StateableMenuItem getMenuItem();
+
+    int getSlot();
 
 }

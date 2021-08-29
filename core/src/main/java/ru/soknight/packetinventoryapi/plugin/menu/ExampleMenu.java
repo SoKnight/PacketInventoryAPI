@@ -39,15 +39,17 @@ public class ExampleMenu extends PageableMenu<Person> {
     public ExampleMenu(Plugin plugin) throws AbstractMenuParseException, AbstractResourceException {
         super("example_menu", plugin, 1);
 
-        super.getContainer().getOriginal().appendPAPIReplacer();
-        super.getContainer().getOriginal().setClickOutsideToClose(true);
+        super.getPlaceholderContext().appendPAPIReplacer();
+        super.getOriginalContainer().setClickOutsideToClose(true);
 
         super.load(true);
 
         super.setStateSelector("stats", this::selectStats);
         super.setStateSelector("page-element", this::selectPageElementState);
+
         super.setClickListener("stats", "second", this::handleStatsSecondClick);
         super.setClickListener("page-element", "third", this::handlePageElementThirdClick);
+
         super.setPageContentFiller("page-element", PageContentFiller.create(this::renderItemSlot, false).appendReplacer(this::putPersonData));
     }
 
@@ -74,7 +76,7 @@ public class ExampleMenu extends PageableMenu<Person> {
 
     @Override
     public int getPageSize(Player viewer) {
-        return pageElement.getElementPattern().getItemFor(viewer).getSlots().length;
+        return pageElement.getElementPattern().getSlots().length;
     }
 
     private RegularMenuItem<?, ?> selectPageElementState(StateSelectorContext context)  {
@@ -89,7 +91,7 @@ public class ExampleMenu extends PageableMenu<Person> {
     private void handleStatsSecondClick(Player actor, GenericContainer container, int clickedSlot, WindowClickType clickType, ItemStack itemStack) {
         actor.sendMessage("You clicked on the second-stated stats part!");
 
-        RegularMenuItem<?, ?> stateItem = statsItem.selectStateItem(actor);
+        RegularMenuItem<?, ?> stateItem = statsItem.selectStateItem(actor, clickedSlot);
         getDataHolder(actor).addInt("click_count", 1);
         updateItem(stateItem, actor).pushSync();
     }
@@ -97,7 +99,7 @@ public class ExampleMenu extends PageableMenu<Person> {
     private void handlePageElementThirdClick(Player actor, GenericContainer container, int clickedSlot, WindowClickType clickType, ItemStack itemStack) {
         actor.sendMessage("You clicked on the third-stated page element part!");
 
-        RegularMenuItem<?, ?> stateItem = pageElement.getElementPattern().selectStateItem(actor);
+        RegularMenuItem<?, ?> stateItem = pageElement.getElementPattern().selectStateItem(actor, clickedSlot);
         getDataHolder(actor).addInt("click_count", 1);
         updateItem(stateItem, actor).pushSync();
     }
@@ -109,7 +111,7 @@ public class ExampleMenu extends PageableMenu<Person> {
 
     @Override
     protected void onClick(Player actor, GenericContainer container, int clickedSlot, WindowClickType clickType, ItemStack clickedItem) {
-        RegularMenuItem<?, ?> stateItem = statsItem.selectStateItem(actor);
+        RegularMenuItem<?, ?> stateItem = statsItem.selectStateItem(actor, clickedSlot);
         if(stateItem.isSetAt(clickedSlot)) {
             getDataHolder(actor).addInt("click_count", 1);
             updateItem(stateItem, actor).pushSync();

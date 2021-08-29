@@ -1,6 +1,6 @@
 package ru.soknight.packetinventoryapi.container;
 
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequestStub;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequestStub;
 
 public interface RowableContainerStub<C extends Container<C, ContentUpdateRequestStub<C>>> {
 

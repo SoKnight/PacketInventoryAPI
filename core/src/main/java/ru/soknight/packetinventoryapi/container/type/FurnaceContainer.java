@@ -8,8 +8,8 @@ import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
 import ru.soknight.packetinventoryapi.container.ContainerType;
 import ru.soknight.packetinventoryapi.container.data.Property;
-import ru.soknight.packetinventoryapi.item.update.BaseContentUpdateRequest;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.BaseContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.util.IntRange;
 
 import java.util.Map;

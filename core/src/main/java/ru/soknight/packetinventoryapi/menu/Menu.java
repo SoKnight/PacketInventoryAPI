@@ -8,9 +8,10 @@ import ru.soknight.packetinventoryapi.configuration.item.ConfigurationItemStruct
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.container.PublicWrapper;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
+import ru.soknight.packetinventoryapi.placeholder.context.PlaceholderContext;
 
 import java.util.Map;
 
@@ -21,6 +22,8 @@ public interface Menu<C extends Container<C, R>, R extends ContentUpdateRequest<
     @NotNull C getOriginalContainer();
 
     @NotNull DataHolder getDataHolder(Player player);
+
+    @NotNull PlaceholderContext getPlaceholderContext();
 
     @NotNull ConfigurationItemStructure<Menu<C, R>> configurationStructure();
 

@@ -8,7 +8,7 @@ import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.type.GenericContainer;
 import ru.soknight.packetinventoryapi.exception.configuration.*;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.Menu;
 import ru.soknight.packetinventoryapi.menu.container.PublicWrapper;
 import ru.soknight.packetinventoryapi.util.Validate;

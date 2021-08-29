@@ -2,8 +2,8 @@ package ru.soknight.packetinventoryapi.container;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequestStub;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequestStub;
 
 public abstract class ContainerStub<C extends Container<C, ContentUpdateRequestStub<C>>> extends Container<C, ContentUpdateRequestStub<C>> {
 

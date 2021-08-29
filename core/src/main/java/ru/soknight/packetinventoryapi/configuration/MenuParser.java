@@ -151,6 +151,9 @@ public class MenuParser {
         ConfigurationSection defaultConfiguration = configuration.getConfigurationSection(DEFAULT_STATE_KEY);
         ParsedDataRaw defaultDataRaw = parseDataRaw(defaultConfiguration, fileName);
 
+        // validating overlapped data bundle
+        defaultDataRaw.validateSlots();
+
         Set<String> keys = configuration.getKeys(false);
         for(String key : keys) {
             if(key.equals(DEFAULT_STATE_KEY) || !configuration.isConfigurationSection(key))
@@ -189,8 +192,8 @@ public class MenuParser {
         ParsedDataRaw parsedDataRaw = parseDataRaw(configuration, fileName);
         ParsedDataRaw overlapped = defaultData.duplicate(configuration, fileName).overlapWith(parsedDataRaw);
 
-        // validating overlapped data bundle
-        overlapped.validateSlots();
+        overlapped.setSlots(defaultData.getSlots());
+        overlapped.setPattern(defaultData.getPattern());
 
         return overlapped.asMenuItem();
     }

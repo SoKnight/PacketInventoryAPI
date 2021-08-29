@@ -27,20 +27,22 @@ import ru.soknight.packetinventoryapi.exception.configuration.NoMenuIOException;
 import ru.soknight.packetinventoryapi.exception.menu.InvalidMethodStructureException;
 import ru.soknight.packetinventoryapi.exception.menu.MenuRegisteredAlreadyException;
 import ru.soknight.packetinventoryapi.exception.menu.RegistrationDeniedException;
-import ru.soknight.packetinventoryapi.item.update.ContentUpdateRequest;
+import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
 import ru.soknight.packetinventoryapi.menu.container.PublicWrapper;
+import ru.soknight.packetinventoryapi.menu.context.Context;
 import ru.soknight.packetinventoryapi.menu.context.state.selector.StateSelectorContext;
 import ru.soknight.packetinventoryapi.menu.extended.PageableMenu;
 import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
+import ru.soknight.packetinventoryapi.menu.item.mapper.ItemMapper;
 import ru.soknight.packetinventoryapi.menu.item.page.element.PageElementMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.page.element.filler.PageContentFiller;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
-import ru.soknight.packetinventoryapi.menu.item.regular.renderer.RegularItemRenderer;
 import ru.soknight.packetinventoryapi.menu.item.stateable.StateSelector;
 import ru.soknight.packetinventoryapi.menu.item.stateable.StateableMenuItem;
 import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
+import ru.soknight.packetinventoryapi.placeholder.context.PlaceholderContext;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -49,6 +51,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Getter
@@ -63,7 +66,7 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
     protected final Executor bukkitSchedulerExecutor;
     private DisplayableMenuItem filler;
 
-    protected AbstractMenu(PublicWrapper<C, R> container, String name, Plugin providingPlugin) {
+    protected AbstractMenu(@NotNull PublicWrapper<C, R> container, String name, Plugin providingPlugin) {
         this.name = name;
         this.providingPlugin = providingPlugin;
 
@@ -78,9 +81,8 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
                 .menuRegistry()
                 .fireEvent(this, event));
 
-        container.getOriginal()
-                .appendReplacerFirst(PlaceholderReplacer.PLAYER_NAME)
-                .setExtraDataProvider(this::provideExtraData);
+        getPlaceholderContext().appendReplacerFirst(PlaceholderReplacer.PLAYER_NAME);
+        getOriginalContainer().setExtraDataProvider(this::provideExtraData);
     }
 
     protected AbstractMenu(C container, String name, Plugin providingPlugin) {
@@ -102,12 +104,11 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
             return;
 
         // --- provide stateable menu items
+        Context context = () -> holder;
         for(MenuItem menuItem : menuItems.values()) {
             if(menuItem instanceof StateableMenuItem) {
                 StateableMenuItem stateableItem = (StateableMenuItem) menuItem;
-                RegularMenuItem<?, ?> stateItem = stateableItem.getItemFor(holder);
-                if(stateItem != null)
-                    updateRequest.insert(stateItem, true);
+                updateRequest.insert(stateableItem, true);
             } else if(menuItem instanceof PageElementMenuItem && this instanceof PageableMenu<?>) {
                 PageElementMenuItem<I> pageElementItem = (PageElementMenuItem<I>) menuItem;
                 PageContentFiller<I> pageContentFiller = pageElementItem.getPageContentFiller();
@@ -153,6 +154,11 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
     }
 
     @Override
+    public @NotNull PlaceholderContext getPlaceholderContext() {
+        return container.getOriginal().getPlaceholderContext();
+    }
+
+    @Override
     public @NotNull Map<String, MenuItem> getMenuItems() {
         return Collections.unmodifiableMap(menuItems);
     }
@@ -185,61 +191,39 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
     }
 
     protected void setClickListener(String itemId, WindowClickListener<C, R> clickListener) {
-        MenuItem menuItem = getMenuItem(itemId);
-        if(menuItem == null)
-            return;
-
-        if(menuItem.isRegular()) {
-            menuItem.asRegularItem().setClickListener(clickListener);
-            return;
-        }
-
-        if(menuItem.isPageElement()) {
-            DisplayableMenuItem elementPattern = menuItem.asPageElementItem().getElementPattern();
-            if(elementPattern.isRegular())
-                elementPattern.asRegularItem().setClickListener(clickListener);
-        }
+        applyForRegularItem(itemId, item -> item.setClickListener(clickListener));
     }
 
     protected void setClickListener(String itemId, String stateId, WindowClickListener<C, R> clickListener) {
-        MenuItem menuItem = getMenuItem(itemId);
-        if(menuItem == null)
-            return;
-
-        if(menuItem.isStateable()) {
-            RegularMenuItem<?, ?> stateItem = menuItem.asStateableItem().getStateItem(stateId);
-            if(stateItem != null)
-                stateItem.setClickListener(clickListener);
-        }
-
-        if(menuItem.isPageElement()) {
-            DisplayableMenuItem elementPattern = menuItem.asPageElementItem().getElementPattern();
-            if(elementPattern.isStateable()) {
-                RegularMenuItem<?, ?> stateItem = elementPattern.asStateableItem().getStateItem(stateId);
-                if(stateItem != null)
-                    stateItem.setClickListener(clickListener);
-            }
-        }
+        applyForRegularItem(itemId, stateId, item -> item.setClickListener(clickListener));
     }
 
-    protected void setItemRenderer(String itemId, RegularItemRenderer itemRenderer) {
+    protected void setItemMapper(String itemId, ItemMapper itemMapper) {
+        applyForRegularItem(itemId, item -> item.setItemMapper(itemMapper));
+    }
+
+    protected void setItemMapper(String itemId, String stateId, ItemMapper itemMapper) {
+        applyForRegularItem(itemId, stateId, item -> item.setItemMapper(itemMapper));
+    }
+
+    protected void applyForRegularItem(String itemId, Consumer<RegularMenuItem<?, ?>> consumer) {
         MenuItem menuItem = getMenuItem(itemId);
         if(menuItem == null)
             return;
 
         if(menuItem.isRegular()) {
-            menuItem.asRegularItem().setItemRenderer(itemRenderer);
+            consumer.accept(menuItem.asRegularItem());
             return;
         }
 
         if(menuItem.isPageElement()) {
             DisplayableMenuItem elementPattern = menuItem.asPageElementItem().getElementPattern();
             if(elementPattern.isRegular())
-                elementPattern.asRegularItem().setItemRenderer(itemRenderer);
+                consumer.accept(elementPattern.asRegularItem());
         }
     }
 
-    protected void setItemRenderer(String itemId, String stateId, RegularItemRenderer itemRenderer) {
+    protected void applyForRegularItem(String itemId, String stateId, Consumer<RegularMenuItem<?, ?>> consumer) {
         MenuItem menuItem = getMenuItem(itemId);
         if(menuItem == null)
             return;
@@ -247,7 +231,7 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
         if(menuItem.isStateable()) {
             RegularMenuItem<?, ?> stateItem = menuItem.asStateableItem().getStateItem(stateId);
             if(stateItem != null)
-                stateItem.setItemRenderer(itemRenderer);
+                consumer.accept(stateItem);
         }
 
         if(menuItem.isPageElement()) {
@@ -255,7 +239,7 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
             if(elementPattern.isStateable()) {
                 RegularMenuItem<?, ?> stateItem = elementPattern.asStateableItem().getStateItem(stateId);
                 if(stateItem != null)
-                    stateItem.setItemRenderer(itemRenderer);
+                    consumer.accept(stateItem);
             }
         }
     }
@@ -321,7 +305,7 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
             if(displayableItem == null)
                 continue;
 
-            RegularMenuItem<?, ?> regularItem = displayableItem.getItemFor(actor);
+            RegularMenuItem<?, ?> regularItem = displayableItem.getItemFor(actor, clickedSlot);
             if(regularItem == null)
                 continue;
 
