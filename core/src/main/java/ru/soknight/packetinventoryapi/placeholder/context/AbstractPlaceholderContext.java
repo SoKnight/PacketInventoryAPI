@@ -75,6 +75,16 @@ public abstract class AbstractPlaceholderContext implements PlaceholderContext {
     }
 
     @Override
+    public @NotNull PlaceholderContext appendContextReplacerFirst(@NotNull PlaceholderContext context) {
+        return appendReplacerFirst(new PlaceholderContextReplacer(context));
+    }
+
+    @Override
+    public @NotNull PlaceholderContext appendContextReplacer(@NotNull PlaceholderContext context) {
+        return appendReplacer(new PlaceholderContextReplacer(context));
+    }
+
+    @Override
     public @NotNull @UnmodifiableView List<PlaceholderReplacer> getReplacers() {
         return Collections.unmodifiableList(placeholderReplacers);
     }

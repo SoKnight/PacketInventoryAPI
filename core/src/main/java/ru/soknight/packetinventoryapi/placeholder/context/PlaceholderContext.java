@@ -30,6 +30,9 @@ public interface PlaceholderContext extends Context {
     @NotNull PlaceholderContext appendPAPIReplacerFirst();
     @NotNull PlaceholderContext appendPAPIReplacer();
 
+    @NotNull PlaceholderContext appendContextReplacerFirst(@NotNull PlaceholderContext context);
+    @NotNull PlaceholderContext appendContextReplacer(@NotNull PlaceholderContext context);
+
     @NotNull @UnmodifiableView List<PlaceholderReplacer> getReplacers();
 
     @NotNull PlaceholderContext removeReplacer(@NotNull PlaceholderReplacer replacer);

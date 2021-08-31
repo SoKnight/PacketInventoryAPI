@@ -216,10 +216,17 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
             return;
         }
 
+        if(menuItem.isStateable()) {
+            menuItem.asStateableItem().getStateItems().values().forEach(consumer);
+            return;
+        }
+
         if(menuItem.isPageElement()) {
             DisplayableMenuItem elementPattern = menuItem.asPageElementItem().getElementPattern();
             if(elementPattern.isRegular())
                 consumer.accept(elementPattern.asRegularItem());
+            else if(elementPattern.isStateable())
+                elementPattern.asStateableItem().getStateItems().values().forEach(consumer);
         }
     }
 
