@@ -134,8 +134,6 @@ public class MenuParser {
             @NotNull String fileName,
             @Nullable ConfigurationItemStructure<?> itemStructure
     ) throws
-            NoMaterialProvidedException,
-            UnknownMaterialException,
             UnknownFillingPatternException,
             NoSlotsToDisplayException,
             RequiredStatesNotFoundException
@@ -159,9 +157,12 @@ public class MenuParser {
             if(key.equals(DEFAULT_STATE_KEY) || !configuration.isConfigurationSection(key))
                 continue;
 
-            ConfigurationSection section = configuration.getConfigurationSection(key);
-            RegularMenuItem<?, ?> regularItem = parseStateItem(section, fileName, defaultDataRaw);
-            stateableItemBuilder.addStateItem(key, regularItem);
+            try {
+                ConfigurationSection section = configuration.getConfigurationSection(key);
+                RegularMenuItem<?, ?> regularItem = parseStateItem(section, fileName, defaultDataRaw);
+                stateableItemBuilder.addStateItem(key, regularItem);
+            } catch (AbstractItemParseException ignored) {
+            }
         }
 
         StateableMenuItem menuItem = stateableItemBuilder
