@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.exception.configuration.NoMaterialProvidedException;
 import ru.soknight.packetinventoryapi.exception.configuration.NoSlotsToDisplayException;
 import ru.soknight.packetinventoryapi.exception.configuration.UnknownMaterialException;
@@ -40,7 +41,7 @@ public final class ParsedDataRaw {
     private String base64Head;
     private Integer customModelData;
 
-    private FillPatternType pattern;
+    private FillPatternType fillPattern;
     private Boolean enchanted;
 
     public RegularMenuItem<?, ?> asMenuItem() throws
@@ -67,7 +68,7 @@ public final class ParsedDataRaw {
             }
         }
 
-        if((slots == null || slots.length == 0) && pattern == null)
+        if((slots == null || slots.length == 0) && fillPattern == null)
             throw new NoSlotsToDisplayException(fileName, configuration.getName());
 
         // setup other values
@@ -77,7 +78,7 @@ public final class ParsedDataRaw {
                 .lore(lore)
                 .slots(slots)
                 .customModelData(customModelData)
-                .fillPattern(pattern)
+                .fillPattern(fillPattern)
                 .enchanted(enchanted != null ? enchanted : false)
                 .build();
     }
@@ -99,11 +100,11 @@ public final class ParsedDataRaw {
                 .setPlayerHead(playerHead)
                 .setBase64Head(base64Head)
                 .setCustomModelData(customModelData)
-                .setPattern(pattern)
+                .setFillPattern(fillPattern)
                 .setEnchanted(enchanted != null ? enchanted : false);
     }
 
-    public ParsedDataRaw overlapWith(ParsedDataRaw other) {
+    public ParsedDataRaw overlapWith(@NotNull ParsedDataRaw other) {
         this.name = overlap(name, other.name);
         this.lore = overlap(lore, other.lore);
 
@@ -115,7 +116,7 @@ public final class ParsedDataRaw {
         this.base64Head = overlap(base64Head, other.base64Head);
         this.customModelData = overlap(customModelData, other.customModelData);
 
-        this.pattern = overlap(pattern, other.pattern);
+        this.fillPattern = overlap(fillPattern, other.fillPattern);
         this.enchanted = overlap(enchanted, other.enchanted);
         return this;
     }
@@ -136,7 +137,7 @@ public final class ParsedDataRaw {
     }
 
     public void validateSlots() throws NoSlotsToDisplayException {
-        if((slots == null || slots.length == 0) && pattern == null)
+        if((slots == null || slots.length == 0) && fillPattern == null)
             throw new NoSlotsToDisplayException(fileName, configuration.getName());
     }
 
@@ -156,7 +157,7 @@ public final class ParsedDataRaw {
                 Objects.equals(playerHead, that.playerHead) &&
                 Objects.equals(base64Head, that.base64Head) &&
                 Objects.equals(customModelData, that.customModelData) &&
-                pattern == that.pattern &&
+                fillPattern == that.fillPattern &&
                 Objects.equals(enchanted, that.enchanted);
     }
 
@@ -164,7 +165,7 @@ public final class ParsedDataRaw {
     public int hashCode() {
         int result = Objects.hash(
                 configuration, fileName, name, lore, materialRaw, amount,
-                playerHead, base64Head, customModelData, pattern, enchanted
+                playerHead, base64Head, customModelData, fillPattern, enchanted
         );
         result = 31 * result + Arrays.hashCode(slots);
         return result;
@@ -183,7 +184,7 @@ public final class ParsedDataRaw {
                 ", playerHead='" + playerHead + '\'' +
                 ", base64Head='" + base64Head + '\'' +
                 ", customModelData=" + customModelData +
-                ", pattern=" + pattern +
+                ", pattern=" + fillPattern +
                 ", enchanted=" + enchanted +
                 '}';
     }

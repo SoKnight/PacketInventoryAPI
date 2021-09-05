@@ -5,12 +5,12 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
 import ru.soknight.packetinventoryapi.container.Container;
+import ru.soknight.packetinventoryapi.exception.item.ItemInsertFailedException;
 import ru.soknight.packetinventoryapi.exception.item.filler.InvalidFillerException;
 import ru.soknight.packetinventoryapi.exception.item.filler.InvalidRowFillerException;
 import ru.soknight.packetinventoryapi.item.update.content.filler.Filler;
 import ru.soknight.packetinventoryapi.item.update.content.filler.column.ColumnFiller;
 import ru.soknight.packetinventoryapi.item.update.content.filler.row.RowFiller;
-import ru.soknight.packetinventoryapi.menu.context.Context;
 import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.MenuItem;
 import ru.soknight.packetinventoryapi.util.IntRange;
@@ -58,7 +58,7 @@ public interface ContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     // --- menu item insertion
-    R insert(@NotNull DisplayableMenuItem item, boolean replace);
+    R insert(@NotNull DisplayableMenuItem item, boolean replace) throws ItemInsertFailedException;
     R remove(@NotNull DisplayableMenuItem item);
 
     // --- setters

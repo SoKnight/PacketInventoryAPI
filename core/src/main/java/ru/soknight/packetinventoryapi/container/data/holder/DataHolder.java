@@ -1,17 +1,22 @@
 package ru.soknight.packetinventoryapi.container.data.holder;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public interface DataHolder {
 
-    static DataHolder create() {
+    static @NotNull DataHolder create() {
         return new SimpleDataHolder();
     }
 
     <T> T compute(String key, Class<T> valueType, BiFunction<? extends String, ? extends T, T> remappingFunction);
+    <T> T computeIfAbsent(String key, Class<T> valueType, Function<? extends String, T> mappingFunction);
+    <T> T computeIfPresent(String key, Class<T> valueType, BiFunction<? extends String, ? extends T, T> remappingFunction);
 
     int addInt(String key, int amount);
     int addInt(String key, int amount, int def);

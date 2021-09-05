@@ -9,6 +9,7 @@ import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.util.IntRange;
 import ru.soknight.packetinventoryapi.util.Validate;
 
+import java.util.Arrays;
 import java.util.OptionalInt;
 
 public abstract class AbstractFiller implements Filler {
@@ -47,7 +48,7 @@ public abstract class AbstractFiller implements Filler {
     @Override public boolean hasMenuItem() { return menuItem != null; }
 
     @Override public @Nullable int[] getSlots() { return slots; }
-    @Override public boolean hasSlots() { return false; }
+    @Override public boolean hasSlots() { return slots != null && slots.length != 0; }
 
     @Override public OptionalInt getSourceSlot() { return wrapInt(sourceSlot); }
     @Override public OptionalInt getDestSlot() { return wrapInt(destSlot); }
@@ -184,6 +185,23 @@ public abstract class AbstractFiller implements Filler {
                 return false;
 
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Filler{" +
+                "forceReplace=" + forceReplace +
+                ", itemStack=" + itemStack +
+                ", menuItem=" + menuItem +
+                ", slots=" + Arrays.toString(slots) +
+                ", sourceSlot=" + sourceSlot +
+                ", destSlot=" + destSlot +
+                ", fromX=" + fromX +
+                ", fromY=" + fromY +
+                ", toX=" + toX +
+                ", toY=" + toY +
+                ", fillPattern=" + fillPattern +
+                '}';
     }
 
 }

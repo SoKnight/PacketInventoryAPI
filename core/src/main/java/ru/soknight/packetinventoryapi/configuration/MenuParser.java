@@ -146,7 +146,7 @@ public class MenuParser {
                 ? itemMeta.resolveRequiredStates()
                 : new String[0];
 
-        StateableMenuItem.Builder stateableItem = StateableMenuItem.create(configuration);
+        StateableMenuItem.Builder stateableItemBuilder = StateableMenuItem.create(configuration);
 
         ConfigurationSection defaultConfiguration = configuration.getConfigurationSection(DEFAULT_STATE_KEY);
         ParsedDataRaw defaultDataRaw = parseDataRaw(defaultConfiguration, fileName);
@@ -161,12 +161,15 @@ public class MenuParser {
 
             ConfigurationSection section = configuration.getConfigurationSection(key);
             RegularMenuItem<?, ?> regularItem = parseStateItem(section, fileName, defaultDataRaw);
-            stateableItem.addStateItem(key, regularItem);
+            stateableItemBuilder.addStateItem(key, regularItem);
         }
 
-        StateableMenuItem menuItem = stateableItem.build();
-        List<String> notFoundStates = new ArrayList<>();
+        StateableMenuItem menuItem = stateableItemBuilder
+                .slots(defaultDataRaw.getSlots())
+                .fillPattern(defaultDataRaw.getFillPattern())
+                .build();
 
+        List<String> notFoundStates = new ArrayList<>();
         if(requiredStates.length > 0)
             for(String requiredState : requiredStates)
                 if(!menuItem.hasStateItem(requiredState))
@@ -193,13 +196,13 @@ public class MenuParser {
         ParsedDataRaw overlapped = defaultData.duplicate(configuration, fileName).overlapWith(parsedDataRaw);
 
         overlapped.setSlots(defaultData.getSlots());
-        overlapped.setPattern(defaultData.getPattern());
+        overlapped.setFillPattern(defaultData.getFillPattern());
 
         return overlapped.asMenuItem();
     }
 
     @SuppressWarnings("unchecked")
-    public static <I extends DisplayableMenuItem> PageElementMenuItem<I> parsePageElementItem(
+    public static <I extends DisplayableMenuItem> @NotNull PageElementMenuItem<I> parsePageElementItem(
             @NotNull ConfigurationSection configuration,
             @NotNull String fileName,
             @NotNull ConfigurationItemStructure<?> itemStructure
@@ -275,7 +278,7 @@ public class MenuParser {
                 .setPlayerHead(playerHead)
                 .setBase64Head(base64Head)
                 .setCustomModelData(customModelData)
-                .setPattern(pattern)
+                .setFillPattern(pattern)
                 .setEnchanted(enchanted);
     }
 

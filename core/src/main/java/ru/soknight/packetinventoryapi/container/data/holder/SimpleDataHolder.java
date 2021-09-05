@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static ru.soknight.packetinventoryapi.util.NumberConvertions.*;
 
@@ -67,6 +68,18 @@ class SimpleDataHolder implements DataHolder {
     @SuppressWarnings("unchecked")
     public <T> T compute(String key, Class<T> valueType, BiFunction<? extends String, ? extends T, T> remappingFunction) {
         return (T) properties.compute(key, (BiFunction<? super String, ? super Object, ?>) remappingFunction);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T computeIfAbsent(String key, Class<T> valueType, Function<? extends String, T> mappingFunction) {
+        return (T) properties.computeIfAbsent(key, (Function<? super String, ?>) mappingFunction);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T computeIfPresent(String key, Class<T> valueType, BiFunction<? extends String, ? extends T, T> remappingFunction) {
+        return (T) properties.computeIfPresent(key, (BiFunction<? super String, ? super Object, ?>) remappingFunction);
     }
 
     @Override

@@ -48,19 +48,19 @@
         <repository>
             <id>nexus</id>
             <name>Releases</name>
-            <url>http://compobox.sytes.net:8081/repository/maven-releases</url>
+            <url>http://soknight.me:8081/repository/releases</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Snapshot</name>
-            <url>http://compobox.sytes.net:8081/repository/maven-snapshots</url>
+            <url>http://soknight.me:8081/repository/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
     <repositories>
         <repository>
             <id>soknight-repo</id>
-            <url>http://compobox.sytes.net:8081/repository/maven-public</url>
+            <url>http://soknight.me:8081/repository/public</url>
         </repository>
         <repository>
             <id>spigot-repo</id>

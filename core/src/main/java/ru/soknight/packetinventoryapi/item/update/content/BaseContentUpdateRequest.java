@@ -11,6 +11,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.container.Container;
+import ru.soknight.packetinventoryapi.exception.item.ItemInsertFailedException;
 import ru.soknight.packetinventoryapi.exception.item.filler.InvalidColumnFillerException;
 import ru.soknight.packetinventoryapi.exception.item.filler.InvalidFillerException;
 import ru.soknight.packetinventoryapi.exception.item.filler.InvalidRowFillerException;
@@ -118,15 +119,19 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R insert(DisplayableMenuItem item, boolean replace) {
+    public R insert(DisplayableMenuItem item, boolean replace) throws ItemInsertFailedException {
         if(item == null)
             return getThis();
 
-        fill(Filler.builder()
-                .useForceReplace()
-                .withMenuItem(item)
-                .build()
-        );
+        try {
+            fill(Filler.builder()
+                    .useForceReplace(replace)
+                    .withMenuItem(item)
+                    .build()
+            );
+        } catch (InvalidFillerException ex) {
+            throw new ItemInsertFailedException(ex, item);
+        }
 
         return getThis();
     }
@@ -181,7 +186,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         if(!filler.hasItemStack() && !filler.hasMenuItem())
             throw new InvalidFillerException(filler, "filler instance must have any ItemStack or MenuItem!");
 
-        if(!filler.hasSlotRange() && !filler.hasSlotRegion() && !filler.hasFillPattern())
+        if(!filler.hasSlots() && !filler.hasSlotRange() && !filler.hasSlotRegion() && !filler.hasFillPattern())
             throw new InvalidFillerException(filler, "filler instance must have slot range/region or fill pattern!");
 
         // --- processing...
