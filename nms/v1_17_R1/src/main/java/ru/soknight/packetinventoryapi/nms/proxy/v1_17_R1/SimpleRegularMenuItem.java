@@ -45,6 +45,28 @@ public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleR
         return itemMeta != null ? itemMeta.getCustomModelData() : 0;
     }
 
+    @Override
+    public boolean assignHeadTexture(SkullMeta itemMeta, String base64Value, String signature) {
+        if(itemMeta == null)
+            return false;
+
+        GameProfile profile = new GameProfile(UUID.randomUUID(), "");
+        Property property = new Property("textures", base64Value, signature);
+        profile.getProperties().put("textures", property);
+
+        try {
+            if(SET_PROFILE_METHOD == null) {
+                SET_PROFILE_METHOD = itemMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
+                SET_PROFILE_METHOD.setAccessible(true);
+            }
+
+            SET_PROFILE_METHOD.invoke(itemMeta, profile);
+            return true;
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+            return false;
+        }
+    }
+
     public static Builder build(ConfigurationSection configuration) {
         return new Builder(new SimpleRegularMenuItem(configuration));
     }
@@ -66,36 +88,8 @@ public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleR
             if(menuItem.getMaterial() != Material.PLAYER_HEAD)
                 Builder.super.material(Material.PLAYER_HEAD);
 
-            ItemMeta itemMeta = menuItem.bukkitItem.getItemMeta();
-            if(itemMeta != null) {
-                SkullMeta skullMeta = (SkullMeta) itemMeta;
-
-                GameProfile profile = new GameProfile(UUID.randomUUID(), "");
-                Property property = new Property("textures", value);
-                profile.getProperties().put("textures", property);
-
-                try {
-                    if(SET_PROFILE_METHOD == null) {
-                        SET_PROFILE_METHOD = skullMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
-                        SET_PROFILE_METHOD.setAccessible(true);
-                    }
-
-                    SET_PROFILE_METHOD.invoke(skullMeta, profile);
-
-                    menuItem.bukkitItem.setItemMeta(itemMeta);
-                    menuItem.requireItemRemap();
-                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {}
-            }
-
-            /*GameProfile profile = new GameProfile(UUID.randomUUID(), "");
-            Property property = new Property("textures", value);
-            profile.getProperties().put("textures", property);
-            NBTTagCompound serialized = GameProfileSerializer.serialize(new NBTTagCompound(), profile);
-
-            ItemStack itemStack = menuItem.asVanillaItem();
-            NBTTagCompound tag = itemStack.getOrCreateTag();
-            tag.set("SkullOwner", serialized);
-            itemStack.setTag(tag);*/
+            if(menuItem.assignHeadTexture(menuItem.bukkitItem, value))
+                menuItem.requireItemRemap();
 
             return getThis();
         }

@@ -255,6 +255,7 @@ public class MenuParser {
 
         String playerHead = configuration.getString("player-head");
         String base64Head = configuration.getString("base64-head");
+        String aSkinsHead = configuration.getString("askins-head");
         Integer customModelData = configuration.isInt("custom-model-data") ? configuration.getInt("custom-model-data") : null;
 
         String patternRaw = configuration.getString("pattern");
@@ -278,6 +279,7 @@ public class MenuParser {
                 .setSlots(slots.length > 0 ? slots : null)
                 .setPlayerHead(playerHead)
                 .setBase64Head(base64Head)
+                .setASkinsHead(aSkinsHead)
                 .setCustomModelData(customModelData)
                 .setFillPattern(pattern)
                 .setEnchanted(enchanted);

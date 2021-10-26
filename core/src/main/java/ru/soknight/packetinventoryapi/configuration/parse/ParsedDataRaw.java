@@ -39,6 +39,7 @@ public final class ParsedDataRaw {
 
     private String playerHead;
     private String base64Head;
+    private String aSkinsHead;
     private Integer customModelData;
 
     private FillPatternType fillPattern;
@@ -57,6 +58,8 @@ public final class ParsedDataRaw {
             menuItem.playerHead(playerHead);
         else if(base64Head != null && !base64Head.isEmpty())
             menuItem.base64Head(base64Head);
+        else if(aSkinsHead != null && !aSkinsHead.isEmpty())
+            menuItem.aSkinsHead(aSkinsHead);
         else {
             if(materialRaw == null || materialRaw.isEmpty())
                 throw new NoMaterialProvidedException(fileName, configuration.getName());
@@ -97,6 +100,7 @@ public final class ParsedDataRaw {
                 .setMaterialRaw(materialRaw)
                 .setAmount(amount != null ? amount : 1)
                 .setSlots(Arrays.copyOf(slots, slots.length))
+                .setASkinsHead(aSkinsHead)
                 .setPlayerHead(playerHead)
                 .setBase64Head(base64Head)
                 .setCustomModelData(customModelData)
@@ -112,6 +116,7 @@ public final class ParsedDataRaw {
         this.amount = overlap(amount, other.amount);
         this.slots = overlap(slots, other.slots);
 
+        this.aSkinsHead = overlap(aSkinsHead, other.aSkinsHead);
         this.playerHead = overlap(playerHead, other.playerHead);
         this.base64Head = overlap(base64Head, other.base64Head);
         this.customModelData = overlap(customModelData, other.customModelData);
@@ -154,6 +159,7 @@ public final class ParsedDataRaw {
                 Objects.equals(materialRaw, that.materialRaw) &&
                 Objects.equals(amount, that.amount) &&
                 Arrays.equals(slots, that.slots) &&
+                Objects.equals(aSkinsHead, that.aSkinsHead) &&
                 Objects.equals(playerHead, that.playerHead) &&
                 Objects.equals(base64Head, that.base64Head) &&
                 Objects.equals(customModelData, that.customModelData) &&
@@ -164,7 +170,7 @@ public final class ParsedDataRaw {
     @Override
     public int hashCode() {
         int result = Objects.hash(
-                configuration, fileName, name, lore, materialRaw, amount,
+                configuration, fileName, name, lore, materialRaw, amount, aSkinsHead,
                 playerHead, base64Head, customModelData, fillPattern, enchanted
         );
         result = 31 * result + Arrays.hashCode(slots);
@@ -172,7 +178,7 @@ public final class ParsedDataRaw {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "ParsedDataRaw{" +
                 "configuration=" + configuration +
                 ", fileName='" + fileName + '\'' +
@@ -181,6 +187,7 @@ public final class ParsedDataRaw {
                 ", materialRaw='" + materialRaw + '\'' +
                 ", amount=" + amount +
                 ", slots=" + Arrays.toString(slots) +
+                ", aSkinsHead='" + aSkinsHead + '\'' +
                 ", playerHead='" + playerHead + '\'' +
                 ", base64Head='" + base64Head + '\'' +
                 ", customModelData=" + customModelData +

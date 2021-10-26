@@ -8,7 +8,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 
 import java.util.List;
@@ -23,6 +25,7 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
     @Getter protected boolean enchanted;
     @Getter protected String playerHead;
     @Getter protected String base64Head;
+    @Getter protected String aSkinsHead;
 
     protected AbstractVanillaItem() {
         this.bukkitItem = new WrappedItemStack(Material.AIR, this);
@@ -92,6 +95,35 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
     @Override
     public int getCustomModelData() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("custom model data modification methods isn't implemented for your version!");
+    }
+
+    @Override
+    public boolean assignHeadTexture(ItemStack item, String base64Value) {
+        return assignHeadTexture(item, base64Value, null);
+    }
+
+    @Override
+    public boolean assignHeadTexture(SkullMeta itemMeta, String base64Value) {
+        return assignHeadTexture(itemMeta, base64Value, null);
+    }
+
+    @Override
+    public boolean assignHeadTexture(ItemStack item, String base64Value, String signature) {
+        if(item == null)
+            return false;
+
+        ItemMeta itemMeta = item.getItemMeta();
+        if(itemMeta == null)
+            return false;
+
+        if(itemMeta instanceof SkullMeta) {
+            boolean assigned = assignHeadTexture((SkullMeta) itemMeta, base64Value, signature);
+            if(assigned)
+                item.setItemMeta(itemMeta);
+            return assigned;
+        }
+
+        return false;
     }
 
     protected static abstract class Builder<I extends AbstractVanillaItem<I, B>, B extends AbstractVanillaItem.Builder<I, B>> implements VanillaItem.Builder<I, B> {
@@ -173,6 +205,18 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
                 material(Material.PLAYER_HEAD);
 
             menuItem.playerHead = value;
+            return getThis();
+        }
+
+        @Override
+        public B aSkinsHead(String value) {
+            if(value == null || value.isEmpty())
+                return getThis();
+
+            if(menuItem.getMaterial() != Material.PLAYER_HEAD)
+                material(Material.PLAYER_HEAD);
+
+            menuItem.aSkinsHead = value;
             return getThis();
         }
 

@@ -33,7 +33,8 @@
         <spigot.api.version>1.16.5-R0.1-SNAPSHOT</spigot.api.version>
         <protocollib.version>4.7.0-SNAPSHOT</protocollib.version>
         <placeholderapi.version>2.10.10</placeholderapi.version>
-        <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
+        <advancedskins.api.version>2.0.0</advancedskins.api.version>
+        <jetbrains.annotations.version>22.0.0</jetbrains.annotations.version>
         <lombok.version>1.18.22</lombok.version>
 
         <!-- Maven plugins -->
@@ -55,6 +56,10 @@
         <repository>
             <id>nexus</id>
             <url>https://repo.soknight.me/repository/public/</url>
+        </repository>
+        <repository>
+            <id>nexus-releases</id>
+            <url>https://repo.soknight.me/repository/releases/</url>
         </repository>
         <repository>
             <id>nexus-snapshots</id>
@@ -100,6 +105,14 @@
                 <groupId>me.clip</groupId>
                 <artifactId>placeholderapi</artifactId>
                 <version>${placeholderapi.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- AdvancedSkins API -->
+            <dependency>
+                <groupId>ru.soknight.advancedskins</groupId>
+                <artifactId>api</artifactId>
+                <version>${advancedskins.api.version}</version>
                 <scope>provided</scope>
             </dependency>
 
