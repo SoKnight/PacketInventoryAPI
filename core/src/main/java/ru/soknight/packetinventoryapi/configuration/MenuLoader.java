@@ -50,7 +50,7 @@ public class MenuLoader {
         String outputFile = menuIO.outputFile();
         Validate.notEmpty(outputFile, "outputFile");
 
-        resourcePath = resourcePath.replace("//", File.separator);
+        resourcePath = resourcePath.replace("//", "/");
         outputFile = outputFile.replace("//", File.separator);
 
         return load(instance, resourcePath, outputFile, resetContent);
