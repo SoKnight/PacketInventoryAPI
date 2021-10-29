@@ -1,5 +1,6 @@
 package ru.soknight.packetinventoryapi.nms.vanilla;
 
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -42,6 +43,10 @@ public interface VanillaItem<I extends VanillaItem<I, B>, B extends VanillaItem.
     boolean assignHeadTexture(ItemStack item, String base64Value, String signature);
 
     boolean assignHeadTexture(SkullMeta itemMeta, String base64Value, String signature);
+
+    boolean assignHeadTexture(ItemStack item, WrappedGameProfile gameProfile);
+
+    boolean assignHeadTexture(SkullMeta itemMeta, WrappedGameProfile gameProfile);
 
     interface Builder<I extends VanillaItem<I, B>, B extends VanillaItem.Builder<I, B>> {
         I build();

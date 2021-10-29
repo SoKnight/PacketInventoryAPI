@@ -12,7 +12,6 @@
 #                         (string)            a list of slot ranges separated with ', ' part (e.g.: '0-12, 14-26')
 #   - player-head         (string)            a name of player which head will be displayed as item icon (you can use %player_name% placeholder)
 #   - base64-head         (string)            a base64 encoded value of the head texture to display
-#   - askins-head         (string)            a name of player which head will be provided by the Advanced Skins cached data
 #   - custom-model-data   (integer)           a custom model data ID (useful for custom items with resource packs)
 #   - pattern             (string)            a filling pattern for this item (actual for @filler): 'full' or 'frame'
 #   - enchanted           (boolean)           if enabled then item will have enchantment glowing effect

@@ -1,5 +1,6 @@
 package ru.soknight.packetinventoryapi.nms.vanilla;
 
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 
 import java.util.List;
+import java.util.function.Function;
 
 public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B extends AbstractVanillaItem.Builder<I, B>> implements VanillaItem<I, B> {
 
@@ -109,6 +111,15 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
 
     @Override
     public boolean assignHeadTexture(ItemStack item, String base64Value, String signature) {
+        return assignHeadTexture(item, meta -> assignHeadTexture(meta, base64Value, signature));
+    }
+
+    @Override
+    public boolean assignHeadTexture(ItemStack item, WrappedGameProfile gameProfile) {
+        return assignHeadTexture(item, meta -> assignHeadTexture(meta, gameProfile));
+    }
+
+    private boolean assignHeadTexture(ItemStack item, Function<SkullMeta, Boolean> mapper) {
         if(item == null)
             return false;
 
@@ -117,7 +128,7 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
             return false;
 
         if(itemMeta instanceof SkullMeta) {
-            boolean assigned = assignHeadTexture((SkullMeta) itemMeta, base64Value, signature);
+            boolean assigned = mapper.apply((SkullMeta) itemMeta);
             if(assigned)
                 item.setItemMeta(itemMeta);
             return assigned;

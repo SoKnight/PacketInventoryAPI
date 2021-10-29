@@ -1,5 +1,6 @@
 package ru.soknight.packetinventoryapi.nms.proxy.v1_16_R1;
 
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_16_R1.ItemStack;
@@ -53,14 +54,26 @@ public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleR
         GameProfile profile = new GameProfile(UUID.randomUUID(), "");
         Property property = new Property("textures", base64Value, signature);
         profile.getProperties().put("textures", property);
+        return setGameProfile(itemMeta, profile);
+    }
 
+    @Override
+    public boolean assignHeadTexture(SkullMeta itemMeta, WrappedGameProfile gameProfile) {
+        Object handle = gameProfile.getHandle();
+        if(handle instanceof GameProfile)
+            return setGameProfile(itemMeta, (GameProfile) handle);
+        else
+            return false;
+    }
+
+    private boolean setGameProfile(SkullMeta itemMeta, GameProfile gameProfile) {
         try {
             if(SET_PROFILE_METHOD == null) {
                 SET_PROFILE_METHOD = itemMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
                 SET_PROFILE_METHOD.setAccessible(true);
             }
 
-            SET_PROFILE_METHOD.invoke(itemMeta, profile);
+            SET_PROFILE_METHOD.invoke(itemMeta, gameProfile);
             return true;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
             return false;

@@ -3,10 +3,12 @@ package ru.soknight.packetinventoryapi;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.animation.Animation;
 import ru.soknight.packetinventoryapi.api.PacketInventoryAPI;
 import ru.soknight.packetinventoryapi.exception.UnsupportedVersionException;
 import ru.soknight.packetinventoryapi.exception.packet.NoConstructorFoundException;
+import ru.soknight.packetinventoryapi.integration.skins.SkinsProvidingBus;
 import ru.soknight.packetinventoryapi.listener.PacketsListener;
 import ru.soknight.packetinventoryapi.menu.registry.MenuRegistry;
 import ru.soknight.packetinventoryapi.menu.registry.SimpleMenuRegistry;
@@ -29,6 +31,8 @@ public final class PacketInventoryAPIPlugin extends JavaPlugin {
     private SimpleContainerStorage containerStorage;
     private SimpleMenuRegistry menuRegistry;
     private PacketsListener packetsListener;
+
+    private SkinsProvidingBus skinsProvidingBus;
 
     private PlaceholderReplacer papiPlaceholderReplacer;
     private ExecutorService asyncSingleExecutorService;
@@ -56,11 +60,13 @@ public final class PacketInventoryAPIPlugin extends JavaPlugin {
         this.menuRegistry = new SimpleMenuRegistry();
         this.packetsListener = new PacketsListener(this, containerStorage);
 
+        this.skinsProvidingBus = new SkinsProvidingBus(this);
+
         resolvePlaceholderReplacer();
         this.asyncSingleExecutorService = Executors.newSingleThreadExecutor();
         this.asyncMultiExecutorService = Executors.newCachedThreadPool();
 
-        API_INSTANCE = new SimplePacketInventoryAPI(containerStorage, menuRegistry);
+        API_INSTANCE = new SimplePacketInventoryAPI(containerStorage, menuRegistry, skinsProvidingBus);
         
         new CommandDebug(this);
         
@@ -128,15 +134,21 @@ public final class PacketInventoryAPIPlugin extends JavaPlugin {
     private static final class SimplePacketInventoryAPI implements PacketInventoryAPI {
         private final ContainerStorage containerStorage;
         private final MenuRegistry menuRegistry;
+        private final SkinsProvidingBus skinsProvidingBus;
 
         @Override
-        public ContainerStorage containerStorage() {
+        public @NotNull ContainerStorage containerStorage() {
             return containerStorage;
         }
 
         @Override
-        public MenuRegistry menuRegistry() {
+        public @NotNull MenuRegistry menuRegistry() {
             return menuRegistry;
+        }
+
+        @Override
+        public @NotNull SkinsProvidingBus skinsProvidingBus() {
+            return skinsProvidingBus;
         }
     }
     
