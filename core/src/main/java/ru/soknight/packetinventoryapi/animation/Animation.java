@@ -2,8 +2,9 @@ package ru.soknight.packetinventoryapi.animation;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.apache.commons.lang.Validate;
+import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.container.Container;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,10 @@ public abstract class Animation<A extends Animation<A>> {
     private static final AtomicInteger COUNTER = new AtomicInteger(1);
     private static final long FINISH_TIMEOUT = 5000L;
 
-    @Getter protected final Container<?, ?> container;
+    protected static final int DEFAULT_STEPS_AMOUNT = 1;
+    protected static final boolean DEFAULT_VIEW_REQUIRED_FLAG = true;
+
+    @Getter protected final @NotNull Container<?, ?> container;
     @Getter protected final int steps;
     @Getter protected final int cycles;
     @Getter protected final boolean viewRequired;
@@ -29,20 +33,20 @@ public abstract class Animation<A extends Animation<A>> {
     private Thread thread;
     private boolean playing;
 
-    public Animation(Container<?, ?> container, int steps) {
-        this(container, steps, 1);
+    public Animation(@NotNull Container<?, ?> container, int steps) {
+        this(container, steps, DEFAULT_VIEW_REQUIRED_FLAG);
     }
 
-    public Animation(Container<?, ?> container, int steps, boolean viewRequired) {
-        this(container, steps, 1, viewRequired);
+    public Animation(@NotNull Container<?, ?> container, int steps, boolean viewRequired) {
+        this(container, steps, DEFAULT_STEPS_AMOUNT, viewRequired);
     }
 
-    public Animation(Container<?, ?> container, int steps, int cycles) {
-        this(container, steps, cycles, true);
+    public Animation(@NotNull Container<?, ?> container, int steps, int cycles) {
+        this(container, steps, cycles, DEFAULT_VIEW_REQUIRED_FLAG);
     }
 
-    public Animation(Container<?, ?> container, int steps, int cycles, boolean viewRequired) {
-        Validate.notNull(container, "'container' cannot be null!");
+    public Animation(@NotNull Container<?, ?> container, int steps, int cycles, boolean viewRequired) {
+        Validate.notNull(container, "container");
         Validate.isTrue(steps > 0, "'steps' must be more than 0!");
         Validate.isTrue(cycles == -1 || cycles > 0, "'cycles' must be more than 0 or equal -1!");
 
@@ -76,10 +80,24 @@ public abstract class Animation<A extends Animation<A>> {
         return futures.length;
     }
 
+    public static int finishAllSameTypeSync(Container<?, ?> container, Class<? extends Animation<?>> animationType) {
+        CompletableFuture<?>[] futures = new ArrayList<>(PLAYING_ANIMATIONS)
+                .stream()
+                .filter(a -> a.isPlayingIn(container))
+                .filter(a -> a.getClass() == animationType)
+                .map(a -> a.finishAsync(FINISH_TIMEOUT))
+                .toArray(CompletableFuture<?>[]::new);
+
+        CompletableFuture.allOf(futures).join();
+        return futures.length;
+    }
+
     protected abstract A getThis();
 
     public boolean isPlaying() {
-        return thread != null && thread.isAlive();
+        synchronized (this) {
+            return thread != null && thread.isAlive();
+        }
     }
 
     public boolean isPlayingIn(Container<?, ?> container) {
@@ -101,14 +119,20 @@ public abstract class Animation<A extends Animation<A>> {
 
         PLAYING_ANIMATIONS.add(this);
         this.playing = true;
-
         this.thread = new Thread(this::runAll, "PIAPI-Animation-#" + COUNTER.getAndIncrement());
         this.thread.start();
+
+        prePlaySync();
         this.thread.join();
+        postPlaySync();
 
         this.playing = false;
         PLAYING_ANIMATIONS.remove(this);
     }
+
+    protected void prePlaySync() {}
+
+    protected void postPlaySync() {}
 
     public CompletableFuture<Void> playAsync(Consumer<A> onFinish) {
         return CompletableFuture.runAsync(this::playSync).thenRun(() -> {
@@ -131,10 +155,18 @@ public abstract class Animation<A extends Animation<A>> {
     @SneakyThrows
     public void finishSync(long timeout) {
         if(isPlaying()) {
-            playing = false;
-            thread.join(timeout);
+            synchronized (this) {
+                playing = false;
+                preFinishSync();
+                thread.join(timeout);
+                postFinishSync();
+            }
         }
     }
+
+    protected void preFinishSync() {}
+
+    protected void postFinishSync() {}
 
     public CompletableFuture<Void> finishAsync() {
         return finishAsync(0L);
@@ -155,18 +187,22 @@ public abstract class Animation<A extends Animation<A>> {
         if(isViewRequired() && !container.isViewing())
             return;
 
-        while(playing && (cycles == -1 || currentCycle.get() < cycles))
+        while(isPlaying() && (cycles == -1 || currentCycle.get() < cycles) && canRunNextCycle())
             runCycle(currentCycle.getAndIncrement());
 
         currentCycle.set(0);
     }
 
     private void runCycle(int cycle) {
-        while(playing && currentTick.get() < steps)
+        while(isPlaying() && currentTick.get() < steps && canRunNextTick())
             tickQuietly(cycle, currentTick.getAndIncrement());
 
         currentTick.set(0);
     }
+
+    protected boolean canRunNextTick() { return true; }
+
+    protected boolean canRunNextCycle() { return true; }
 
     private void tickQuietly(int cycle, int step) {
         try {
