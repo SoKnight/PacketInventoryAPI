@@ -2,13 +2,17 @@ package ru.soknight.packetinventoryapi.container;
 
 import lombok.Getter;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
 import ru.soknight.packetinventoryapi.animation.Animation;
+import ru.soknight.packetinventoryapi.animation.AttachableAnimation;
+import ru.soknight.packetinventoryapi.animation.function.AnimationCreator;
+import ru.soknight.packetinventoryapi.animation.function.AttachableCreator;
+import ru.soknight.packetinventoryapi.animation.function.CompletionTask;
 import ru.soknight.packetinventoryapi.api.PacketInventoryAPI;
 import ru.soknight.packetinventoryapi.container.data.Property;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
@@ -30,14 +34,15 @@ import ru.soknight.packetinventoryapi.packet.server.PacketServerWindowProperty;
 import ru.soknight.packetinventoryapi.placeholder.context.PlaceholderContext;
 import ru.soknight.packetinventoryapi.storage.ContainerStorage;
 import ru.soknight.packetinventoryapi.storage.SimpleContainerStorage;
+import ru.soknight.packetinventoryapi.util.Colorizer;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public abstract class Container<C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> implements CloneableContainer<C, R> {
@@ -45,19 +50,19 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     protected final Map<Integer, EventListener<WindowClickEvent<C, R>>> slotsClickListeners;
     protected final Map<IntRange, EventListener<WindowClickEvent<C, R>>> rangesClickListeners;
 
-    protected final Map<Integer, ItemStack> contentData;
+    protected final @NotNull Map<Integer, ItemStack> contentData;
     protected final int inventoryId;
-    protected final Player inventoryHolder;
-    protected final ContainerType containerType;
-    protected final DataHolder dataHolder;
-    protected PlaceholderContext placeholderContext;
-    protected BaseComponent title;
-    protected DisplayableMenuItem filler;
+    protected final @Nullable Player inventoryHolder;
+    protected final @NotNull ContainerType containerType;
+    protected final @NotNull DataHolder dataHolder;
+    protected @NotNull PlaceholderContext placeholderContext;
+    protected @NotNull BaseComponent title;
+    protected @Nullable DisplayableMenuItem filler;
     
-    protected EventListener<WindowOpenEvent<C, R>> openListener;
-    protected EventListener<WindowContentLoadEvent<C, R>> contentLoadListener;
-    protected EventListener<WindowCloseEvent<C, R>> closeListener;
-    protected ExtraDataProvider<C, R> extraDataProvider;
+    protected @Nullable EventListener<WindowOpenEvent<C, R>> openListener;
+    protected @Nullable EventListener<WindowContentLoadEvent<C, R>> contentLoadListener;
+    protected @Nullable EventListener<WindowCloseEvent<C, R>> closeListener;
+    protected @Nullable ExtraDataProvider<C, R> extraDataProvider;
     private boolean viewing;
 
     protected boolean viewingPlayerInventory;
@@ -68,11 +73,14 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     protected boolean interactable;
     protected boolean clickOutsideToClose;
     
-    protected Container(Player inventoryHolder, ContainerType containerType, String title) {
-        this(inventoryHolder, containerType, title != null ? new TextComponent(ChatColor.translateAlternateColorCodes('&', title)) : null);
+    protected Container(@Nullable Player inventoryHolder, @NotNull ContainerType containerType, @Nullable String title) {
+        this(inventoryHolder, containerType, Colorizer.asComponent(title));
     }
 
-    protected Container(Player inventoryHolder, ContainerType containerType, BaseComponent title) {
+    protected Container(@Nullable Player inventoryHolder, @NotNull ContainerType containerType, @NotNull BaseComponent title) {
+        Validate.notNull(containerType, "containerType");
+        Validate.notNull(title, "title");
+        
         this.slotsClickListeners = new HashMap<>();
         this.rangesClickListeners = new HashMap<>();
 
@@ -85,14 +93,14 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         this.title = title;
     }
 
-    protected abstract C getThis();
+    protected abstract @NotNull C getThis();
 
-    protected abstract C copy(Player holder);
+    protected abstract @NotNull C copy(@Nullable Player holder);
 
-    protected void hookEventListener(C clone, AnyEventListener listener) {}
+    protected void hookEventListener(@NotNull C clone, @NotNull AnyEventListener listener) {}
 
     @Override
-    public C copyFull(Player holder, AnyEventListener listener) {
+    public C copyFull(@Nullable Player holder, @NotNull AnyEventListener listener) {
         C clone = copy(holder);
 
         clone.contentData.putAll(contentData);
@@ -128,96 +136,161 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         }
     }
 
-    public Map<Integer, ItemStack> getContentData() {
+    public @NotNull @UnmodifiableView Map<Integer, ItemStack> getContentData() {
         return Collections.unmodifiableMap(contentData);
     }
 
     // --- animations
-    public <A extends Animation<A>> C playAnimationSync(Function<C, A> creator) {
+    public <A extends Animation<A>> @NotNull C playAnimationSync(@NotNull AnimationCreator<C, R, A> creator) {
         return playAnimationSync(creator, 0L);
     }
 
-    public <A extends Animation<A>> C playAnimationSync(@NotNull Function<C, A> creator, long delay) {
-        A animation = creator.apply(getThis());
+    public <A extends Animation<A>> @NotNull C playAnimationSync(@NotNull AnimationCreator<C, R, A> creator, long delay) {
+        Validate.notNull(creator, "creator");
+
+        A animation = creator.create(getThis());
         if(animation != null)
             animation.playSync(delay);
         return getThis();
     }
 
-    public <A extends Animation<A>> C playAnimationAsync(Function<C, A> creator) {
+    public <A extends Animation<A>> @NotNull C playAnimationAsync(@NotNull AnimationCreator<C, R, A> creator) {
         return playAnimationAsync(creator, 0L);
     }
 
-    public <A extends Animation<A>> C playAnimationAsync(Function<C, A> creator, long delay) {
+    public <A extends Animation<A>> @NotNull C playAnimationAsync(@NotNull AnimationCreator<C, R, A> creator, long delay) {
         return playAnimationAsync(creator, null, delay);
     }
 
-    public <A extends Animation<A>> C playAnimationAsync(Function<C, A> creator, Consumer<A> onFinish) {
+    public <A extends Animation<A>> @NotNull C playAnimationAsync(@NotNull AnimationCreator<C, R, A> creator, @Nullable CompletionTask<A> onFinish) {
         return playAnimationAsync(creator, onFinish, 0L);
     }
 
-    public <A extends Animation<A>> C playAnimationAsync(@NotNull Function<C, A> creator, Consumer<A> onFinish, long delay) {
-        A animation = creator.apply(getThis());
+    public <A extends Animation<A>> @NotNull C playAnimationAsync(@NotNull AnimationCreator<C, R, A> creator, @Nullable CompletionTask<A> onFinish, long delay) {
+        Validate.notNull(creator, "creator");
+
+        A animation = creator.create(getThis());
+        if(animation != null)
+            animation.playAsync(onFinish, delay);
+        return getThis();
+    }
+
+    // --- attachable animations
+    public <A extends AttachableAnimation<A, T>, T> @NotNull C playAnimationSync(
+            @NotNull AttachableCreator<C, R, A, T> creator,
+            @NotNull CompletableFuture<T> task
+    ) {
+        return playAnimationSync(creator, task, 0L);
+    }
+
+    public <A extends AttachableAnimation<A, T>, T> @NotNull C playAnimationSync(
+            @NotNull AttachableCreator<C, R, A, T> creator,
+            @NotNull CompletableFuture<T> task,
+            long delay
+    ) {
+        Validate.notNull(creator, "creator");
+        Validate.notNull(task, "task");
+
+        A animation = creator.create(getThis(), task);
+        if(animation != null)
+            animation.playSync(delay);
+        return getThis();
+    }
+
+    public <A extends AttachableAnimation<A, T>, T> @NotNull C playAnimationAsync(
+            @NotNull AttachableCreator<C, R, A, T> creator,
+            @NotNull CompletableFuture<T> task
+    ) {
+        return playAnimationAsync(creator, task, 0L);
+    }
+
+    public <A extends AttachableAnimation<A, T>, T> @NotNull C playAnimationAsync(
+            @NotNull AttachableCreator<C, R, A, T> creator,
+            @NotNull CompletableFuture<T> task,
+            long delay
+    ) {
+        return playAnimationAsync(creator, task, null, delay);
+    }
+
+    public <A extends AttachableAnimation<A, T>, T> @NotNull C playAnimationAsync(
+            @NotNull AttachableCreator<C, R, A, T> creator,
+            @NotNull CompletableFuture<T> task,
+            @Nullable CompletionTask<A> onFinish
+    ) {
+        return playAnimationAsync(creator, task, onFinish, 0L);
+    }
+
+    public <A extends AttachableAnimation<A, T>, T> @NotNull C playAnimationAsync(
+            @NotNull AttachableCreator<C, R, A, T> creator,
+            @NotNull CompletableFuture<T> task,
+            @Nullable CompletionTask<A> onFinish,
+            long delay
+    ) {
+        Validate.notNull(creator, "creator");
+        Validate.notNull(task, "task");
+
+        A animation = creator.create(getThis(), task);
         if(animation != null)
             animation.playAsync(onFinish, delay);
         return getThis();
     }
 
     // --- base container properties
-    public C setTitle(BaseComponent title) {
+    public @NotNull C setTitle(@NotNull BaseComponent title) {
+        Validate.notNull(title, "title");
         this.title = title;
         return getThis();
     }
 
-    public C setFiller(DisplayableMenuItem filler) {
+    public @NotNull C setFiller(@Nullable DisplayableMenuItem filler) {
         this.filler = filler;
         return getThis();
     }
 
-    public C setExtraDataProvider(ExtraDataProvider<C, R> extraDataProvider) {
+    public @NotNull C setExtraDataProvider(@Nullable ExtraDataProvider<C, R> extraDataProvider) {
         this.extraDataProvider = extraDataProvider;
         return getThis();
     }
 
-    public C setViewingPlayerInventory(boolean value) {
+    public @NotNull C setViewingPlayerInventory(boolean value) {
         this.viewingPlayerInventory = value;
         return getThis();
     }
 
-    public C setViewingHotbarContent(boolean value) {
+    public @NotNull C setViewingHotbarContent(boolean value) {
         this.viewingHotbarContent = value;
         return getThis();
     }
 
-    public C setFinishAnimationsOnClose(boolean value) {
+    public @NotNull C setFinishAnimationsOnClose(boolean value) {
         this.finishAnimationsOnClose = value;
         return getThis();
     }
 
-    public C setUpdateInventoryOnClose(boolean value) {
+    public @NotNull C setUpdateInventoryOnClose(boolean value) {
         this.updateInventoryOnClose = value;
         return getThis();
     }
 
-    public C setCloseable(boolean value) {
+    public @NotNull C setCloseable(boolean value) {
         this.closeable = value;
         return getThis();
     }
 
-    public C setInteractable(boolean value) {
+    public @NotNull C setInteractable(boolean value) {
         this.interactable = value;
         return getThis();
     }
 
-    public C setClickOutsideToClose(boolean value) {
+    public @NotNull C setClickOutsideToClose(boolean value) {
         this.clickOutsideToClose = value;
         return getThis();
     }
 
     // --- content items updating
-    public abstract R updateContent();
+    public abstract @NotNull R updateContent();
 
-    public C submitUpdate(ContentUpdateRequest<C, R> request) {
+    public @NotNull C submitUpdate(@NotNull R request) {
         if(!request.isPushed())
             throw new IllegalArgumentException("'request' must be already pushed to submit it!");
 
@@ -227,7 +300,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     }
 
     // --- window reopening
-    public C reopen() {
+    public @NotNull C reopen() {
         return close().open();
     }
 
@@ -235,20 +308,20 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
      *  Events listening  *
      *********************/
 
-    public Map<Integer, EventListener<WindowClickEvent<C, R>>> getSlotsClickListeners() {
+    public @NotNull @UnmodifiableView Map<Integer, EventListener<WindowClickEvent<C, R>>> getSlotsClickListeners() {
         return Collections.unmodifiableMap(slotsClickListeners);
     }
 
-    public Map<IntRange, EventListener<WindowClickEvent<C, R>>> getRangesClickListeners() {
+    public @NotNull @UnmodifiableView Map<IntRange, EventListener<WindowClickEvent<C, R>>> getRangesClickListeners() {
         return Collections.unmodifiableMap(rangesClickListeners);
     }
 
     // --- open listening
-    public C open() {
+    public @NotNull C open() {
         return open(false);
     }
 
-    public synchronized C open(boolean reopened) {
+    public synchronized @NotNull C open(boolean reopened) {
         if(!reopened && isViewing())
             close();
 
@@ -258,29 +331,32 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         return getThis();
     }
 
-    public C openListener(WindowOpenListener<C, R> listener) {
+    public @NotNull C openListener(@Nullable WindowOpenListener<C, R> listener) {
         this.openListener = listener;
         return getThis();
     }
     
     public void onOpen(boolean reopened) {
         viewing = true;
+
         if(!reopened && openListener != null)
             openListener.handle(new WindowOpenEvent<>(inventoryHolder, getThis(), reopened));
+
         updateContent().pushSync();
+
         if(contentLoadListener != null)
             contentLoadListener.handle(new WindowContentLoadEvent<>(inventoryHolder, getThis()));
     }
     
     // --- close listening
-    public synchronized C close() {
+    public synchronized @NotNull C close() {
         PacketInventoryAPI apiInstance = PacketInventoryAPIPlugin.getApiInstance();
         SimpleContainerStorage storage = (SimpleContainerStorage) apiInstance.containerStorage();
         storage.close(this, false);
         return getThis();
     }
 
-    public C closeListener(WindowCloseListener<C, R> listener) {
+    public @NotNull C closeListener(@Nullable WindowCloseListener<C, R> listener) {
         this.closeListener = listener;
         return getThis();
     }
@@ -309,27 +385,28 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     }
 
     // --- click listening
-    public C clickListener(int slot, WindowClickListener<C, R> listener) {
+    public @NotNull C clickListener(int slot, @NotNull WindowClickListener<C, R> listener) {
+        Validate.notNull(listener, "listener");
         slotsClickListeners.put(slot, listener);
         return getThis();
     }
     
-    public C clickListener(IntRange slots, WindowClickListener<C, R> listener) {
+    public @NotNull C clickListener(@NotNull IntRange slots, @NotNull WindowClickListener<C, R> listener) {
+        Validate.notNull(slots, "slots");
+        Validate.notNull(listener, "listener");
         rangesClickListeners.put(slots, listener);
         return getThis();
     }
     
-    public C playerInventoryClickListener(WindowClickListener<C, R> listener) {
-        rangesClickListeners.put(playerInventorySlots(), listener);
-        return getThis();
+    public @NotNull C playerInventoryClickListener(@NotNull WindowClickListener<C, R> listener) {
+        return clickListener(playerInventorySlots(), listener);
     }
     
-    public C playerHotbarClickListener(WindowClickListener<C, R> listener) {
-        rangesClickListeners.put(playerHotbarSlots(), listener);
-        return getThis();
+    public @NotNull C playerHotbarClickListener(@NotNull WindowClickListener<C, R> listener) {
+        return clickListener(playerInventorySlots(), listener);
     }
 
-    public void onClick(WindowClickEvent<C, R> event) {
+    public void onClick(@NotNull WindowClickEvent<C, R> event) {
         int slot = event.getClickedSlot();
         if(slotsClickListeners.containsKey(slot))
             slotsClickListeners.get(slot).handle(event);
@@ -353,7 +430,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
      * So, every container will have a different slots range
      * @return container slots range
      */
-    public abstract IntRange containerSlots();
+    public abstract @NotNull IntRange containerSlots();
     
     /**
      * Gets range of player's inventory slots depending on the children container type
@@ -361,7 +438,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
      * So, every container will have a different slots range
      * @return player's inventory slots range
      */
-    public abstract IntRange playerInventorySlots();
+    public abstract @NotNull IntRange playerInventorySlots();
     
     /**
      * Gets range of player's hotbar slots depending on the children container type
@@ -369,7 +446,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
      * So, every container will have a different slots range
      * @return player's hotbar slots range
      */
-    public abstract IntRange playerHotbarSlots();
+    public abstract @NotNull IntRange playerHotbarSlots();
     
     /**
      * Gets the player's inventory slots offset of first slot indexed as 0
@@ -391,10 +468,10 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     public void updateProperty(@NotNull Property propertyType, int value) {
         ContainerType propertyContainerType = propertyType.getContainerType();
         if(propertyContainerType != containerType && !propertyContainerType.isFurnace())
-            throw new IllegalStateException(
-                    "this property requires container '" + propertyContainerType
-                    + "', current container is '" + containerType + "'"
-            );
+            throw new IllegalArgumentException(String.format(
+                    "Property %s required container type %s, but current is %s!",
+                    propertyType, propertyContainerType, containerType
+            ));
 
         updatePropertyRaw(propertyType.getPropertyId(), value);
     }

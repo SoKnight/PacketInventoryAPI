@@ -9,6 +9,7 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum EnchantmentPosition {
+
     UNKNOWN(-1),
     TOP(0),
     MIDDLE(1),
@@ -26,4 +27,5 @@ public enum EnchantmentPosition {
     public String toString() {
         return name().toLowerCase() + " (#" + id + ")";
     }
+
 }

@@ -9,6 +9,7 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum LecternButtonType {
+
     UNKNOWN(-1),
     PREVIOUS_PAGE(1),
     NEXT_PAGE(2),
@@ -26,4 +27,5 @@ public enum LecternButtonType {
     public String toString() {
         return name().toLowerCase() + " (#" + id + ")";
     }
+
 }

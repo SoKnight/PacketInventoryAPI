@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.bukkit.potion.PotionEffectType;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.ContainerType;
+import ru.soknight.packetinventoryapi.container.ContainerTypes;
 
 import java.util.Objects;
 
@@ -23,7 +24,7 @@ public class Property {
     private final int propertyId;
     
     public static class Furnace {
-        private static final ContainerType TYPE = ContainerType.FURNACE;
+        private static final ContainerType TYPE = ContainerTypes.FURNACE;
         
         /** Counting from fuel burn time down to 0 (in-game ticks). */
         public static final Property FUEL_BURN_TIME_LEFT = new Property(TYPE, 0);
@@ -36,7 +37,7 @@ public class Property {
     }
     
     public static class EnchantmentTable {
-        private static final ContainerType TYPE = ContainerType.ENCHANTMENT_TABLE;
+        private static final ContainerType TYPE = ContainerTypes.ENCHANTMENT_TABLE;
         
         /** The enchantment's xp level requirement. */
         public static final Property LEVEL_REQUIREMENT_TOP = new Property(TYPE, 0);
@@ -108,7 +109,7 @@ public class Property {
     }
     
     public static class Beacon {
-        private static final ContainerType TYPE = ContainerType.BEACON;
+        private static final ContainerType TYPE = ContainerTypes.BEACON;
         
         /** 0-4, controls what effect buttons are enabled. */
         public static final Property POWER_LEVEL = new Property(TYPE, 0);
@@ -119,14 +120,14 @@ public class Property {
     }
     
     public static class Anvil {
-        private static final ContainerType TYPE = ContainerType.ANVIL;
+        private static final ContainerType TYPE = ContainerTypes.ANVIL;
         
         /** The repair's cost in xp levels. */
         public static final Property REPAIR_COST = new Property(TYPE, 0);
     }
     
     public static class BrewingStand {
-        private static final ContainerType TYPE = ContainerType.BREWING_STAND;
+        private static final ContainerType TYPE = ContainerTypes.BREWING_STAND;
         
         /** 0 – 400, with 400 making the arrow empty, and 0 making the arrow full. */
         public static final Property BREW_TIME = new Property(TYPE, 0);
@@ -135,14 +136,14 @@ public class Property {
     }
     
     public static class Stonecutter {
-        private static final ContainerType TYPE = ContainerType.STONECUTTER;
+        private static final ContainerType TYPE = ContainerTypes.STONECUTTER;
         
         /** The index of the selected recipe. -1 means none is selected. */
         public static final Property SELECTED_RECIPE = new Property(TYPE, 0);
     }
     
     public static class Loom {
-        private static final ContainerType TYPE = ContainerType.LOOM;
+        private static final ContainerType TYPE = ContainerTypes.LOOM;
         
         /**
          * The index of the selected pattern. 0 means none is selected.
@@ -153,7 +154,7 @@ public class Property {
     }
 
     public static class Lectern {
-        private static final ContainerType TYPE = ContainerType.LECTERN;
+        private static final ContainerType TYPE = ContainerTypes.LECTERN;
 
         /**
          * The current page number, starting from 0.
@@ -162,20 +163,18 @@ public class Property {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(containerType, propertyId);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Property property = (Property) o;
+        return propertyId == property.propertyId &&
+                Objects.equals(containerType, property.containerType);
     }
 
     @Override
-    public boolean equals(Object other) {
-        if(this == other)
-            return true;
-        if(other == null || getClass() != other.getClass())
-            return false;
-        
-        Property property = (Property) other;
-        return containerType == property.containerType &&
-                propertyId == property.propertyId;
+    public int hashCode() {
+        return Objects.hash(containerType, propertyId);
     }
 
     @Override

@@ -3,6 +3,8 @@ package ru.soknight.packetinventoryapi.animation;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import ru.soknight.packetinventoryapi.animation.function.CompletionTask;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.util.Validate;
 
@@ -26,6 +28,8 @@ public abstract class Animation<A extends Animation<A>> {
     @Getter protected final int steps;
     @Getter protected final int cycles;
     @Getter protected final boolean viewRequired;
+
+    @Getter private @Nullable Runnable completionTask;
 
     protected final AtomicInteger currentTick;
     protected final AtomicInteger currentCycle;
@@ -134,17 +138,22 @@ public abstract class Animation<A extends Animation<A>> {
 
     protected void postPlaySync() {}
 
-    public CompletableFuture<Void> playAsync(Consumer<A> onFinish) {
-        return CompletableFuture.runAsync(this::playSync).thenRun(() -> {
-            if(onFinish != null)
-                onFinish.accept(getThis());
-        });
+    public CompletableFuture<Void> playAsync() {
+        return playAsync(null, 0L);
     }
 
-    public CompletableFuture<Void> playAsync(Consumer<A> onFinish, long delay) {
+    public CompletableFuture<Void> playAsync(long delay) {
+        return playAsync(null, delay);
+    }
+
+    public CompletableFuture<Void> playAsync(@Nullable CompletionTask<A> onFinish) {
+        return playAsync(onFinish, 0L);
+    }
+
+    public CompletableFuture<Void> playAsync(@Nullable CompletionTask<A> onFinish, long delay) {
         return CompletableFuture.runAsync(() -> playSync(delay)).thenRun(() -> {
             if(onFinish != null)
-                onFinish.accept(getThis());
+                onFinish.onFinish(getThis());
         });
     }
 
@@ -161,6 +170,8 @@ public abstract class Animation<A extends Animation<A>> {
                 thread.join(timeout);
                 postFinishSync();
             }
+            if(completionTask != null)
+                completionTask.run();
         }
     }
 
@@ -181,6 +192,12 @@ public abstract class Animation<A extends Animation<A>> {
             if(onFinish != null)
                 onFinish.accept(getThis());
         });
+    }
+
+    public A setCompletionTask(@NotNull Runnable completionTask) {
+        Validate.notNull(completionTask, "completionTask");
+        this.completionTask = completionTask;
+        return getThis();
     }
 
     private void runAll() {

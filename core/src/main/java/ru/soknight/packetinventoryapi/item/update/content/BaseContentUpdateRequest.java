@@ -3,12 +3,12 @@ package ru.soknight.packetinventoryapi.item.update.content;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.configuration.parse.FillPatternType;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.exception.item.ItemInsertFailedException;
@@ -26,6 +26,7 @@ import ru.soknight.packetinventoryapi.packet.PacketAssistant;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerWindowItems;
 import ru.soknight.packetinventoryapi.placeholder.context.PlaceholderContext;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -37,8 +38,8 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     
     private static final ItemStack EMPTY_ITEM = new ItemStack(Material.AIR);
 
-    private final C container;
-    private final Map<Integer, ItemStack> itemMatrix;
+    private final @NotNull C container;
+    private final @NotNull Map<Integer, ItemStack> itemMatrix;
     private final int slotsOffset;
 
     private boolean viewingPlayerInventory;
@@ -50,11 +51,14 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     @Setter(AccessLevel.NONE)
     private boolean pushed;
 
-    protected BaseContentUpdateRequest(C container, Map<Integer, ItemStack> contentData) {
+    protected BaseContentUpdateRequest(@NotNull C container, @NotNull Map<Integer, ItemStack> contentData) {
         this(container, contentData, container.playerInventoryOffset());
     }
     
-    protected BaseContentUpdateRequest(C container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+    protected BaseContentUpdateRequest(@NotNull C container, @NotNull Map<Integer, ItemStack> contentData, int slotsOffset) {
+        Validate.notNull(container, "container");
+        Validate.notNull(contentData, "contentData");
+
         this.container = container;
         this.itemMatrix = contentData;
         this.slotsOffset = slotsOffset;
@@ -64,33 +68,33 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
     
     @Override
-    public C getContainer() {
+    public @NotNull C getContainer() {
         return container;
     }
 
-    private DisplayableMenuItem getFiller() {
+    private @Nullable DisplayableMenuItem getFiller() {
         return container.getFiller();
     }
     
     @SuppressWarnings("unchecked")
-    R getThis() {
+    @NotNull R getThis() {
         return (R) this;
     }
 
     @Override
-    public R setViewingPlayerInventory(boolean viewingPlayerInventory) {
+    public @NotNull R setViewingPlayerInventory(boolean viewingPlayerInventory) {
         this.viewingPlayerInventory = viewingPlayerInventory;
         return getThis();
     }
 
     @Override
-    public R setViewingHotbarContent(boolean viewingHotbarContent) {
+    public @NotNull R setViewingHotbarContent(boolean viewingHotbarContent) {
         this.viewingHotbarContent = viewingHotbarContent;
         return getThis();
     }
 
     @Override
-    public R resetItemMatrix() {
+    public @NotNull R resetItemMatrix() {
         itemMatrix.clear();
         return getThis();
     }
@@ -105,7 +109,9 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R fromParsedData(Iterable<? extends MenuItem> items, boolean replace) {
+    public @NotNull R fromParsedData(@NotNull Iterable<? extends MenuItem> items, boolean replace) {
+        Validate.notNull(items, "items");
+
         if(items != null)
             items.forEach(item -> {
                 if(!(item instanceof RegularMenuItem<?, ?>))
@@ -119,7 +125,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R insert(DisplayableMenuItem item, boolean replace) throws ItemInsertFailedException {
+    public @NotNull R insert(@NotNull DisplayableMenuItem item, boolean replace) throws ItemInsertFailedException {
         if(item == null)
             return getThis();
 
@@ -137,7 +143,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R remove(DisplayableMenuItem item) {
+    public @NotNull R remove(@NotNull DisplayableMenuItem item) {
         if(item == null)
             return getThis();
 
@@ -150,27 +156,33 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R set(ItemStack item, int slot, boolean replace) {
+    public @NotNull R set(@Nullable ItemStack item, int slot, boolean replace) {
         Validate.isTrue(slot >= 0, "'slot' must be not negative number");
 
-        if(replace || !isSet(slot))
-            itemMatrix.put(slot, item);
+        if(replace || !isSet(slot)) {
+            if(item != null)
+                itemMatrix.put(slot, item);
+            else
+                itemMatrix.remove(slot);
+        }
 
         return getThis();
     }
 
     @Override
-    public R set(IntFunction<ItemStack> itemProvider, int slot, boolean replace) {
+    public @NotNull R set(@NotNull IntFunction<ItemStack> itemProvider, int slot, boolean replace) {
+        Validate.notNull(itemProvider, "itemProvider");
         return set(itemProvider.apply(slot), slot, replace);
     }
 
     @Override
-    public R setAt(ItemStack item, int x, int y, boolean replace) {
+    public @NotNull R setAt(@Nullable ItemStack item, int x, int y, boolean replace) {
         return setAt(slot -> item, x, y, replace);
     }
 
     @Override
-    public R setAt(@NotNull IntFunction<ItemStack> itemProvider, int x, int y, boolean replace) {
+    public @NotNull R setAt(@NotNull IntFunction<ItemStack> itemProvider, int x, int y, boolean replace) {
+        Validate.notNull(itemProvider, "itemProvider");
         Validate.isTrue(x >= 0 && x <= 8, "'x' must be in the range [0;8]");
         Validate.isTrue(y >= 0, "'y' must be not negative number");
 
@@ -179,7 +191,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R fill(@NotNull Filler filler) throws InvalidFillerException {
+    public @NotNull R fill(@NotNull Filler filler) throws InvalidFillerException {
         Validate.notNull(filler, "filler");
 
         // --- filler validation
@@ -273,7 +285,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R fillRow(@NotNull RowFiller rowFiller) throws InvalidRowFillerException {
+    public @NotNull R fillRow(@NotNull RowFiller rowFiller) throws InvalidRowFillerException {
         Validate.notNull(rowFiller, "rowFiller");
 
         // --- filler validation
@@ -308,7 +320,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R fillColumn(@NotNull ColumnFiller columnFiller) throws InvalidColumnFillerException {
+    public @NotNull R fillColumn(@NotNull ColumnFiller columnFiller) throws InvalidColumnFillerException {
         Validate.notNull(columnFiller, "columnFiller");
 
         // --- filler validation
@@ -344,44 +356,47 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public R remove(int slot) {
+    public @NotNull R remove(int slot) {
         return set(EMPTY_ITEM, slot, true);
     }
 
     @Override
-    public R remove(int x, int y) {
+    public @NotNull R remove(int x, int y) {
         return setAt(EMPTY_ITEM, x, y, true);
     }
 
     @Override
-    public R removeAll() {
+    public @NotNull R removeAll() {
         return removeAll(0, container.playerHotbarSlots().getMax());
     }
     
     @Override
-    public R removeAll(IntRange slotRange) {
+    public @NotNull R removeAll(@NotNull IntRange slotRange) {
+        Validate.notNull(slotRange, "slotRange");
         return removeAll(slotRange.getMin(), slotRange.getMax());
     }
 
     @Override
-    public R removeAll(int sourceSlot, int destSlot) {
+    public @NotNull R removeAll(int sourceSlot, int destSlot) {
         fillUsing(slot -> EMPTY_ITEM, sourceSlot, destSlot, true);
         return getThis();
     }
     
     @Override
-    public R removeAll(IntRange xRange, IntRange yRange) {
+    public @NotNull R removeAll(@NotNull IntRange xRange, @NotNull IntRange yRange) {
+        Validate.notNull(xRange, "xRange");
+        Validate.notNull(yRange, "yRange");
         return removeAll(xRange.getMin(), yRange.getMin(), xRange.getMax(), yRange.getMax());
     }
 
     @Override
-    public R removeAll(int fromX, int fromY, int toX, int toY) {
+    public @NotNull R removeAll(int fromX, int fromY, int toX, int toY) {
         fillUsing(slot -> EMPTY_ITEM, fromX, fromY, toX, toY, true);
         return getThis();
     }
 
     @Override
-    public C pushSync() {
+    public @NotNull C pushSync() {
         if(itemMatrix.isEmpty() || !container.isViewing())
             return container;
         
@@ -426,12 +441,14 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
     }
 
     @Override
-    public CompletableFuture<C> pushAsync() {
+    public @NotNull CompletableFuture<C> pushAsync() {
         return CompletableFuture.supplyAsync(this::pushSync);
     }
     
     @Override
-    public CompletableFuture<C> pushLater(long duration, TimeUnit timeUnit) {
+    public @NotNull CompletableFuture<C> pushLater(long duration, @NotNull TimeUnit timeUnit) {
+        Validate.notNull(timeUnit, "timeUnit");
+
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Thread.sleep(timeUnit.toMillis(duration));
@@ -442,8 +459,12 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         });
     }
 
-    private void viewPlayerInventory(List<ItemStack> slotData, ItemStack[] content) {
-        if(!viewingPlayerInventory) return;
+    private void viewPlayerInventory(@NotNull List<ItemStack> slotData, @NotNull ItemStack[] content) {
+        Validate.notNull(slotData, "slotData");
+        Validate.notNull(content, "content");
+
+        if(!viewingPlayerInventory)
+            return;
 
         ItemStack[] inventory = Arrays.copyOfRange(content, 9, 36);
         int firstIndex = container.playerInventorySlots().getMin();
@@ -456,8 +477,12 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         }
     }
 
-    private void viewHotbarContent(List<ItemStack> slotData, ItemStack[] content) {
-        if(!viewingHotbarContent) return;
+    private void viewHotbarContent(@NotNull List<ItemStack> slotData, @NotNull ItemStack[] content) {
+        Validate.notNull(slotData, "slotData");
+        Validate.notNull(content, "content");
+
+        if(!viewingHotbarContent)
+            return;
 
         ItemStack[] hotbar = Arrays.copyOfRange(content, 0, 9);
         int firstIndex = container.playerHotbarSlots().getMin();

@@ -5,9 +5,11 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
-import ru.soknight.packetinventoryapi.container.ContainerType;
+import ru.soknight.packetinventoryapi.container.ContainerTypes;
 import ru.soknight.packetinventoryapi.container.data.Property;
 import ru.soknight.packetinventoryapi.event.container.AnvilRenameEvent;
 import ru.soknight.packetinventoryapi.item.update.content.BaseContentUpdateRequest;
@@ -16,6 +18,7 @@ import ru.soknight.packetinventoryapi.listener.event.AnyEventListener;
 import ru.soknight.packetinventoryapi.listener.event.EventListener;
 import ru.soknight.packetinventoryapi.listener.event.container.AnvilRenameListener;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.Map;
 
@@ -26,46 +29,46 @@ public class AnvilContainer extends Container<AnvilContainer, AnvilContainer.Anv
     public static final int SECOND_ITEM_SLOT = 1;
     public static final int RESULT_SLOT = 2;
     
-    private EventListener<AnvilRenameEvent> itemRenameListener;
-    private String customName;
+    private @Nullable EventListener<AnvilRenameEvent> itemRenameListener;
+    private @Nullable String customName;
 
-    private AnvilContainer(Player inventoryHolder, String title) {
-        super(inventoryHolder, ContainerType.ANVIL, title);
+    private AnvilContainer(@Nullable Player inventoryHolder, @Nullable String title) {
+        super(inventoryHolder, ContainerTypes.ANVIL, title);
     }
 
-    private AnvilContainer(Player inventoryHolder, BaseComponent title) {
-        super(inventoryHolder, ContainerType.ANVIL, title);
+    private AnvilContainer(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
+        super(inventoryHolder, ContainerTypes.ANVIL, title);
     }
 
-    public static AnvilContainer create(Player inventoryHolder, String title) {
+    public static @NotNull AnvilContainer create(@Nullable Player inventoryHolder, @Nullable String title) {
         return new AnvilContainer(inventoryHolder, title);
     }
 
-    public static AnvilContainer create(Player inventoryHolder, BaseComponent title) {
+    public static @NotNull AnvilContainer create(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
         return new AnvilContainer(inventoryHolder, title);
     }
 
-    public static AnvilContainer createDefault(Player inventoryHolder) {
+    public static @NotNull AnvilContainer createDefault(@Nullable Player inventoryHolder) {
         return create(inventoryHolder, ContainerLocaleTitles.ANVIL);
     }
 
     @Override
-    protected AnvilContainer getThis() {
+    protected @NotNull AnvilContainer getThis() {
         return this;
     }
 
     @Override
-    public AnvilContainer copy(Player holder) {
+    public @NotNull AnvilContainer copy(@Nullable Player holder) {
         return create(holder, title.duplicate());
     }
 
     @Override
-    public AnvilUpdateRequest updateContent() {
+    public @NotNull AnvilUpdateRequest updateContent() {
         return AnvilUpdateRequest.create(this, contentData);
     }
 
     @Override
-    protected void hookEventListener(AnvilContainer clone, AnyEventListener listener) {
+    protected void hookEventListener(@NotNull AnvilContainer clone, @NotNull AnyEventListener listener) {
         clone.itemRenameListener = listener::handle;
     }
 
@@ -74,12 +77,12 @@ public class AnvilContainer extends Container<AnvilContainer, AnvilContainer.Anv
      *********************/
 
     // --- item renaming listening
-    public AnvilContainer itemRenameListener(AnvilRenameListener listener) {
+    public @NotNull AnvilContainer itemRenameListener(@Nullable AnvilRenameListener listener) {
         this.itemRenameListener = listener;
         return this;
     }
     
-    public void onItemRename(AnvilRenameEvent event) {
+    public void onItemRename(@NotNull AnvilRenameEvent event) {
         this.customName = event.getCustomName();
         
         if(itemRenameListener != null)
@@ -90,7 +93,7 @@ public class AnvilContainer extends Container<AnvilContainer, AnvilContainer.Anv
      *  Container properties  *
      *************************/
     
-    public AnvilContainer updateRepairCost(int value) {
+    public @NotNull AnvilContainer updateRepairCost(int value) {
         updateProperty(Property.Anvil.REPAIR_COST, value);
         return this;
     }
@@ -100,65 +103,103 @@ public class AnvilContainer extends Container<AnvilContainer, AnvilContainer.Anv
      ********************/
 
     @Override
-    public IntRange containerSlots() {
+    public @NotNull IntRange containerSlots() {
         return new IntRange(0, 2);
     }
 
     @Override
-    public IntRange playerInventorySlots() {
+    public @NotNull IntRange playerInventorySlots() {
         return new IntRange(3, 29);
     }
 
     @Override
-    public IntRange playerHotbarSlots() {
+    public @NotNull IntRange playerHotbarSlots() {
         return new IntRange(30, 38);
     }
 
     public interface AnvilUpdateRequest extends ContentUpdateRequest<AnvilContainer, AnvilUpdateRequest> {
 
-        static AnvilUpdateRequest create(AnvilContainer container, Map<Integer, ItemStack> contentData) {
+        static @NotNull AnvilUpdateRequest create(
+                @NotNull AnvilContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             return new BaseAnvilUpdateRequest(container, contentData);
         }
 
-        static AnvilUpdateRequest create(AnvilContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        static @NotNull AnvilUpdateRequest create(
+                @NotNull AnvilContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             return new BaseAnvilUpdateRequest(container, contentData, slotsOffset);
         }
 
-        AnvilUpdateRequest firstItem(ItemStack item);
-        default AnvilUpdateRequest firstItem(Material type, int amount) { return firstItem(new ItemStack(type, amount)); }
-        default AnvilUpdateRequest firstItem(Material type) { return firstItem(type, 1); }
+        // --- first item slot
+        @NotNull AnvilUpdateRequest firstItem(@Nullable ItemStack item);
 
-        AnvilUpdateRequest secondItem(ItemStack item);
-        default AnvilUpdateRequest secondItem(Material type, int amount) { return secondItem(new ItemStack(type, amount)); }
-        default AnvilUpdateRequest secondItem(Material type) { return secondItem(type, 1); }
+        default @NotNull AnvilUpdateRequest firstItem(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return firstItem(new ItemStack(type, amount));
+        }
 
-        AnvilUpdateRequest resultItem(ItemStack item);
-        default AnvilUpdateRequest resultItem(Material type, int amount) { return resultItem(new ItemStack(type, amount)); }
-        default AnvilUpdateRequest resultItem(Material type) { return resultItem(type, 1); }
+        default @NotNull AnvilUpdateRequest firstItem(@NotNull Material type) {
+            return firstItem(type, 1);
+        }
+
+        // --- second item slot
+        @NotNull AnvilUpdateRequest secondItem(@Nullable ItemStack item);
+
+        default @NotNull AnvilUpdateRequest secondItem(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return secondItem(new ItemStack(type, amount));
+        }
+
+        default @NotNull AnvilUpdateRequest secondItem(@NotNull Material type) {
+            return secondItem(type, 1);
+        }
+
+        // --- result item slot
+        @NotNull AnvilUpdateRequest resultItem(@Nullable ItemStack item);
+
+        default @NotNull AnvilUpdateRequest resultItem(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return resultItem(new ItemStack(type, amount));
+        }
+
+        default @NotNull AnvilUpdateRequest resultItem(@NotNull Material type) {
+            return resultItem(type, 1);
+        }
 
     }
 
     private static final class BaseAnvilUpdateRequest extends BaseContentUpdateRequest<AnvilContainer, AnvilUpdateRequest> implements AnvilUpdateRequest {
-        private BaseAnvilUpdateRequest(AnvilContainer container, Map<Integer, ItemStack> contentData) {
+        private BaseAnvilUpdateRequest(
+                @NotNull AnvilContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             super(container, contentData);
         }
 
-        private BaseAnvilUpdateRequest(AnvilContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        private BaseAnvilUpdateRequest(
+                @NotNull AnvilContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             super(container, contentData, slotsOffset);
         }
 
         @Override
-        public AnvilUpdateRequest firstItem(ItemStack item) {
+        public @NotNull AnvilUpdateRequest firstItem(@Nullable ItemStack item) {
             return set(item, FIRST_ITEM_SLOT, true);
         }
 
         @Override
-        public AnvilUpdateRequest secondItem(ItemStack item) {
+        public @NotNull AnvilUpdateRequest secondItem(@Nullable ItemStack item) {
             return set(item, SECOND_ITEM_SLOT, true);
         }
 
         @Override
-        public AnvilUpdateRequest resultItem(ItemStack item) {
+        public @NotNull AnvilUpdateRequest resultItem(@Nullable ItemStack item) {
             return set(item, RESULT_SLOT, true);
         }
     }

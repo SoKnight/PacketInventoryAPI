@@ -2,38 +2,40 @@ package ru.soknight.packetinventoryapi.container.type;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
-import ru.soknight.packetinventoryapi.container.ContainerType;
+import ru.soknight.packetinventoryapi.container.ContainerTypes;
 
 public class BlastFurnaceContainer extends FurnaceContainer<BlastFurnaceContainer> {
 
-    private BlastFurnaceContainer(Player inventoryHolder, String title) {
-        super(inventoryHolder, ContainerType.BLAST_FURNACE, title);
+    private BlastFurnaceContainer(@Nullable Player inventoryHolder, @Nullable String title) {
+        super(inventoryHolder, ContainerTypes.BLAST_FURNACE, title);
     }
 
-    private BlastFurnaceContainer(Player inventoryHolder, BaseComponent title) {
-        super(inventoryHolder, ContainerType.BLAST_FURNACE, title);
+    private BlastFurnaceContainer(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
+        super(inventoryHolder, ContainerTypes.BLAST_FURNACE, title);
     }
 
-    public static BlastFurnaceContainer create(Player inventoryHolder, String title) {
+    public static @NotNull BlastFurnaceContainer create(@Nullable Player inventoryHolder, @Nullable String title) {
         return new BlastFurnaceContainer(inventoryHolder, title);
     }
 
-    public static BlastFurnaceContainer create(Player inventoryHolder, BaseComponent title) {
+    public static @NotNull BlastFurnaceContainer create(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
         return new BlastFurnaceContainer(inventoryHolder, title);
     }
 
-    public static BlastFurnaceContainer createDefault(Player inventoryHolder) {
+    public static @NotNull BlastFurnaceContainer createDefault(@Nullable Player inventoryHolder) {
         return create(inventoryHolder, ContainerLocaleTitles.BLAST_FURNACE);
     }
 
     @Override
-    protected BlastFurnaceContainer getThis() {
+    protected @NotNull BlastFurnaceContainer getThis() {
         return this;
     }
 
     @Override
-    public BlastFurnaceContainer copy(Player holder) {
+    public @NotNull BlastFurnaceContainer copy(@Nullable Player holder) {
         return create(holder, title.duplicate());
     }
     

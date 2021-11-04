@@ -4,50 +4,53 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
-import ru.soknight.packetinventoryapi.container.ContainerType;
+import ru.soknight.packetinventoryapi.container.ContainerTypes;
 import ru.soknight.packetinventoryapi.item.update.content.BaseContentUpdateRequest;
 import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.window.WindowClickListener;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.Map;
 
 public class HopperContainer extends Container<HopperContainer, HopperContainer.HopperUpdateRequest> {
 
-    private HopperContainer(Player inventoryHolder, String title) {
-        super(inventoryHolder, ContainerType.HOPPER, title);
+    private HopperContainer(@Nullable Player inventoryHolder, @Nullable String title) {
+        super(inventoryHolder, ContainerTypes.HOPPER, title);
     }
 
-    private HopperContainer(Player inventoryHolder, BaseComponent title) {
-        super(inventoryHolder, ContainerType.HOPPER, title);
+    private HopperContainer(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
+        super(inventoryHolder, ContainerTypes.HOPPER, title);
     }
 
-    public static HopperContainer create(Player inventoryHolder, String title) {
+    public static @NotNull HopperContainer create(@Nullable Player inventoryHolder, @Nullable String title) {
         return new HopperContainer(inventoryHolder, title);
     }
 
-    public static HopperContainer create(Player inventoryHolder, BaseComponent title) {
+    public static @NotNull HopperContainer create(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
         return new HopperContainer(inventoryHolder, title);
     }
 
-    public static HopperContainer createDefault(Player inventoryHolder) {
+    public static @NotNull HopperContainer createDefault(@Nullable Player inventoryHolder) {
         return create(inventoryHolder, ContainerLocaleTitles.HOPPER);
     }
 
     @Override
-    protected HopperContainer getThis() {
+    protected @NotNull HopperContainer getThis() {
         return this;
     }
 
     @Override
-    public HopperContainer copy(Player holder) {
+    public @NotNull HopperContainer copy(@Nullable Player holder) {
         return create(holder, title.duplicate());
     }
 
     @Override
-    public HopperUpdateRequest updateContent() {
+    public @NotNull HopperUpdateRequest updateContent() {
         return HopperUpdateRequest.create(this, contentData);
     }
 
@@ -55,16 +58,15 @@ public class HopperContainer extends Container<HopperContainer, HopperContainer.
      *  Events listening  *
      *********************/
     
-    public HopperContainer hopperClickListener(int slot, WindowClickListener<HopperContainer, HopperUpdateRequest> listener) {
-        super.clickListener(hopperSlot(slot), listener);
-        return this;
+    public @NotNull HopperContainer hopperClickListener(int slot, @NotNull WindowClickListener<HopperContainer, HopperUpdateRequest> listener) {
+        return clickListener(hopperSlot(slot), listener);
     }
     
-    /*********************
-     *  Inventory slots  *
-     ********************/
+    /****************************
+     *  Hopper inventory slots  *
+     ***************************/
     
-    public static IntRange hopperSlots() {
+    public static @NotNull IntRange hopperSlots() {
         return new IntRange(0, 4);
     }
     
@@ -80,47 +82,69 @@ public class HopperContainer extends Container<HopperContainer, HopperContainer.
      ********************/
 
     @Override
-    public IntRange containerSlots() {
+    public @NotNull IntRange containerSlots() {
         return new IntRange(0, 4);
     }
 
     @Override
-    public IntRange playerInventorySlots() {
+    public @NotNull IntRange playerInventorySlots() {
         return new IntRange(5, 31);
     }
 
     @Override
-    public IntRange playerHotbarSlots() {
+    public @NotNull IntRange playerHotbarSlots() {
         return new IntRange(32, 40);
     }
 
     public interface HopperUpdateRequest extends ContentUpdateRequest<HopperContainer, HopperUpdateRequest> {
 
-        static HopperUpdateRequest create(HopperContainer container, Map<Integer, ItemStack> contentData) {
+        static @NotNull HopperUpdateRequest create(
+                @NotNull HopperContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             return new BaseHopperUpdateRequest(container, contentData);
         }
 
-        static HopperUpdateRequest create(HopperContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        static @NotNull HopperUpdateRequest create(
+                @NotNull HopperContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             return new BaseHopperUpdateRequest(container, contentData, slotsOffset);
         }
 
-        HopperUpdateRequest hopperItem(ItemStack item, int slot);
-        default HopperUpdateRequest hopperItem(Material type, int amount, int slot) { return hopperItem(new ItemStack(type, amount), slot); }
-        default HopperUpdateRequest hopperItem(Material type, int slot) { return hopperItem(type, 1, slot); }
+        // --- hopper item slots
+        @NotNull HopperUpdateRequest hopperItem(@Nullable ItemStack item, int slot);
+
+        default @NotNull HopperUpdateRequest hopperItem(@NotNull Material type, int amount, int slot) {
+            Validate.notNull(type, "type");
+            return hopperItem(new ItemStack(type, amount), slot);
+        }
+
+        default @NotNull HopperUpdateRequest hopperItem(@NotNull Material type, int slot) {
+            return hopperItem(type, 1, slot);
+        }
 
     }
 
     private static final class BaseHopperUpdateRequest extends BaseContentUpdateRequest<HopperContainer, HopperUpdateRequest> implements HopperUpdateRequest {
-        private BaseHopperUpdateRequest(HopperContainer container, Map<Integer, ItemStack> contentData) {
+        private BaseHopperUpdateRequest(
+                @NotNull HopperContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             super(container, contentData);
         }
 
-        private BaseHopperUpdateRequest(HopperContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        private BaseHopperUpdateRequest(
+                @NotNull HopperContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             super(container, contentData, slotsOffset);
         }
 
         @Override
-        public HopperUpdateRequest hopperItem(ItemStack item, int slot) {
+        public @NotNull HopperUpdateRequest hopperItem(@Nullable ItemStack item, int slot) {
             return set(item, hopperSlot(slot), true);
         }
     }

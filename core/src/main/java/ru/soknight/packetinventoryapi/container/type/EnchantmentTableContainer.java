@@ -5,9 +5,11 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
-import ru.soknight.packetinventoryapi.container.ContainerType;
+import ru.soknight.packetinventoryapi.container.ContainerTypes;
 import ru.soknight.packetinventoryapi.container.data.EnchantmentPosition;
 import ru.soknight.packetinventoryapi.container.data.Property;
 import ru.soknight.packetinventoryapi.event.container.EnchantmentSelectEvent;
@@ -17,6 +19,7 @@ import ru.soknight.packetinventoryapi.listener.event.AnyEventListener;
 import ru.soknight.packetinventoryapi.listener.event.EventListener;
 import ru.soknight.packetinventoryapi.listener.event.container.EnchantmentSelectListener;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.Map;
 
@@ -28,45 +31,45 @@ public class EnchantmentTableContainer extends Container<EnchantmentTableContain
 
     public static final int DEFAULT_SEED = 0xFFFFFFF0;
     
-    private EventListener<EnchantmentSelectEvent> selectListener;
+    private @Nullable EventListener<EnchantmentSelectEvent> selectListener;
 
-    private EnchantmentTableContainer(Player inventoryHolder, String title) {
-        super(inventoryHolder, ContainerType.ENCHANTMENT_TABLE, title);
+    private EnchantmentTableContainer(@Nullable Player inventoryHolder, @Nullable String title) {
+        super(inventoryHolder, ContainerTypes.ENCHANTMENT_TABLE, title);
     }
 
-    private EnchantmentTableContainer(Player inventoryHolder, BaseComponent title) {
-        super(inventoryHolder, ContainerType.ENCHANTMENT_TABLE, title);
+    private EnchantmentTableContainer(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
+        super(inventoryHolder, ContainerTypes.ENCHANTMENT_TABLE, title);
     }
 
-    public static EnchantmentTableContainer create(Player inventoryHolder, String title) {
+    public static @NotNull EnchantmentTableContainer create(@Nullable Player inventoryHolder, @Nullable String title) {
         return new EnchantmentTableContainer(inventoryHolder, title);
     }
 
-    public static EnchantmentTableContainer create(Player inventoryHolder, BaseComponent title) {
+    public static @NotNull EnchantmentTableContainer create(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
         return new EnchantmentTableContainer(inventoryHolder, title);
     }
 
-    public static EnchantmentTableContainer createDefault(Player inventoryHolder) {
+    public static @NotNull EnchantmentTableContainer createDefault(@Nullable Player inventoryHolder) {
         return create(inventoryHolder, ContainerLocaleTitles.ENCHANTMENT_TABLE);
     }
 
     @Override
-    protected EnchantmentTableContainer getThis() {
+    protected @NotNull EnchantmentTableContainer getThis() {
         return this;
     }
 
     @Override
-    public EnchantmentTableContainer copy(Player holder) {
+    public @NotNull EnchantmentTableContainer copy(@Nullable Player holder) {
         return create(holder, title.duplicate());
     }
 
     @Override
-    public EnchantmentTableUpdateRequest updateContent() {
+    public @NotNull EnchantmentTableUpdateRequest updateContent() {
         return EnchantmentTableUpdateRequest.create(this, contentData);
     }
 
     @Override
-    protected void hookEventListener(EnchantmentTableContainer clone, AnyEventListener listener) {
+    protected void hookEventListener(@NotNull EnchantmentTableContainer clone, @NotNull AnyEventListener listener) {
         clone.selectListener = listener::handle;
     }
 
@@ -75,12 +78,12 @@ public class EnchantmentTableContainer extends Container<EnchantmentTableContain
      *********************/
 
     // --- enchantment select listening
-    public EnchantmentTableContainer selectListener(EnchantmentSelectListener listener) {
+    public @NotNull EnchantmentTableContainer selectListener(@Nullable EnchantmentSelectListener listener) {
         this.selectListener = listener;
         return this;
     }
     
-    public void onEnchantmentSelected(EnchantmentSelectEvent event) {
+    public void onEnchantmentSelected(@NotNull EnchantmentSelectEvent event) {
         if(selectListener != null)
             selectListener.handle(event);
     }
@@ -89,42 +92,47 @@ public class EnchantmentTableContainer extends Container<EnchantmentTableContain
      *  Container properties  *
      *************************/
     
-    public EnchantmentTableContainer updateSeed(int value) {
+    public @NotNull EnchantmentTableContainer updateSeed(int value) {
         updateProperty(Property.EnchantmentTable.ENCHANTMENT_SEED, value);
         return this;
     }
     
-    public EnchantmentTableContainer updateLevelRequirement(EnchantmentPosition position, int value) {
+    public @NotNull EnchantmentTableContainer updateLevelRequirement(@NotNull EnchantmentPosition position, int value) {
+        Validate.notNull(position, "position");
         updateProperty(Property.EnchantmentTable.levelRequirement(position), value);
         return this;
     }
     
-    public EnchantmentTableContainer updateEnchantmentId(EnchantmentPosition position, int value) {
+    public @NotNull EnchantmentTableContainer updateEnchantmentId(@NotNull EnchantmentPosition position, int value) {
+        Validate.notNull(position, "position");
         updateProperty(Property.EnchantmentTable.hoverEnchantmentId(position), value);
         return this;
     }
     
-    public EnchantmentTableContainer updateEnchantmentLevel(EnchantmentPosition position, int value) {
+    public @NotNull EnchantmentTableContainer updateEnchantmentLevel(@NotNull EnchantmentPosition position, int value) {
+        Validate.notNull(position, "position");
         updateProperty(Property.EnchantmentTable.hoverEnchantmentLevel(position), value);
         return this;
     }
     
-    public EnchantmentTableContainer updateEnchantment(
-            EnchantmentPosition position,
+    public @NotNull EnchantmentTableContainer updateEnchantment(
+            @NotNull EnchantmentPosition position,
             int enchantmentId,
             int enchantmentLevel
     ) {
+        Validate.notNull(position, "position");
         updateEnchantmentId(position, enchantmentId);
         updateEnchantmentLevel(position, enchantmentLevel);
         return this;
     }
     
-    public EnchantmentTableContainer updateEnchantment(
-            EnchantmentPosition position,
+    public @NotNull EnchantmentTableContainer updateEnchantment(
+            @NotNull EnchantmentPosition position,
             int levelRequirement,
             int enchantmentId,
             int enchantmentLevel
     ) {
+        Validate.notNull(position, "position");
         updateLevelRequirement(position, levelRequirement);
         updateEnchantmentId(position, enchantmentId);
         updateEnchantmentLevel(position, enchantmentLevel);
@@ -136,56 +144,86 @@ public class EnchantmentTableContainer extends Container<EnchantmentTableContain
      ********************/
 
     @Override
-    public IntRange containerSlots() {
+    public @NotNull IntRange containerSlots() {
         return new IntRange(0, 1);
     }
 
     @Override
-    public IntRange playerInventorySlots() {
+    public @NotNull IntRange playerInventorySlots() {
         return new IntRange(2, 28);
     }
 
     @Override
-    public IntRange playerHotbarSlots() {
+    public @NotNull IntRange playerHotbarSlots() {
         return new IntRange(29, 37);
     }
 
     public interface EnchantmentTableUpdateRequest extends ContentUpdateRequest<EnchantmentTableContainer, EnchantmentTableUpdateRequest> {
 
-        static EnchantmentTableUpdateRequest create(EnchantmentTableContainer container, Map<Integer, ItemStack> contentData) {
+        static @NotNull EnchantmentTableUpdateRequest create(
+                @NotNull EnchantmentTableContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             return new BaseEnchantmentTableUpdateRequest(container, contentData);
         }
 
-        static EnchantmentTableUpdateRequest create(EnchantmentTableContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        static @NotNull EnchantmentTableUpdateRequest create(
+                @NotNull EnchantmentTableContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             return new BaseEnchantmentTableUpdateRequest(container, contentData, slotsOffset);
         }
 
-        EnchantmentTableUpdateRequest itemToEnchant(ItemStack item);
-        default EnchantmentTableUpdateRequest itemToEnchant(Material type, int amount) { return itemToEnchant(new ItemStack(type, amount)); }
-        default EnchantmentTableUpdateRequest itemToEnchant(Material type) { return itemToEnchant(type, 1); }
+        // --- item to enchant slot
+        @NotNull EnchantmentTableUpdateRequest itemToEnchant(@Nullable ItemStack item);
 
-        EnchantmentTableUpdateRequest lapisLazuli(ItemStack item);
-        default EnchantmentTableUpdateRequest lapisLazuli(Material type, int amount) { return lapisLazuli(new ItemStack(type, amount)); }
-        default EnchantmentTableUpdateRequest lapisLazuli(Material type) { return lapisLazuli(type, 1); }
+        default @NotNull EnchantmentTableUpdateRequest itemToEnchant(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return itemToEnchant(new ItemStack(type, amount));
+        }
+
+        default @NotNull EnchantmentTableUpdateRequest itemToEnchant(@NotNull Material type) {
+            return itemToEnchant(type, 1);
+        }
+
+        // --- lapis lazuli slot
+        @NotNull EnchantmentTableUpdateRequest lapisLazuli(@Nullable ItemStack item);
+
+        default @NotNull EnchantmentTableUpdateRequest lapisLazuli(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return lapisLazuli(new ItemStack(type, amount));
+        }
+
+        default @NotNull EnchantmentTableUpdateRequest lapisLazuli(@NotNull Material type) {
+            return lapisLazuli(type, 1);
+        }
 
     }
 
     private static final class BaseEnchantmentTableUpdateRequest extends BaseContentUpdateRequest<EnchantmentTableContainer, EnchantmentTableUpdateRequest> implements EnchantmentTableUpdateRequest {
-        private BaseEnchantmentTableUpdateRequest(EnchantmentTableContainer container, Map<Integer, ItemStack> contentData) {
+        private BaseEnchantmentTableUpdateRequest(
+                @NotNull EnchantmentTableContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             super(container, contentData);
         }
 
-        private BaseEnchantmentTableUpdateRequest(EnchantmentTableContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        private BaseEnchantmentTableUpdateRequest(
+                @NotNull EnchantmentTableContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             super(container, contentData, slotsOffset);
         }
 
         @Override
-        public EnchantmentTableUpdateRequest itemToEnchant(ItemStack item) {
+        public @NotNull EnchantmentTableUpdateRequest itemToEnchant(@Nullable ItemStack item) {
             return set(item, EnchantmentTableContainer.ITEM_TO_ENCHANT_SLOT, true);
         }
 
         @Override
-        public EnchantmentTableUpdateRequest lapisLazuli(ItemStack item) {
+        public @NotNull EnchantmentTableUpdateRequest lapisLazuli(@Nullable ItemStack item) {
             return set(item, EnchantmentTableContainer.LAPIS_LAZULI_SLOT, true);
         }
     }

@@ -4,12 +4,15 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
-import ru.soknight.packetinventoryapi.container.ContainerType;
+import ru.soknight.packetinventoryapi.container.ContainerTypes;
 import ru.soknight.packetinventoryapi.item.update.content.BaseContentUpdateRequest;
 import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.Map;
 
@@ -19,38 +22,38 @@ public class CartographyTableContainer extends Container<CartographyTableContain
     public static final int PAPER_SLOT = 1;
     public static final int OUTPUT_SLOT = 2;
 
-    private CartographyTableContainer(Player inventoryHolder, String title) {
-        super(inventoryHolder, ContainerType.CARTOGRAPHY_TABLE, title);
+    private CartographyTableContainer(@Nullable Player inventoryHolder, @Nullable String title) {
+        super(inventoryHolder, ContainerTypes.CARTOGRAPHY_TABLE, title);
     }
 
-    private CartographyTableContainer(Player inventoryHolder, BaseComponent title) {
-        super(inventoryHolder, ContainerType.CARTOGRAPHY_TABLE, title);
+    private CartographyTableContainer(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
+        super(inventoryHolder, ContainerTypes.CARTOGRAPHY_TABLE, title);
     }
 
-    public static CartographyTableContainer create(Player inventoryHolder, String title) {
+    public static @NotNull CartographyTableContainer create(@Nullable Player inventoryHolder, @Nullable String title) {
         return new CartographyTableContainer(inventoryHolder, title);
     }
 
-    public static CartographyTableContainer create(Player inventoryHolder, BaseComponent title) {
+    public static @NotNull CartographyTableContainer create(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
         return new CartographyTableContainer(inventoryHolder, title);
     }
 
-    public static CartographyTableContainer createDefault(Player inventoryHolder) {
+    public static @NotNull CartographyTableContainer createDefault(@Nullable Player inventoryHolder) {
         return create(inventoryHolder, ContainerLocaleTitles.CARTOGRAPHY_TABLE);
     }
 
     @Override
-    protected CartographyTableContainer getThis() {
+    protected @NotNull CartographyTableContainer getThis() {
         return this;
     }
 
     @Override
-    public CartographyTableContainer copy(Player holder) {
+    public @NotNull CartographyTableContainer copy(@Nullable Player holder) {
         return create(holder, title.duplicate());
     }
 
     @Override
-    public CartographyTableUpdateRequest updateContent() {
+    public @NotNull CartographyTableUpdateRequest updateContent() {
         return CartographyTableUpdateRequest.create(this, contentData);
     }
 
@@ -59,65 +62,103 @@ public class CartographyTableContainer extends Container<CartographyTableContain
      ********************/
 
     @Override
-    public IntRange containerSlots() {
+    public @NotNull IntRange containerSlots() {
         return new IntRange(0, 2);
     }
 
     @Override
-    public IntRange playerInventorySlots() {
+    public @NotNull IntRange playerInventorySlots() {
         return new IntRange(3, 29);
     }
 
     @Override
-    public IntRange playerHotbarSlots() {
+    public @NotNull IntRange playerHotbarSlots() {
         return new IntRange(30, 38);
     }
 
     public interface CartographyTableUpdateRequest extends ContentUpdateRequest<CartographyTableContainer, CartographyTableUpdateRequest> {
 
-        static CartographyTableUpdateRequest create(CartographyTableContainer container, Map<Integer, ItemStack> contentData) {
+        static @NotNull CartographyTableUpdateRequest create(
+                @NotNull CartographyTableContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             return new BaseCartographyTableUpdateRequest(container, contentData);
         }
 
-        static CartographyTableUpdateRequest create(CartographyTableContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        static @NotNull CartographyTableUpdateRequest create(
+                @NotNull CartographyTableContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             return new BaseCartographyTableUpdateRequest(container, contentData, slotsOffset);
         }
 
-        CartographyTableUpdateRequest map(ItemStack item);
-        default CartographyTableUpdateRequest map(Material type, int amount) { return map(new ItemStack(type, amount)); }
-        default CartographyTableUpdateRequest map(Material type) { return map(type, 1); }
+        // --- map slot
+        @NotNull CartographyTableUpdateRequest map(@Nullable ItemStack item);
 
-        CartographyTableUpdateRequest paper(ItemStack item);
-        default CartographyTableUpdateRequest paper(Material type, int amount) { return paper(new ItemStack(type, amount)); }
-        default CartographyTableUpdateRequest paper(Material type) { return paper(type, 1); }
+        default @NotNull CartographyTableUpdateRequest map(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return map(new ItemStack(type, amount));
+        }
 
-        CartographyTableUpdateRequest outputItem(ItemStack item);
-        default CartographyTableUpdateRequest outputItem(Material type, int amount) { return outputItem(new ItemStack(type, amount)); }
-        default CartographyTableUpdateRequest outputItem(Material type) { return outputItem(type, 1); }
+        default @NotNull CartographyTableUpdateRequest map(@NotNull Material type) {
+            return map(type, 1);
+        }
+
+        // --- paper slot
+        @NotNull CartographyTableUpdateRequest paper(@Nullable ItemStack item);
+
+        default @NotNull CartographyTableUpdateRequest paper(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return paper(new ItemStack(type, amount));
+        }
+
+        default @NotNull CartographyTableUpdateRequest paper(@NotNull Material type) {
+            return paper(type, 1);
+        }
+
+        // --- output item slot
+        @NotNull CartographyTableUpdateRequest outputItem(@Nullable ItemStack item);
+
+        default @NotNull CartographyTableUpdateRequest outputItem(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return outputItem(new ItemStack(type, amount));
+        }
+
+        default @NotNull CartographyTableUpdateRequest outputItem(@NotNull Material type) {
+            return outputItem(type, 1);
+        }
 
     }
 
     private static final class BaseCartographyTableUpdateRequest extends BaseContentUpdateRequest<CartographyTableContainer, CartographyTableUpdateRequest> implements CartographyTableUpdateRequest {
-        private BaseCartographyTableUpdateRequest(CartographyTableContainer container, Map<Integer, ItemStack> contentData) {
+        private BaseCartographyTableUpdateRequest(
+                @NotNull CartographyTableContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             super(container, contentData);
         }
 
-        private BaseCartographyTableUpdateRequest(CartographyTableContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        private BaseCartographyTableUpdateRequest(
+                @NotNull CartographyTableContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             super(container, contentData, slotsOffset);
         }
 
         @Override
-        public CartographyTableUpdateRequest map(ItemStack item) {
+        public @NotNull CartographyTableUpdateRequest map(@Nullable ItemStack item) {
             return set(item, MAP_SLOT, true);
         }
 
         @Override
-        public CartographyTableUpdateRequest paper(ItemStack item) {
+        public @NotNull CartographyTableUpdateRequest paper(@Nullable ItemStack item) {
             return set(item, PAPER_SLOT, true);
         }
 
         @Override
-        public CartographyTableUpdateRequest outputItem(ItemStack item) {
+        public @NotNull CartographyTableUpdateRequest outputItem(@Nullable ItemStack item) {
             return set(item, OUTPUT_SLOT, true);
         }
     }

@@ -6,9 +6,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
-import ru.soknight.packetinventoryapi.container.ContainerType;
+import ru.soknight.packetinventoryapi.container.ContainerTypes;
 import ru.soknight.packetinventoryapi.container.data.Property;
 import ru.soknight.packetinventoryapi.event.container.BeaconEffectChangeEvent;
 import ru.soknight.packetinventoryapi.item.update.content.BaseContentUpdateRequest;
@@ -17,6 +19,7 @@ import ru.soknight.packetinventoryapi.listener.event.AnyEventListener;
 import ru.soknight.packetinventoryapi.listener.event.EventListener;
 import ru.soknight.packetinventoryapi.listener.event.container.BeaconEffectChangeListener;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.Map;
 
@@ -25,47 +28,47 @@ public class BeaconContainer extends Container<BeaconContainer, BeaconContainer.
     
     public static final int PAYMENT_ITEM_SLOT = 0;
     
-    private EventListener<BeaconEffectChangeEvent> effectChangeListener;
-    private PotionEffectType currentPrimaryEffect;
-    private PotionEffectType currentSecondaryEffect;
+    private @Nullable EventListener<BeaconEffectChangeEvent> effectChangeListener;
+    private @Nullable PotionEffectType currentPrimaryEffect;
+    private @Nullable PotionEffectType currentSecondaryEffect;
 
-    private BeaconContainer(Player inventoryHolder, String title) {
-        super(inventoryHolder, ContainerType.BEACON, title);
+    private BeaconContainer(@Nullable Player inventoryHolder, @Nullable String title) {
+        super(inventoryHolder, ContainerTypes.BEACON, title);
     }
 
-    private BeaconContainer(Player inventoryHolder, BaseComponent title) {
-        super(inventoryHolder, ContainerType.BEACON, title);
+    private BeaconContainer(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
+        super(inventoryHolder, ContainerTypes.BEACON, title);
     }
 
-    public static BeaconContainer create(Player inventoryHolder, String title) {
+    public static @NotNull BeaconContainer create(@Nullable Player inventoryHolder, @Nullable String title) {
         return new BeaconContainer(inventoryHolder, title);
     }
 
-    public static BeaconContainer create(Player inventoryHolder, BaseComponent title) {
+    public static @NotNull BeaconContainer create(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
         return new BeaconContainer(inventoryHolder, title);
     }
 
-    public static BeaconContainer createDefault(Player inventoryHolder) {
+    public static @NotNull BeaconContainer createDefault(@Nullable Player inventoryHolder) {
         return create(inventoryHolder, ContainerLocaleTitles.BEACON);
     }
 
     @Override
-    protected BeaconContainer getThis() {
+    protected @NotNull BeaconContainer getThis() {
         return this;
     }
 
     @Override
-    public BeaconContainer copy(Player holder) {
+    public @NotNull BeaconContainer copy(@Nullable Player holder) {
         return create(holder, title.duplicate());
     }
 
     @Override
-    public BeaconUpdateRequest updateContent() {
+    public @NotNull BeaconUpdateRequest updateContent() {
         return BeaconUpdateRequest.create(this, contentData);
     }
 
     @Override
-    protected void hookEventListener(BeaconContainer clone, AnyEventListener listener) {
+    protected void hookEventListener(@NotNull BeaconContainer clone, @NotNull AnyEventListener listener) {
         clone.effectChangeListener = listener::handle;
     }
 
@@ -74,12 +77,12 @@ public class BeaconContainer extends Container<BeaconContainer, BeaconContainer.
      *********************/
 
     // --- effect changing listening
-    public BeaconContainer effectChangeListener(BeaconEffectChangeListener listener) {
+    public @NotNull BeaconContainer effectChangeListener(@Nullable BeaconEffectChangeListener listener) {
         this.effectChangeListener = listener;
         return this;
     }
     
-    public void onEffectChanged(BeaconEffectChangeEvent event) {
+    public void onEffectChanged(@NotNull BeaconEffectChangeEvent event) {
         this.currentPrimaryEffect = event.getPrimaryEffect();
         this.currentSecondaryEffect = event.getSecondaryEffect();
         
@@ -91,32 +94,32 @@ public class BeaconContainer extends Container<BeaconContainer, BeaconContainer.
      *  Container properties  *
      *************************/
     
-    public BeaconContainer updatePowerLevel(int value) {
+    public @NotNull BeaconContainer updatePowerLevel(int value) {
         updateProperty(Property.Beacon.POWER_LEVEL, value);
         return this;
     }
 
     @SuppressWarnings("deprecation")
-    public BeaconContainer updateFirstPotionEffect(int value) {
+    public @NotNull BeaconContainer updateFirstPotionEffect(int value) {
         updateProperty(Property.Beacon.FIRST_POTION_EFFECT, value);
         this.currentPrimaryEffect = PotionEffectType.getById(value);
         return this;
     }
 
     @SuppressWarnings("deprecation")
-    public BeaconContainer updateFirstPotionEffect(PotionEffectType effectType) {
+    public @NotNull BeaconContainer updateFirstPotionEffect(@NotNull PotionEffectType effectType) {
         return updateFirstPotionEffect(effectType.getId());
     }
 
     @SuppressWarnings("deprecation")
-    public BeaconContainer updateSecondPotionEffect(int value) {
+    public @NotNull BeaconContainer updateSecondPotionEffect(int value) {
         updateProperty(Property.Beacon.SECOND_POTION_EFFECT, value);
         this.currentSecondaryEffect = PotionEffectType.getById(value);
         return this;
     }
 
     @SuppressWarnings("deprecation")
-    public BeaconContainer updateSecondPotionEffect(PotionEffectType effectType) {
+    public @NotNull BeaconContainer updateSecondPotionEffect(@NotNull PotionEffectType effectType) {
         return updateSecondPotionEffect(effectType.getId());
     }
 
@@ -125,47 +128,69 @@ public class BeaconContainer extends Container<BeaconContainer, BeaconContainer.
      ********************/
 
     @Override
-    public IntRange containerSlots() {
+    public @NotNull IntRange containerSlots() {
         return new IntRange(0);
     }
 
     @Override
-    public IntRange playerInventorySlots() {
+    public @NotNull IntRange playerInventorySlots() {
         return new IntRange(1, 27);
     }
 
     @Override
-    public IntRange playerHotbarSlots() {
+    public @NotNull IntRange playerHotbarSlots() {
         return new IntRange(28, 36);
     }
 
     public interface BeaconUpdateRequest extends ContentUpdateRequest<BeaconContainer, BeaconContainer.BeaconUpdateRequest> {
 
-        static BeaconUpdateRequest create(BeaconContainer container, Map<Integer, ItemStack> contentData) {
+        static @NotNull BeaconUpdateRequest create(
+                @NotNull BeaconContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             return new BaseBeaconUpdateRequest(container, contentData);
         }
 
-        static BeaconUpdateRequest create(BeaconContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        static @NotNull BeaconUpdateRequest create(
+                @NotNull BeaconContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             return new BaseBeaconUpdateRequest(container, contentData, slotsOffset);
         }
 
-        BeaconUpdateRequest paymentItem(ItemStack item);
-        default BeaconUpdateRequest paymentItem(Material type, int amount) { return paymentItem(new ItemStack(type, amount)); }
-        default BeaconUpdateRequest paymentItem(Material type) { return paymentItem(type, 1); }
+        // --- payment item slot
+        @NotNull BeaconUpdateRequest paymentItem(@Nullable ItemStack item);
+
+        default @NotNull BeaconUpdateRequest paymentItem(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return paymentItem(new ItemStack(type, amount));
+        }
+
+        default @NotNull BeaconUpdateRequest paymentItem(@NotNull Material type) {
+            return paymentItem(type, 1);
+        }
 
     }
 
     private static final class BaseBeaconUpdateRequest extends BaseContentUpdateRequest<BeaconContainer, BeaconUpdateRequest> implements BeaconUpdateRequest {
-        private BaseBeaconUpdateRequest(BeaconContainer container, Map<Integer, ItemStack> contentData) {
+        private BaseBeaconUpdateRequest(
+                @NotNull BeaconContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             super(container, contentData);
         }
 
-        private BaseBeaconUpdateRequest(BeaconContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        private BaseBeaconUpdateRequest(
+                @NotNull BeaconContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             super(container, contentData, slotsOffset);
         }
 
         @Override
-        public BeaconUpdateRequest paymentItem(ItemStack item) {
+        public @NotNull BeaconUpdateRequest paymentItem(@Nullable ItemStack item) {
             return set(item, PAYMENT_ITEM_SLOT, true);
         }
     }

@@ -2,7 +2,6 @@ package ru.soknight.packetinventoryapi.configuration;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
@@ -20,9 +19,9 @@ import ru.soknight.packetinventoryapi.menu.item.MenuItem;
 import ru.soknight.packetinventoryapi.menu.item.page.element.PageElementMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.stateable.StateableMenuItem;
+import ru.soknight.packetinventoryapi.util.Colorizer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class MenuParser {
@@ -45,7 +44,7 @@ public class MenuParser {
             UnexpectedPatternItemType,
             RequiredStatesNotFoundException
     {
-        BaseComponent title = new TextComponent(colorize(configuration.getString("title", "")));
+        BaseComponent title = Colorizer.asComponent(configuration.getString("title", ""));
 
         int rowsAmount = configuration.getInt("rows", 3);
         if(rowsAmount < 1 || rowsAmount > 6)
@@ -245,9 +244,9 @@ public class MenuParser {
             return ParsedDataRaw.DEFAULT.duplicate(configuration, fileName);
 
         // --- gathering some data
-        String nameRaw = colorize(configuration.getString("name"));
+        String nameRaw = Colorizer.colorize(configuration.getString("name"));
         BaseComponent name = nameRaw != null ? new TextComponent(nameRaw) : null;
-        List<String> lore = colorize(configuration.getStringList("lore"));
+        List<String> lore = Colorizer.colorize(configuration.getStringList("lore"));
 
         String materialRaw = configuration.getString("material");
         Integer amount = configuration.isInt("amount") ? configuration.getInt("amount") : null;
@@ -329,28 +328,12 @@ public class MenuParser {
                 .toArray();
     }
 
-    private static Integer asInt(String source) {
+    private static @Nullable Integer asInt(@NotNull String source) {
         try {
             return Integer.parseInt(source);
         } catch (NumberFormatException ex) {
             return null;
         }
-    }
-
-    private static String colorize(String original) {
-        return original != null && !original.isEmpty()
-                ? ChatColor.translateAlternateColorCodes('&', original)
-                : original;
-    }
-
-    private static List<String> colorize(List<String> original) {
-        return original != null && !original.isEmpty()
-                ? original.stream().map(MenuParser::colorizeWithoutCheck).collect(Collectors.toList())
-                : null;
-    }
-
-    private static String colorizeWithoutCheck(String original) {
-        return ChatColor.translateAlternateColorCodes('&', original);
     }
 
 }

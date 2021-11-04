@@ -5,7 +5,6 @@ import lombok.Getter;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -13,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
+import ru.soknight.packetinventoryapi.util.Colorizer;
 
 import java.util.List;
 import java.util.function.Function;
@@ -155,7 +155,7 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
         public B name(String value) {
             ItemMeta itemMeta = menuItem.bukkitItem.getItemMeta();
             if(itemMeta != null) {
-                itemMeta.setDisplayName(value != null ? ChatColor.translateAlternateColorCodes('&', value) : null);
+                itemMeta.setDisplayName(Colorizer.colorize(value));
                 menuItem.bukkitItem.setItemMeta(itemMeta);
                 menuItem.requireItemRemap();
             }

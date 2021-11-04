@@ -3,6 +3,7 @@ package ru.soknight.packetinventoryapi.item.update.content;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.exception.item.ItemInsertFailedException;
@@ -22,11 +23,18 @@ import java.util.function.IntFunction;
 
 public interface ContentUpdateRequest<C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> {
 
-    static <C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> R create(C container, Map<Integer, ItemStack> contentData) {
+    static <C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> @NotNull R create(
+            @NotNull C container,
+            @NotNull Map<Integer, ItemStack> contentData
+    ) {
         return new BaseContentUpdateRequest<>(container, contentData).getThis();
     }
 
-    static <C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> R create(C container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+    static <C extends Container<C, R>, R extends ContentUpdateRequest<C, R>> @NotNull R create(
+            @NotNull C container,
+            @NotNull Map<Integer, ItemStack> contentData,
+            int slotsOffset
+    ) {
         return new BaseContentUpdateRequest<>(container, contentData, slotsOffset).getThis();
     }
 
@@ -35,63 +43,63 @@ public interface ContentUpdateRequest<C extends Container<C, R>, R extends Conte
     boolean isPushed();
 
     boolean isViewingPlayerInventory();
-    R setViewingPlayerInventory(boolean value);
+    @NotNull R setViewingPlayerInventory(boolean value);
 
-    default R doViewPlayerInventory() { return setViewingPlayerInventory(true); }
-    default R doHidePlayerInventory() { return setViewingPlayerInventory(false); }
+    default @NotNull R doViewPlayerInventory() { return setViewingPlayerInventory(true); }
+    default @NotNull R doHidePlayerInventory() { return setViewingPlayerInventory(false); }
 
     boolean isViewingHotbarContent();
-    R setViewingHotbarContent(boolean value);
+    @NotNull R setViewingHotbarContent(boolean value);
 
-    default R doViewHotbarContent() { return setViewingHotbarContent(true); }
-    default R doHideHotbarContent() { return setViewingHotbarContent(false); }
+    default @NotNull R doViewHotbarContent() { return setViewingHotbarContent(true); }
+    default @NotNull R doHideHotbarContent() { return setViewingHotbarContent(false); }
 
     @NotNull Map<Integer, ItemStack> getItemMatrix();
-    R resetItemMatrix();
+    @NotNull R resetItemMatrix();
 
     boolean isSet(int slot);
 
     // --- using parsed data bundle
-    R fromParsedData(@NotNull Iterable<? extends MenuItem> items, boolean replace);
-    default R fromParsedData(@NotNull ParsedDataBundle parsedDataBundle, boolean replace) {
+    @NotNull R fromParsedData(@NotNull Iterable<? extends MenuItem> items, boolean replace);
+    default @NotNull R fromParsedData(@NotNull ParsedDataBundle parsedDataBundle, boolean replace) {
         return fromParsedData(parsedDataBundle.getContent().values(), replace);
     }
 
     // --- menu item insertion
-    R insert(@NotNull DisplayableMenuItem item, boolean replace) throws ItemInsertFailedException;
-    R remove(@NotNull DisplayableMenuItem item);
+    @NotNull R insert(@NotNull DisplayableMenuItem item, boolean replace) throws ItemInsertFailedException;
+    @NotNull R remove(@NotNull DisplayableMenuItem item);
 
     // --- setters
-    R set(@NotNull ItemStack item, int slot, boolean replace);
-    R set(@NotNull IntFunction<ItemStack> itemProvider, int slot, boolean replace);
-    default R set(@NotNull Material type, int slot, boolean replace) { return set(type, 1, slot, replace); }
-    default R set(@NotNull Material type, int amount, int slot, boolean replace) { return set(new ItemStack(type, amount), slot, replace); }
+    @NotNull R set(@Nullable ItemStack item, int slot, boolean replace);
+    @NotNull R set(@NotNull IntFunction<ItemStack> itemProvider, int slot, boolean replace);
+    default @NotNull R set(@NotNull Material type, int slot, boolean replace) { return set(type, 1, slot, replace); }
+    default @NotNull R set(@NotNull Material type, int amount, int slot, boolean replace) { return set(new ItemStack(type, amount), slot, replace); }
 
-    R setAt(@NotNull ItemStack item, int x, int y, boolean replace);
-    R setAt(@NotNull IntFunction<ItemStack> itemProvider, int x, int y, boolean replace);
-    default R setAt(@NotNull Material type, int x, int y, boolean replace) { return setAt(type, 1, x, y, replace); }
-    default R setAt(@NotNull Material type, int amount, int x, int y, boolean replace) { return setAt(new ItemStack(type, amount), x, y, replace); }
+    @NotNull R setAt(@Nullable ItemStack item, int x, int y, boolean replace);
+    @NotNull R setAt(@NotNull IntFunction<ItemStack> itemProvider, int x, int y, boolean replace);
+    default @NotNull R setAt(@NotNull Material type, int x, int y, boolean replace) { return setAt(type, 1, x, y, replace); }
+    default @NotNull R setAt(@NotNull Material type, int amount, int x, int y, boolean replace) { return setAt(new ItemStack(type, amount), x, y, replace); }
     
     // --- filler
-    R fill(@NotNull Filler filler) throws InvalidFillerException;
+    @NotNull R fill(@NotNull Filler filler) throws InvalidFillerException;
 
     // --- row filler
-    R fillRow(@NotNull RowFiller rowFiller) throws InvalidRowFillerException;
+    @NotNull R fillRow(@NotNull RowFiller rowFiller) throws InvalidRowFillerException;
 
     // --- column filler
-    R fillColumn(@NotNull ColumnFiller columnFiller);
+    @NotNull R fillColumn(@NotNull ColumnFiller columnFiller);
 
-    R remove(int slot);
-    R remove(int x, int y);
-    
-    R removeAll();
-    R removeAll(IntRange slotRange);
-    R removeAll(int sourceSlot, int destSlot);
-    R removeAll(IntRange xRange, IntRange yRange);
-    R removeAll(int fromX, int fromY, int toX, int toY);
-    
-    C pushSync();
-    CompletableFuture<C> pushAsync();
-    CompletableFuture<C> pushLater(long duration, TimeUnit timeUnit);
+    @NotNull R remove(int slot);
+    @NotNull R remove(int x, int y);
+
+    @NotNull R removeAll();
+    @NotNull R removeAll(@NotNull IntRange slotRange);
+    @NotNull R removeAll(int sourceSlot, int destSlot);
+    @NotNull R removeAll(@NotNull IntRange xRange, @NotNull IntRange yRange);
+    @NotNull R removeAll(int fromX, int fromY, int toX, int toY);
+
+    @NotNull C pushSync();
+    @NotNull CompletableFuture<C> pushAsync();
+    @NotNull CompletableFuture<C> pushLater(long duration, @NotNull TimeUnit timeUnit);
     
 }

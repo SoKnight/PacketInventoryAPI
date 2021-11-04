@@ -1,8 +1,10 @@
 package ru.soknight.packetinventoryapi.container;
 
 import net.md_5.bungee.api.chat.TranslatableComponent;
+import org.jetbrains.annotations.NotNull;
+import ru.soknight.packetinventoryapi.util.Validate;
 
-public class ContainerLocaleTitles {
+public final class ContainerLocaleTitles {
 
     public static final TranslatableComponent ANVIL = create("container.repair");
     public static final TranslatableComponent BARREL = create("container.barrel");
@@ -43,7 +45,8 @@ public class ContainerLocaleTitles {
     public static final TranslatableComponent VILLAGER_WEAPONSMITH = create("entity.minecraft.villager.weaponsmith");
     public static final TranslatableComponent WANDERING_TRADER = create("entity.minecraft.wandering_trader");
 
-    private static TranslatableComponent create(String localeKey) {
+    private static @NotNull TranslatableComponent create(@NotNull String localeKey) {
+        Validate.notNull(localeKey, "localeKey");
         return new TranslatableComponent(localeKey);
     }
 

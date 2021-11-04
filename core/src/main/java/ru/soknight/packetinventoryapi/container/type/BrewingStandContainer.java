@@ -4,13 +4,16 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
-import ru.soknight.packetinventoryapi.container.ContainerType;
+import ru.soknight.packetinventoryapi.container.ContainerTypes;
 import ru.soknight.packetinventoryapi.container.data.Property;
 import ru.soknight.packetinventoryapi.item.update.content.BaseContentUpdateRequest;
 import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.Map;
 
@@ -22,38 +25,38 @@ public class BrewingStandContainer extends Container<BrewingStandContainer, Brew
     public static final int POTION_INGREDIENT_SLOT = 3;
     public static final int BLAZE_POWDER_SLOT = 4;
 
-    private BrewingStandContainer(Player inventoryHolder, String title) {
-        super(inventoryHolder, ContainerType.BREWING_STAND, title);
+    private BrewingStandContainer(@Nullable Player inventoryHolder, @Nullable String title) {
+        super(inventoryHolder, ContainerTypes.BREWING_STAND, title);
     }
 
-    private BrewingStandContainer(Player inventoryHolder, BaseComponent title) {
-        super(inventoryHolder, ContainerType.BREWING_STAND, title);
+    private BrewingStandContainer(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
+        super(inventoryHolder, ContainerTypes.BREWING_STAND, title);
     }
 
-    public static BrewingStandContainer create(Player inventoryHolder, String title) {
+    public static @NotNull BrewingStandContainer create(@Nullable Player inventoryHolder, @Nullable String title) {
         return new BrewingStandContainer(inventoryHolder, title);
     }
 
-    public static BrewingStandContainer create(Player inventoryHolder, BaseComponent title) {
+    public static @NotNull BrewingStandContainer create(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
         return new BrewingStandContainer(inventoryHolder, title);
     }
 
-    public static BrewingStandContainer createDefault(Player inventoryHolder) {
+    public static @NotNull BrewingStandContainer createDefault(@Nullable Player inventoryHolder) {
         return create(inventoryHolder, ContainerLocaleTitles.BREWING_STAND);
     }
 
     @Override
-    protected BrewingStandContainer getThis() {
+    protected @NotNull BrewingStandContainer getThis() {
         return this;
     }
 
     @Override
-    public BrewingStandContainer copy(Player holder) {
+    public @NotNull BrewingStandContainer copy(@Nullable Player holder) {
         return create(holder, title.duplicate());
     }
 
     @Override
-    public BrewingStandUpdateRequest updateContent() {
+    public @NotNull BrewingStandUpdateRequest updateContent() {
         return BrewingStandUpdateRequest.create(this, contentData);
     }
 
@@ -61,12 +64,12 @@ public class BrewingStandContainer extends Container<BrewingStandContainer, Brew
      *  Container properties  *
      *************************/
     
-    public BrewingStandContainer updateBrewTime(int value) {
+    public @NotNull BrewingStandContainer updateBrewTime(int value) {
         updateProperty(Property.BrewingStand.BREW_TIME, value);
         return this;
     }
     
-    public BrewingStandContainer updateFuelTime(int value) {
+    public @NotNull BrewingStandContainer updateFuelTime(int value) {
         updateProperty(Property.BrewingStand.FUEL_TIME, value);
         return this;
     }
@@ -76,83 +79,137 @@ public class BrewingStandContainer extends Container<BrewingStandContainer, Brew
      ********************/
 
     @Override
-    public IntRange containerSlots() {
+    public @NotNull IntRange containerSlots() {
         return new IntRange(0, 4);
     }
 
     @Override
-    public IntRange playerInventorySlots() {
+    public @NotNull IntRange playerInventorySlots() {
         return new IntRange(5, 31);
     }
 
     @Override
-    public IntRange playerHotbarSlots() {
+    public @NotNull IntRange playerHotbarSlots() {
         return new IntRange(32, 40);
     }
 
     public interface BrewingStandUpdateRequest extends ContentUpdateRequest<BrewingStandContainer, BrewingStandUpdateRequest> {
 
-        static BrewingStandUpdateRequest create(BrewingStandContainer container, Map<Integer, ItemStack> contentData) {
+        static @NotNull BrewingStandUpdateRequest create(
+                @NotNull BrewingStandContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             return new BaseBrewingStandUpdateRequest(container, contentData);
         }
 
-        static BrewingStandUpdateRequest create(BrewingStandContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        static @NotNull BrewingStandUpdateRequest create(
+                @NotNull BrewingStandContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             return new BaseBrewingStandUpdateRequest(container, contentData, slotsOffset);
         }
 
-        BrewingStandUpdateRequest leftBottle(ItemStack item);
-        default BrewingStandUpdateRequest leftBottle(Material type, int amount) { return leftBottle(new ItemStack(type, amount)); }
-        default BrewingStandUpdateRequest leftBottle(Material type) { return leftBottle(type, 1); }
+        // --- left bottle slot
+        @NotNull BrewingStandUpdateRequest leftBottle(@Nullable ItemStack item);
 
-        BrewingStandUpdateRequest centerBottle(ItemStack item);
-        default BrewingStandUpdateRequest centerBottle(Material type, int amount) { return centerBottle(new ItemStack(type, amount)); }
-        default BrewingStandUpdateRequest centerBottle(Material type) { return centerBottle(type, 1); }
+        default @NotNull BrewingStandUpdateRequest leftBottle(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return leftBottle(new ItemStack(type, amount));
+        }
 
-        BrewingStandUpdateRequest rightBottle(ItemStack item);
-        default BrewingStandUpdateRequest rightBottle(Material type, int amount) { return rightBottle(new ItemStack(type, amount)); }
-        default BrewingStandUpdateRequest rightBottle(Material type) { return rightBottle(type, 1); }
+        default @NotNull BrewingStandUpdateRequest leftBottle(@NotNull Material type) {
+            return leftBottle(type, 1);
+        }
 
-        BrewingStandUpdateRequest potionIngredient(ItemStack item);
-        default BrewingStandUpdateRequest potionIngredient(Material type, int amount) { return potionIngredient(new ItemStack(type, amount)); }
-        default BrewingStandUpdateRequest potionIngredient(Material type) { return potionIngredient(type, 1); }
+        // --- center bottle slot
+        @NotNull BrewingStandUpdateRequest centerBottle(@Nullable ItemStack item);
 
-        BrewingStandUpdateRequest blazePowder(ItemStack item);
-        default BrewingStandUpdateRequest blazePowder(Material type, int amount) { return blazePowder(new ItemStack(type, amount)); }
-        default BrewingStandUpdateRequest blazePowder(Material type) { return blazePowder(type, 1); }
+        default @NotNull BrewingStandUpdateRequest centerBottle(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return centerBottle(new ItemStack(type, amount));
+        }
+
+        default @NotNull BrewingStandUpdateRequest centerBottle(@NotNull Material type) {
+            return centerBottle(type, 1);
+        }
+
+        // --- right bottle slot
+        @NotNull BrewingStandUpdateRequest rightBottle(@Nullable ItemStack item);
+
+        default @NotNull BrewingStandUpdateRequest rightBottle(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return rightBottle(new ItemStack(type, amount));
+        }
+
+        default @NotNull BrewingStandUpdateRequest rightBottle(@NotNull Material type) {
+            return rightBottle(type, 1);
+        }
+
+        // --- potion ingredient slot
+        @NotNull BrewingStandUpdateRequest potionIngredient(@Nullable ItemStack item);
+
+        default @NotNull BrewingStandUpdateRequest potionIngredient(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return potionIngredient(new ItemStack(type, amount));
+        }
+
+        default @NotNull BrewingStandUpdateRequest potionIngredient(@NotNull Material type) {
+            return potionIngredient(type, 1);
+        }
+
+        // --- blaze powder slot
+        @NotNull BrewingStandUpdateRequest blazePowder(@Nullable ItemStack item);
+
+        default @NotNull BrewingStandUpdateRequest blazePowder(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return blazePowder(new ItemStack(type, amount));
+        }
+
+        default @NotNull BrewingStandUpdateRequest blazePowder(@NotNull Material type) {
+            return blazePowder(type, 1);
+        }
 
     }
 
     private static final class BaseBrewingStandUpdateRequest extends BaseContentUpdateRequest<BrewingStandContainer, BrewingStandUpdateRequest> implements BrewingStandUpdateRequest {
-        private BaseBrewingStandUpdateRequest(BrewingStandContainer container, Map<Integer, ItemStack> contentData) {
+        private BaseBrewingStandUpdateRequest(
+                @NotNull BrewingStandContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             super(container, contentData);
         }
 
-        private BaseBrewingStandUpdateRequest(BrewingStandContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        private BaseBrewingStandUpdateRequest(
+                @NotNull BrewingStandContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             super(container, contentData, slotsOffset);
         }
 
         @Override
-        public BrewingStandUpdateRequest leftBottle(ItemStack item) {
+        public @NotNull BrewingStandUpdateRequest leftBottle(@Nullable ItemStack item) {
             return set(item, LEFT_BOTTLE_SLOT, true);
         }
 
         @Override
-        public BrewingStandUpdateRequest centerBottle(ItemStack item) {
+        public @NotNull BrewingStandUpdateRequest centerBottle(@Nullable ItemStack item) {
             return set(item, CENTER_BOTTLE_SLOT, true);
         }
 
         @Override
-        public BrewingStandUpdateRequest rightBottle(ItemStack item) {
+        public @NotNull BrewingStandUpdateRequest rightBottle(@Nullable ItemStack item) {
             return set(item, RIGHT_BOTTLE_SLOT, true);
         }
 
         @Override
-        public BrewingStandUpdateRequest potionIngredient(ItemStack item) {
+        public @NotNull BrewingStandUpdateRequest potionIngredient(@Nullable ItemStack item) {
             return set(item, POTION_INGREDIENT_SLOT, true);
         }
 
         @Override
-        public BrewingStandUpdateRequest blazePowder(ItemStack item) {
+        public @NotNull BrewingStandUpdateRequest blazePowder(@Nullable ItemStack item) {
             return set(item, BLAZE_POWDER_SLOT, true);
         }
     }

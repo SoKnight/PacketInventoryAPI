@@ -3,6 +3,9 @@ package ru.soknight.packetinventoryapi.menu.container;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.RowableContainer;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
@@ -22,29 +25,29 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
     private final Map<Player, C> views;
     private AnyEventListener eventListener;
 
-    SimplePublicWrapper(C original) {
+    SimplePublicWrapper(@NotNull C original) {
         this(original, null);
     }
 
-    SimplePublicWrapper(C original, AnyEventListener eventListener) {
+    SimplePublicWrapper(@NotNull C original, @NotNull AnyEventListener eventListener) {
         this.original = original;
         this.eventListener = eventListener;
         this.views = new ConcurrentHashMap<>();
     }
 
     @Override
-    public BaseComponent getTitle() {
+    public @NotNull BaseComponent getTitle() {
         return original.getTitle();
     }
 
     @Override
-    public PublicWrapper<C, R> setTitle(BaseComponent title) {
+    public @NotNull PublicWrapper<C, R> setTitle(@NotNull BaseComponent title) {
         this.original.setTitle(title);
         return this;
     }
 
     @Override
-    public PublicWrapper<C, R> updateViewTitles(boolean reopenAll) {
+    public @NotNull PublicWrapper<C, R> updateViewTitles(boolean reopenAll) {
         views.values().forEach(view -> {
             view.setTitle(getTitle());
             if(reopenAll)
@@ -54,10 +57,9 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public int getRowsAmount() {
         if(original instanceof RowableContainer<?, ?>)
-            return ((RowableContainer<C, R>) original).getRowsAmount();
+            return ((RowableContainer<?, ?>) original).getRowsAmount();
 
         throw new UnsupportedOperationException(String.format(
                 "container type %s is not a RowableContainer!",
@@ -66,10 +68,9 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public PublicWrapper<C, R> setRowsAmount(int amount) {
+    public @NotNull PublicWrapper<C, R> setRowsAmount(int amount) {
         if(original instanceof RowableContainer<?, ?>) {
-            ((RowableContainer<C, R>) original).setRowsAmount(amount);
+            ((RowableContainer<?, ?>) original).setRowsAmount(amount);
             return this;
         }
 
@@ -80,39 +81,39 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
     }
 
     @Override
-    public DisplayableMenuItem getFiller() {
+    public @Nullable DisplayableMenuItem getFiller() {
         return original.getFiller();
     }
 
     @Override
-    public PublicWrapper<C, R> setFiller(DisplayableMenuItem filler) {
+    public @NotNull PublicWrapper<C, R> setFiller(@Nullable DisplayableMenuItem filler) {
         original.setFiller(filler);
         return this;
     }
 
     @Override
-    public Set<Player> getViewers() {
+    public @NotNull @UnmodifiableView Set<Player> getViewers() {
         return Collections.unmodifiableSet(views.keySet());
     }
 
     @Override
-    public Map<Player, C> getViews() {
+    public @NotNull @UnmodifiableView Map<Player, C> getViews() {
         return Collections.unmodifiableMap(views);
     }
 
     @Override
-    public C getView(Player player) {
+    public @Nullable C getView(@NotNull Player player) {
         return views.get(player);
     }
 
     @Override
-    public DataHolder getDataHolder(Player player) {
+    public @Nullable DataHolder getDataHolder(@NotNull Player player) {
         C view = getView(player);
         return view != null ? view.getDataHolder() : null;
     }
 
     @Override
-    public boolean open(Player player) {
+    public boolean open(@NotNull Player player) {
         if(isViewing(player))
             return false;
 
@@ -123,12 +124,12 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
     }
 
     @Override
-    public boolean isViewing(Player player) {
+    public boolean isViewing(@NotNull Player player) {
         return views.containsKey(player);
     }
 
     @Override
-    public boolean close(Player player) {
+    public boolean close(@NotNull Player player) {
         C container = views.remove(player);
         if(container == null)
             return false;
@@ -142,7 +143,7 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
         views.keySet().removeIf(this::closeSafety);
     }
 
-    private boolean closeSafety(Player player) {
+    private boolean closeSafety(@NotNull Player player) {
         C container = views.get(player);
         if(container != null)
             container.close();
@@ -151,7 +152,7 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
     }
 
     @Override
-    public void setEventListener(AnyEventListener eventListener) {
+    public void setEventListener(@NotNull AnyEventListener eventListener) {
         this.eventListener = eventListener;
     }
 

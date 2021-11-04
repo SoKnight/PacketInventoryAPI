@@ -79,7 +79,7 @@ public final class SimpleContainerStorage implements ContainerStorage {
         if(container.getInventoryHolder().isOnline())
             PacketAssistant.createServerPacket(PacketServerOpenWindow.class)
                     .windowID(container.getInventoryId())
-                    .windowType(container.getContainerType().getTypeID())
+                    .windowType(container.getContainerType().getTypeId())
                     .windowTitle(container.getTitle())
                     .send(container.getInventoryHolder());
     }

@@ -5,9 +5,11 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.ContainerLocaleTitles;
-import ru.soknight.packetinventoryapi.container.ContainerType;
+import ru.soknight.packetinventoryapi.container.ContainerTypes;
 import ru.soknight.packetinventoryapi.container.data.Property;
 import ru.soknight.packetinventoryapi.event.container.PatternSelectEvent;
 import ru.soknight.packetinventoryapi.item.update.content.BaseContentUpdateRequest;
@@ -16,6 +18,7 @@ import ru.soknight.packetinventoryapi.listener.event.AnyEventListener;
 import ru.soknight.packetinventoryapi.listener.event.EventListener;
 import ru.soknight.packetinventoryapi.listener.event.container.PatternSelectListener;
 import ru.soknight.packetinventoryapi.util.IntRange;
+import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.Map;
 
@@ -27,46 +30,46 @@ public class LoomContainer extends Container<LoomContainer, LoomContainer.LoomUp
     public static final int PATTERN_SLOT = 2;
     public static final int RESULT_SLOT = 3;
     
-    private EventListener<PatternSelectEvent> patternSelectListener;
+    private @Nullable EventListener<PatternSelectEvent> patternSelectListener;
     private int selectedPattern;
 
-    private LoomContainer(Player inventoryHolder, String title) {
-        super(inventoryHolder, ContainerType.LOOM, title);
+    private LoomContainer(@Nullable Player inventoryHolder, @Nullable String title) {
+        super(inventoryHolder, ContainerTypes.LOOM, title);
     }
 
-    private LoomContainer(Player inventoryHolder, BaseComponent title) {
-        super(inventoryHolder, ContainerType.LOOM, title);
+    private LoomContainer(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
+        super(inventoryHolder, ContainerTypes.LOOM, title);
     }
 
-    public static LoomContainer create(Player inventoryHolder, String title) {
+    public static @NotNull LoomContainer create(@Nullable Player inventoryHolder, @Nullable String title) {
         return new LoomContainer(inventoryHolder, title);
     }
 
-    public static LoomContainer create(Player inventoryHolder, BaseComponent title) {
+    public static @NotNull LoomContainer create(@Nullable Player inventoryHolder, @NotNull BaseComponent title) {
         return new LoomContainer(inventoryHolder, title);
     }
 
-    public static LoomContainer createDefault(Player inventoryHolder) {
+    public static @NotNull LoomContainer createDefault(@Nullable Player inventoryHolder) {
         return create(inventoryHolder, ContainerLocaleTitles.LOOM);
     }
 
     @Override
-    protected LoomContainer getThis() {
+    protected @NotNull LoomContainer getThis() {
         return this;
     }
 
     @Override
-    public LoomContainer copy(Player holder) {
+    public @NotNull LoomContainer copy(@Nullable Player holder) {
         return create(holder, title.duplicate());
     }
 
     @Override
-    public LoomUpdateRequest updateContent() {
+    public @NotNull LoomUpdateRequest updateContent() {
         return LoomUpdateRequest.create(this, contentData);
     }
 
     @Override
-    protected void hookEventListener(LoomContainer clone, AnyEventListener listener) {
+    protected void hookEventListener(@NotNull LoomContainer clone, @NotNull AnyEventListener listener) {
         clone.patternSelectListener = listener::handle;
     }
 
@@ -75,12 +78,12 @@ public class LoomContainer extends Container<LoomContainer, LoomContainer.LoomUp
      *********************/
 
     // --- pattern select listening
-    public LoomContainer patternSelectListener(PatternSelectListener listener) {
+    public @NotNull LoomContainer patternSelectListener(@Nullable PatternSelectListener listener) {
         this.patternSelectListener = listener;
         return this;
     }
     
-    public void onPatternSelected(PatternSelectEvent event) {
+    public void onPatternSelected(@NotNull PatternSelectEvent event) {
         this.selectedPattern = event.getSlot();
         
         if(patternSelectListener != null)
@@ -91,13 +94,13 @@ public class LoomContainer extends Container<LoomContainer, LoomContainer.LoomUp
      *  Container properties  *
      *************************/
     
-    public LoomContainer updateSelectedPattern(int value) {
+    public @NotNull LoomContainer updateSelectedPattern(int value) {
         updateProperty(Property.Loom.SELECTED_PATTERN, value);
         this.selectedPattern = value;
         return this;
     }
     
-    public LoomContainer updateSelectedPattern(int row, int column) {
+    public @NotNull LoomContainer updateSelectedPattern(int row, int column) {
         return updateSelectedPattern(4 * row + column);
     }
 
@@ -106,74 +109,120 @@ public class LoomContainer extends Container<LoomContainer, LoomContainer.LoomUp
      ********************/
 
     @Override
-    public IntRange containerSlots() {
+    public @NotNull IntRange containerSlots() {
         return new IntRange(0, 3);
     }
 
     @Override
-    public IntRange playerInventorySlots() {
+    public @NotNull IntRange playerInventorySlots() {
         return new IntRange(4, 30);
     }
 
     @Override
-    public IntRange playerHotbarSlots() {
+    public @NotNull IntRange playerHotbarSlots() {
         return new IntRange(31, 39);
     }
 
     public interface LoomUpdateRequest extends ContentUpdateRequest<LoomContainer, LoomUpdateRequest> {
 
-        static LoomUpdateRequest create(LoomContainer container, Map<Integer, ItemStack> contentData) {
+        static @NotNull LoomUpdateRequest create(
+                @NotNull LoomContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             return new BaseLoomUpdateRequest(container, contentData);
         }
 
-        static LoomUpdateRequest create(LoomContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        static @NotNull LoomUpdateRequest create(
+                @NotNull LoomContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             return new BaseLoomUpdateRequest(container, contentData, slotsOffset);
         }
 
-        LoomUpdateRequest banner(ItemStack item);
-        default LoomUpdateRequest banner(Material type, int amount) { return banner(new ItemStack(type, amount)); }
-        default LoomUpdateRequest banner(Material type) { return banner(type, 1); }
+        // --- banner slot
+        @NotNull LoomUpdateRequest banner(@Nullable ItemStack item);
 
-        LoomUpdateRequest dye(ItemStack item);
-        default LoomUpdateRequest dye(Material type, int amount) { return dye(new ItemStack(type, amount)); }
-        default LoomUpdateRequest dye(Material type) { return dye(type, 1); }
+        default @NotNull LoomUpdateRequest banner(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return banner(new ItemStack(type, amount));
+        }
 
-        LoomUpdateRequest pattern(ItemStack item);
-        default LoomUpdateRequest pattern(Material type, int amount) { return pattern(new ItemStack(type, amount)); }
-        default LoomUpdateRequest pattern(Material type) { return pattern(type, 1); }
+        default @NotNull LoomUpdateRequest banner(@NotNull Material type) {
+            return banner(type, 1);
+        }
 
-        LoomUpdateRequest resultItem(ItemStack item);
-        default LoomUpdateRequest resultItem(Material type, int amount) { return resultItem(new ItemStack(type, amount)); }
-        default LoomUpdateRequest resultItem(Material type) { return resultItem(type, 1); }
+        // --- dye slot
+        @NotNull LoomUpdateRequest dye(@Nullable ItemStack item);
+
+        default @NotNull LoomUpdateRequest dye(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return dye(new ItemStack(type, amount));
+        }
+
+        default @NotNull LoomUpdateRequest dye(@NotNull Material type) {
+            return dye(type, 1);
+        }
+
+        // --- pattern slot
+        @NotNull LoomUpdateRequest pattern(@Nullable ItemStack item);
+
+        default @NotNull LoomUpdateRequest pattern(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return pattern(new ItemStack(type, amount));
+        }
+
+        default @NotNull LoomUpdateRequest pattern(@NotNull Material type) {
+            return pattern(type, 1);
+        }
+
+        // --- result item slot
+        @NotNull LoomUpdateRequest resultItem(@Nullable ItemStack item);
+
+        default @NotNull LoomUpdateRequest resultItem(@NotNull Material type, int amount) {
+            Validate.notNull(type, "type");
+            return resultItem(new ItemStack(type, amount));
+        }
+
+        default @NotNull LoomUpdateRequest resultItem(@NotNull Material type) {
+            return resultItem(type, 1);
+        }
 
     }
 
     private static final class BaseLoomUpdateRequest extends BaseContentUpdateRequest<LoomContainer, LoomUpdateRequest> implements LoomUpdateRequest {
-        private BaseLoomUpdateRequest(LoomContainer container, Map<Integer, ItemStack> contentData) {
+        private BaseLoomUpdateRequest(
+                @NotNull LoomContainer container,
+                @NotNull Map<Integer, ItemStack> contentData
+        ) {
             super(container, contentData);
         }
 
-        private BaseLoomUpdateRequest(LoomContainer container, Map<Integer, ItemStack> contentData, int slotsOffset) {
+        private BaseLoomUpdateRequest(
+                @NotNull LoomContainer container,
+                @NotNull Map<Integer, ItemStack> contentData,
+                int slotsOffset
+        ) {
             super(container, contentData, slotsOffset);
         }
 
         @Override
-        public LoomUpdateRequest banner(ItemStack item) {
+        public @NotNull LoomUpdateRequest banner(@Nullable ItemStack item) {
             return set(item, BANNER_SLOT, true);
         }
 
         @Override
-        public LoomUpdateRequest dye(ItemStack item) {
+        public @NotNull LoomUpdateRequest dye(@Nullable ItemStack item) {
             return set(item, DYE_SLOT, true);
         }
 
         @Override
-        public LoomUpdateRequest pattern(ItemStack item) {
+        public @NotNull LoomUpdateRequest pattern(@Nullable ItemStack item) {
             return set(item, PATTERN_SLOT, true);
         }
 
         @Override
-        public LoomUpdateRequest resultItem(ItemStack item) {
+        public @NotNull LoomUpdateRequest resultItem(@Nullable ItemStack item) {
             return set(item, RESULT_SLOT, true);
         }
     }
