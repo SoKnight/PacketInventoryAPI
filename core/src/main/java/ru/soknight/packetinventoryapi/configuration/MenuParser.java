@@ -46,13 +46,16 @@ public class MenuParser {
     {
         BaseComponent title = Colorizer.asComponent(configuration.getString("title", ""));
 
-        int rowsAmount = configuration.getInt("rows", 3);
-        if(rowsAmount < 1 || rowsAmount > 6)
-            throw new InvalidRowsAmountException(fileName, rowsAmount);
-
         ParsedDataBundle dataBundle = new ParsedDataBundle();
         dataBundle.setTitle(title);
-        dataBundle.setRowsAmount(rowsAmount);
+
+        if(configuration.isInt("rows")) {
+            int rowsAmount = configuration.getInt("rows");
+            if(rowsAmount < 1 || rowsAmount > 6)
+                throw new InvalidRowsAmountException(fileName, rowsAmount);
+
+            dataBundle.setRowsAmount(rowsAmount);
+        }
 
         ConfigurationSection content = configuration.getConfigurationSection("content");
         if(content == null)
