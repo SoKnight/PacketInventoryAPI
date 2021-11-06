@@ -4,7 +4,9 @@ import lombok.SneakyThrows;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
+import ru.soknight.packetinventoryapi.animation.Animation;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.EnchantmentPosition;
 import ru.soknight.packetinventoryapi.container.data.LecternButtonType;
@@ -18,54 +20,88 @@ import ru.soknight.packetinventoryapi.packet.server.PacketServerCloseWindow;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerOpenWindow;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerSetSlot;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 public final class SimpleContainerStorage implements ContainerStorage {
 
-    private final Map<String, Container<?, ?>> containers = new ConcurrentHashMap<>();
+    private final Map<String, Container<?, ?>> containers = new LinkedHashMap<>();
 
     @Override
-    public void open(Container<?, ?> container) {
+    public boolean isViewing(@NotNull String holderName) {
+        synchronized (this) {
+            return containers.containsKey(holderName);
+        }
+    }
+
+    @Override
+    public boolean isViewing(@NotNull Container<?, ?> container) {
+        synchronized (this) {
+            return containers.get(container.getInventoryHolder().getName()) == container;
+        }
+    }
+
+    @Override
+    public void open(@NotNull Container<?, ?> container) {
         open(container, false);
     }
 
-    public synchronized void open(Container<?, ?> container, boolean reopened) {
-        container.sync(() -> {
+    public void open(@NotNull Container<?, ?> container, boolean reopened) {
+        synchronized (this) {
+            Container<?, ?> currentContainer = containers.remove(container.getInventoryHolder().getName());
+            if(currentContainer != null) {
+                if(currentContainer == container) {
+                    container.onOpen(true);
+                } else if(currentContainer.isFinishAnimationsOnClose()) {
+                    Animation.finishAllSync(currentContainer);
+                }
+            }
+
             containers.put(container.getInventoryHolder().getName(), container);
 
             sendOpenPacket(container);
             container.onOpen(reopened);
-        });
+        }
     }
 
     @Override
-    public boolean close(Player player) {
-        return close(player, false);
+    @Deprecated
+    public boolean close(@NotNull Player player) {
+        return close(player.getName());
     }
-    
-    public boolean close(Player player, boolean closedByHolder) {
-        Container<?, ?> container = containers.get(player.getName());
-        if(container == null) return false;
+
+    @Override
+    public boolean close(@NotNull String holderName) {
+        return close(holderName, false);
+    }
+
+    public boolean close(String playerName, boolean closedByHolder) {
+        Container<?, ?> container = containers.get(playerName);
+        if(container == null)
+            return false;
 
         close(container, closedByHolder);
         return true;
     }
 
     @Override
-    public void close(Container<?, ?> container) {
+    public void close(@NotNull Container<?, ?> container) {
         close(container, false);
     }
     
-    public synchronized void close(Container<?, ?> container, boolean closedByHolder) {
-        container.sync(() -> {
+    public void close(@NotNull Container<?, ?> container, boolean closedByHolder) {
+        synchronized (containers) {
+            Container<?, ?> currentContainer = containers.get(container.getInventoryHolder().getName());
+            if(currentContainer != container)
+                return;
+
             if(!container.onClose(closedByHolder))
                 return;
 
             sendClosePacket(container);
             containers.remove(container.getInventoryHolder().getName());
-        });
+        }
     }
     
     public void closeAll() {

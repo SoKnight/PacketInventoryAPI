@@ -100,7 +100,7 @@ public class PacketsListener extends PacketAdapter {
     }
     
     private boolean onCloseWindow(PacketClientCloseWindow packet) {
-        return storage.close(packet.getPlayer(), true);
+        return storage.close(packet.getPlayer().getName(), true);
     }
     
     private boolean onAnvilRename(PacketClientNameItem packet) {

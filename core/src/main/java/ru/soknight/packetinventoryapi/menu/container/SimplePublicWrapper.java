@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+import ru.soknight.packetinventoryapi.api.PacketInventoryAPI;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.RowableContainer;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
@@ -125,7 +126,11 @@ final class SimplePublicWrapper<C extends Container<C, R>, R extends ContentUpda
 
     @Override
     public boolean isViewing(@NotNull Player player) {
-        return views.containsKey(player);
+        C container = views.get(player);
+        if(container == null)
+            return false;
+
+        return PacketInventoryAPI.getInstance().containerStorage().isViewing(container);
     }
 
     @Override

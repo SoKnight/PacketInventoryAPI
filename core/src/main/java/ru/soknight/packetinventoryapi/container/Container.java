@@ -336,7 +336,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         return getThis();
     }
     
-    public void onOpen(boolean reopened) {
+    public synchronized void onOpen(boolean reopened) {
         viewing = true;
 
         if(!reopened && openListener != null)
@@ -365,7 +365,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         return onClose(false);
     }
     
-    public boolean onClose(boolean closedByHolder) {
+    public synchronized boolean onClose(boolean closedByHolder) {
         if(closedByHolder && !closeable) {
             open(true);
             return false;
