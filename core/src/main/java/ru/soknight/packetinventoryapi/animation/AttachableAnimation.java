@@ -22,6 +22,7 @@ public abstract class AttachableAnimation<A extends AttachableAnimation<A, T>, T
 
     @Getter(AccessLevel.NONE) private T taskResult;
     @Getter(AccessLevel.NONE) private Throwable taskThrowable;
+    @Getter(AccessLevel.NONE) private boolean isResultHandled;
 
     public AttachableAnimation(@NotNull Container<?, ?> container, @NotNull CompletableFuture<T> task, int steps) {
         this(container, task, steps, DEFAULT_VIEW_REQUIRED_FLAG);
@@ -60,8 +61,13 @@ public abstract class AttachableAnimation<A extends AttachableAnimation<A, T>, T
     }
 
     @Override
+    protected void postPlaySync() {
+        handleTaskResult();
+    }
+
+    @Override
     protected void postFinishSync() {
-        if(attachmentPolicy.isFinishOnCompletion())
+        if(attachmentPolicy.isFinishOnCompletion() || !isResultHandled)
             handleTaskResult();
     }
 
@@ -74,6 +80,13 @@ public abstract class AttachableAnimation<A extends AttachableAnimation<A, T>, T
     }
 
     private void handleTaskResult() {
+        synchronized (this) {
+            if(isResultHandled)
+                return;
+
+            this.isResultHandled = true;
+        }
+
         Player player = container.getInventoryHolder();
         if(taskThrowable == null) {
             resultHandler.handle(player, taskResult);
@@ -96,10 +109,10 @@ public abstract class AttachableAnimation<A extends AttachableAnimation<A, T>, T
         synchronized (this) {
             if(!isTaskDone() || additionalCondition)
                 return true;
-
-            finishAnimationPlaying();
-            return false;
         }
+
+        finishAnimationPlaying();
+        return false;
     }
 
     public A setAttachmentPolicy(@NotNull AttachmentPolicy attachmentPolicy) {
