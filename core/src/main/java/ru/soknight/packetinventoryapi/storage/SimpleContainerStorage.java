@@ -90,18 +90,22 @@ public final class SimpleContainerStorage implements ContainerStorage {
         close(container, false);
     }
     
-    public void close(@NotNull Container<?, ?> container, boolean closedByHolder) {
+    public void close(@NotNull Container<?, ?> container, boolean requestedByHolder) {
+        boolean closedActually = false;
+
         synchronized (this) {
             Container<?, ?> currentContainer = containers.get(container.getInventoryHolder().getName());
             if(currentContainer != container)
                 return;
 
-            if(!container.onClose(closedByHolder))
-                return;
-
-            sendClosePacket(container);
-            containers.remove(container.getInventoryHolder().getName());
+            if(container.onClose(requestedByHolder)) {
+                sendClosePacket(container);
+                containers.remove(container.getInventoryHolder().getName());
+                closedActually = true;
+            }
         }
+
+        container.onPostClose(requestedByHolder, closedActually);
     }
     
     public void closeAll() {

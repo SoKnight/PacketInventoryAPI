@@ -6,20 +6,14 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.bukkit.entity.Player;
 import ru.soknight.packetinventoryapi.annotation.container.*;
-import ru.soknight.packetinventoryapi.annotation.window.ClickListener;
-import ru.soknight.packetinventoryapi.annotation.window.CloseListener;
-import ru.soknight.packetinventoryapi.annotation.window.ContentLoadListener;
-import ru.soknight.packetinventoryapi.annotation.window.OpenListener;
+import ru.soknight.packetinventoryapi.annotation.window.*;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.EnchantmentPosition;
 import ru.soknight.packetinventoryapi.container.data.LecternButtonType;
 import ru.soknight.packetinventoryapi.container.type.*;
 import ru.soknight.packetinventoryapi.event.Event;
 import ru.soknight.packetinventoryapi.event.container.*;
-import ru.soknight.packetinventoryapi.event.window.WindowClickEvent;
-import ru.soknight.packetinventoryapi.event.window.WindowCloseEvent;
-import ru.soknight.packetinventoryapi.event.window.WindowContentLoadEvent;
-import ru.soknight.packetinventoryapi.event.window.WindowOpenEvent;
+import ru.soknight.packetinventoryapi.event.window.*;
 import ru.soknight.packetinventoryapi.exception.menu.InvalidMethodStructureException;
 import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.Menu;
@@ -43,6 +37,7 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
     private final List<Listener> windowContentLoadListeners;
     private final List<Listener> windowClickListeners;
     private final List<Listener> windowCloseListeners;
+    private final List<Listener> windowPostCloseListeners;
 
     private final List<Listener> anvilRenameListeners;
     private final List<Listener> beaconEffectChangeListeners;
@@ -60,6 +55,7 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
         this.windowContentLoadListeners = new ArrayList<>();
         this.windowClickListeners = new ArrayList<>();
         this.windowCloseListeners = new ArrayList<>();
+        this.windowPostCloseListeners = new ArrayList<>();
 
         this.anvilRenameListeners = new ArrayList<>();
         this.beaconEffectChangeListeners = new ArrayList<>();
@@ -102,6 +98,8 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
             windowClickListeners.forEach(listener -> listener.invoke(event));
         else if(event instanceof WindowCloseEvent<?, ?>)
             windowCloseListeners.forEach(listener -> listener.invoke(event));
+        else if(event instanceof WindowPostCloseEvent<?, ?>)
+            windowPostCloseListeners.forEach(listener -> listener.invoke(event));
 
         // --- specific events
         else if(event instanceof AnvilRenameEvent)
@@ -131,6 +129,7 @@ final class RegistrationBundle<C extends Container<C, R>, R extends ContentUpdat
             registerListener(method, ContentLoadListener.class, WindowContentLoadEvent.class, windowContentLoadListeners);
             registerListener(method, ClickListener.class, WindowClickEvent.class, windowClickListeners);
             registerListener(method, CloseListener.class, WindowCloseEvent.class, windowCloseListeners);
+            registerListener(method, PostCloseListener.class, WindowPostCloseEvent.class, windowPostCloseListeners);
 
             // --- container events
             if(container instanceof AnvilContainer)

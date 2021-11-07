@@ -16,10 +16,7 @@ import ru.soknight.packetinventoryapi.animation.function.CompletionTask;
 import ru.soknight.packetinventoryapi.api.PacketInventoryAPI;
 import ru.soknight.packetinventoryapi.container.data.Property;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
-import ru.soknight.packetinventoryapi.event.window.WindowClickEvent;
-import ru.soknight.packetinventoryapi.event.window.WindowCloseEvent;
-import ru.soknight.packetinventoryapi.event.window.WindowContentLoadEvent;
-import ru.soknight.packetinventoryapi.event.window.WindowOpenEvent;
+import ru.soknight.packetinventoryapi.event.window.*;
 import ru.soknight.packetinventoryapi.item.ExtraDataProvider;
 import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.listener.event.AnyEventListener;
@@ -62,6 +59,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     protected @Nullable EventListener<WindowOpenEvent<C, R>> openListener;
     protected @Nullable EventListener<WindowContentLoadEvent<C, R>> contentLoadListener;
     protected @Nullable EventListener<WindowCloseEvent<C, R>> closeListener;
+    protected @Nullable EventListener<WindowPostCloseEvent<C, R>> postCloseListener;
     protected @Nullable ExtraDataProvider<C, R> extraDataProvider;
     private boolean viewing;
 
@@ -120,6 +118,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
             clone.openListener = listener::handle;
             clone.contentLoadListener = listener::handle;
             clone.closeListener = listener::handle;
+            clone.postCloseListener = listener::handle;
 
             IntRange range = new IntRange(0, playerHotbarSlots().getMax());
             clone.rangesClickListeners.put(range, listener::handle);
@@ -365,8 +364,9 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         return onClose(false);
     }
     
-    public synchronized boolean onClose(boolean closedByHolder) {
-        if(closedByHolder && !closeable) {
+    public synchronized boolean onClose(boolean requestedByHolder) {
+        // TODO add close performer to do other action instead of container reopen
+        if(requestedByHolder && !closeable) {
             open(true);
             return false;
         }
@@ -376,12 +376,17 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
             Animation.finishAllSync(this);
 
         if(closeListener != null)
-            closeListener.handle(new WindowCloseEvent<>(inventoryHolder, getThis(), closedByHolder));
+            closeListener.handle(new WindowCloseEvent<>(inventoryHolder, getThis(), requestedByHolder));
 
         if(updateInventoryOnClose)
             inventoryHolder.updateInventory();
 
         return true;
+    }
+
+    public void onPostClose(boolean requestedByHolder, boolean closedActually) {
+        if(postCloseListener != null)
+            postCloseListener.handle(new WindowPostCloseEvent<>(inventoryHolder, getThis(), requestedByHolder, closedActually));
     }
 
     // --- click listening

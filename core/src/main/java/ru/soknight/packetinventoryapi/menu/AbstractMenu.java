@@ -7,20 +7,14 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
-import ru.soknight.packetinventoryapi.annotation.window.ClickListener;
-import ru.soknight.packetinventoryapi.annotation.window.CloseListener;
-import ru.soknight.packetinventoryapi.annotation.window.ContentLoadListener;
-import ru.soknight.packetinventoryapi.annotation.window.OpenListener;
+import ru.soknight.packetinventoryapi.annotation.window.*;
 import ru.soknight.packetinventoryapi.configuration.MenuLoader;
 import ru.soknight.packetinventoryapi.configuration.item.ConfigurationItemStructure;
 import ru.soknight.packetinventoryapi.configuration.parse.ParsedDataBundle;
 import ru.soknight.packetinventoryapi.container.Container;
 import ru.soknight.packetinventoryapi.container.data.holder.DataHolder;
 import ru.soknight.packetinventoryapi.event.type.WindowClickType;
-import ru.soknight.packetinventoryapi.event.window.WindowClickEvent;
-import ru.soknight.packetinventoryapi.event.window.WindowCloseEvent;
-import ru.soknight.packetinventoryapi.event.window.WindowContentLoadEvent;
-import ru.soknight.packetinventoryapi.event.window.WindowOpenEvent;
+import ru.soknight.packetinventoryapi.event.window.*;
 import ru.soknight.packetinventoryapi.exception.configuration.AbstractMenuParseException;
 import ru.soknight.packetinventoryapi.exception.configuration.AbstractResourceException;
 import ru.soknight.packetinventoryapi.exception.configuration.NoMenuIOException;
@@ -338,6 +332,13 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
     }
 
     protected void onClose(Player actor, C container) {}
+
+    @PostCloseListener
+    public void onPostClose(WindowPostCloseEvent<C, R> event) {
+        onPostClose(event.getActor(), event.getContainer(), event.isClosedActually());
+    }
+
+    protected void onPostClose(Player actor, C container, boolean closedActually) {}
 
     @Override
     public boolean open(Player player) {
