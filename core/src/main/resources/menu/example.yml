@@ -85,7 +85,7 @@ content:
       - '   &fName: &b%real_name% &7(%nickname%) '
       - '   &fAge: &b%age% y.o.'
       - ' '
-      askins-head: '%player_name%'
+      player-head: '%nickname%'
 
   $filler:
     name: ' '
