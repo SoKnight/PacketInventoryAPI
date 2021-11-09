@@ -397,7 +397,8 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
 
     @Override
     public @NotNull C pushSync() {
-        if(itemMatrix.isEmpty() || !container.isViewing())
+        DisplayableMenuItem filler = getFiller();
+        if((itemMatrix.isEmpty() && filler == null) || !container.isViewing())
             return container;
         
         int max = container.playerHotbarSlots().getMax() + 1;
@@ -416,7 +417,6 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         viewPlayerInventory(slotData, content);
         viewHotbarContent(slotData, content);
 
-        DisplayableMenuItem filler = getFiller();
         if(filler != null)
             insert(filler, false);
 
