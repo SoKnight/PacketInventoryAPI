@@ -247,13 +247,14 @@ public class MenuParser {
             return ParsedDataRaw.DEFAULT.duplicate(configuration, fileName);
 
         // --- gathering some data
+        String materialRaw = configuration.getString("material");
+        String itemsAdderItem = configuration.getString("itemsadder-item");
+        Integer amount = configuration.isInt("amount") ? configuration.getInt("amount") : null;
+        int[] slots = parseSlots(configuration);
+
         String nameRaw = Colorizer.colorize(configuration.getString("name"));
         BaseComponent name = nameRaw != null ? new TextComponent(nameRaw) : null;
         List<String> lore = Colorizer.colorize(configuration.getStringList("lore"));
-
-        String materialRaw = configuration.getString("material");
-        Integer amount = configuration.isInt("amount") ? configuration.getInt("amount") : null;
-        int[] slots = parseSlots(configuration);
 
         String playerHead = configuration.getString("player-head");
         String base64Head = configuration.getString("base64-head");
@@ -273,9 +274,10 @@ public class MenuParser {
         }
 
         return new ParsedDataRaw(configuration, fileName)
+                .setMaterialRaw(materialRaw)
+                .setItemsAdderItem(itemsAdderItem)
                 .setName(name)
                 .setLore(lore)
-                .setMaterialRaw(materialRaw)
                 .setAmount(amount)
                 .setSlots(slots.length > 0 ? slots : null)
                 .setPlayerHead(playerHead)

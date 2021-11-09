@@ -30,12 +30,13 @@ public final class ParsedDataRaw {
     private final ConfigurationSection configuration;
     private final String fileName;
 
-    private BaseComponent name;
-    private List<String> lore;
-
     private String materialRaw;
+    private String itemsAdderItem;
     private Integer amount;
     private int[] slots;
+
+    private BaseComponent name;
+    private List<String> lore;
 
     private String playerHead;
     private String base64Head;
@@ -53,7 +54,9 @@ public final class ParsedDataRaw {
         RegularMenuItem.Builder<?, ?> menuItem = NMSAssistant.newMenuItem(configuration);
 
         // head textures applying or regular material usage
-        if(playerHead != null && !playerHead.isEmpty())
+        if(itemsAdderItem != null && !itemsAdderItem.isEmpty())
+            menuItem.itemsAdderItem(itemsAdderItem);
+        else if(playerHead != null && !playerHead.isEmpty())
             menuItem.playerHead(playerHead);
         else if(base64Head != null && !base64Head.isEmpty())
             menuItem.base64Head(base64Head);
@@ -73,10 +76,11 @@ public final class ParsedDataRaw {
 
         // setup other values
         return menuItem
+                .itemsAdderItem(itemsAdderItem)
                 .amount(amount != null ? amount : 1)
+                .slots(slots)
                 .nameComponent(name)
                 .lore(lore)
-                .slots(slots)
                 .customModelData(customModelData)
                 .fillPattern(fillPattern)
                 .enchanted(enchanted != null ? enchanted : false)
@@ -92,11 +96,12 @@ public final class ParsedDataRaw {
             return new ParsedDataRaw(configuration, fileName);
 
         return new ParsedDataRaw(configuration, fileName)
-                .setName(name != null ? name.duplicate() : null)
-                .setLore(lore != null ? new ArrayList<>(lore) : null)
+                .setItemsAdderItem(itemsAdderItem)
                 .setMaterialRaw(materialRaw)
                 .setAmount(amount != null ? amount : 1)
                 .setSlots(Arrays.copyOf(slots, slots.length))
+                .setName(name != null ? name.duplicate() : null)
+                .setLore(lore != null ? new ArrayList<>(lore) : null)
                 .setPlayerHead(playerHead)
                 .setBase64Head(base64Head)
                 .setCustomModelData(customModelData)
@@ -105,12 +110,13 @@ public final class ParsedDataRaw {
     }
 
     public ParsedDataRaw overlapWith(@NotNull ParsedDataRaw other) {
-        this.name = overlap(name, other.name);
-        this.lore = overlap(lore, other.lore);
-
         this.materialRaw = overlap(materialRaw, other.materialRaw);
+        this.itemsAdderItem = overlap(itemsAdderItem, other.itemsAdderItem);
         this.amount = overlap(amount, other.amount);
         this.slots = overlap(slots, other.slots);
+
+        this.name = overlap(name, other.name);
+        this.lore = overlap(lore, other.lore);
 
         this.playerHead = overlap(playerHead, other.playerHead);
         this.base64Head = overlap(base64Head, other.base64Head);
@@ -149,11 +155,12 @@ public final class ParsedDataRaw {
         ParsedDataRaw that = (ParsedDataRaw) o;
         return Objects.equals(configuration, that.configuration) &&
                 Objects.equals(fileName, that.fileName) &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(lore, that.lore) &&
                 Objects.equals(materialRaw, that.materialRaw) &&
+                Objects.equals(itemsAdderItem, that.itemsAdderItem) &&
                 Objects.equals(amount, that.amount) &&
                 Arrays.equals(slots, that.slots) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(lore, that.lore) &&
                 Objects.equals(playerHead, that.playerHead) &&
                 Objects.equals(base64Head, that.base64Head) &&
                 Objects.equals(customModelData, that.customModelData) &&
@@ -164,7 +171,7 @@ public final class ParsedDataRaw {
     @Override
     public int hashCode() {
         int result = Objects.hash(
-                configuration, fileName, name, lore, materialRaw, amount,
+                configuration, fileName, materialRaw, itemsAdderItem, amount, name, lore,
                 playerHead, base64Head, customModelData, fillPattern, enchanted
         );
         result = 31 * result + Arrays.hashCode(slots);
@@ -176,11 +183,12 @@ public final class ParsedDataRaw {
         return "ParsedDataRaw{" +
                 "configuration=" + configuration +
                 ", fileName='" + fileName + '\'' +
-                ", name=" + name +
-                ", lore=" + lore +
                 ", materialRaw='" + materialRaw + '\'' +
+                ", itemsAdderItem='" + itemsAdderItem + '\'' +
                 ", amount=" + amount +
                 ", slots=" + Arrays.toString(slots) +
+                ", name=" + name +
+                ", lore=" + lore +
                 ", playerHead='" + playerHead + '\'' +
                 ", base64Head='" + base64Head + '\'' +
                 ", customModelData=" + customModelData +

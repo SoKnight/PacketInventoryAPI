@@ -11,6 +11,9 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
+import ru.soknight.packetinventoryapi.integration.Integrations;
+import ru.soknight.packetinventoryapi.integration.itemsadder.ItemsAdderService;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 import ru.soknight.packetinventoryapi.util.Colorizer;
 
@@ -21,13 +24,13 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
 
     public static final Enchantment GLOWING_ENCHANTMENT = Enchantment.DURABILITY;
 
-    protected final WrappedItemStack bukkitItem;
+    private WrappedItemStack bukkitItem;
     protected boolean itemRemapRequired;
 
     @Getter protected boolean enchanted;
+    @Getter protected String itemsAdderItem;
     @Getter protected String playerHead;
     @Getter protected String base64Head;
-    @Getter protected String aSkinsHead;
 
     protected AbstractVanillaItem() {
         this.bukkitItem = new WrappedItemStack(Material.AIR, this);
@@ -47,9 +50,27 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
         this.itemRemapRequired = true;
     }
 
+    protected void changeWrappedItem(@NotNull Material type) {
+        this.bukkitItem = new WrappedItemStack(type, this);
+    }
+
+    protected void changeWrappedItem(@NotNull ItemStack itemStack) {
+        this.bukkitItem = new WrappedItemStack(itemStack, this);
+    }
+
     @Override
     public WrappedItemStack asBukkitItem() {
         return bukkitItem;
+    }
+
+    @Override
+    public Material getMaterial() {
+        return bukkitItem.getType();
+    }
+
+    @Override
+    public int getAmount() {
+        return bukkitItem.getAmount();
     }
 
     @Override
@@ -82,16 +103,6 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
     public List<String> getLore() {
         ItemMeta itemMeta = bukkitItem.getItemMeta();
         return itemMeta != null ? itemMeta.getLore() : null;
-    }
-
-    @Override
-    public Material getMaterial() {
-        return bukkitItem.getType();
-    }
-
-    @Override
-    public int getAmount() {
-        return bukkitItem.getAmount();
     }
 
     @Override
@@ -152,57 +163,28 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
         }
 
         @Override
-        public B name(String value) {
-            ItemMeta itemMeta = menuItem.bukkitItem.getItemMeta();
-            if(itemMeta != null) {
-                itemMeta.setDisplayName(Colorizer.colorize(value));
-                menuItem.bukkitItem.setItemMeta(itemMeta);
-                menuItem.requireItemRemap();
-            }
-            return getThis();
-        }
-
-        @Override
-        public B nameComponent(BaseComponent value) {
-            ItemMeta itemMeta = menuItem.bukkitItem.getItemMeta();
-            if(itemMeta != null) {
-                itemMeta.setDisplayName(value != null ? value.toLegacyText() : null);
-                menuItem.bukkitItem.setItemMeta(itemMeta);
-                menuItem.requireItemRemap();
-            }
-            return getThis();
-        }
-
-        @Override
-        public B lore(List<String> value) {
-            ItemMeta itemMeta = menuItem.bukkitItem.getItemMeta();
-            if(itemMeta != null) {
-                itemMeta.setLore(value);
-                menuItem.bukkitItem.setItemMeta(itemMeta);
-                menuItem.requireItemRemap();
-            }
-            return getThis();
-        }
-
-        @Override
         public B material(Material value) {
-            menuItem.bukkitItem.setType(value != null ? value : Material.AIR);
+            menuItem.asBukkitItem().setType(value != null ? value : Material.AIR);
             menuItem.addItemFlags();
             menuItem.requireItemRemap();
             return getThis();
         }
 
         @Override
-        public B amount(int value) {
-            int amount = value;
-            int maxStackSize = menuItem.bukkitItem.getMaxStackSize();
+        public B itemsAdderItem(String value) {
+            if(value == null || value.isEmpty())
+                return getThis();
 
-            if(amount < 1)
-                amount = 1;
-            else if(amount > maxStackSize)
-                amount = maxStackSize;
+            menuItem.itemsAdderItem = value;
 
-            menuItem.bukkitItem.setAmount(amount);
+            if(!Integrations.availableItemsAdder())
+                return getThis();
+
+            ItemStack asBukkitItem = ItemsAdderService.getAsBukkitItem(value);
+            if(asBukkitItem == null)
+                asBukkitItem = new ItemStack(Material.AIR);
+
+            menuItem.changeWrappedItem(asBukkitItem);
             menuItem.requireItemRemap();
             return getThis();
         }
@@ -220,21 +202,64 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
         }
 
         @Override
-        public B aSkinsHead(String value) {
-            if(value == null || value.isEmpty())
-                return getThis();
+        public B amount(int value) {
+            int amount = value;
+            int maxStackSize = menuItem.asBukkitItem().getMaxStackSize();
 
-            if(menuItem.getMaterial() != Material.PLAYER_HEAD)
-                material(Material.PLAYER_HEAD);
+            if(amount < 1)
+                amount = 1;
+            else if(amount > maxStackSize)
+                amount = maxStackSize;
 
-            menuItem.aSkinsHead = value;
+            menuItem.asBukkitItem().setAmount(amount);
+            menuItem.requireItemRemap();
+            return getThis();
+        }
+
+        @Override
+        public B name(String value) {
+            ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
+            if(itemMeta != null) {
+                itemMeta.setDisplayName(Colorizer.colorize(value));
+                menuItem.asBukkitItem().setItemMeta(itemMeta);
+                menuItem.requireItemRemap();
+            }
+            return getThis();
+        }
+
+        @Override
+        public B nameComponent(BaseComponent value) {
+            ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
+            if(itemMeta != null) {
+                if(value instanceof TextComponent) {
+                    itemMeta.setDisplayName(value != null ? value.toLegacyText() : null);
+                } else if(value instanceof TranslatableComponent) {
+                    itemMeta.setLocalizedName(value.toPlainText());
+                } else {
+                    return getThis();
+                }
+
+                menuItem.asBukkitItem().setItemMeta(itemMeta);
+                menuItem.requireItemRemap();
+            }
+            return getThis();
+        }
+
+        @Override
+        public B lore(List<String> value) {
+            ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
+            if(itemMeta != null) {
+                itemMeta.setLore(value);
+                menuItem.asBukkitItem().setItemMeta(itemMeta);
+                menuItem.requireItemRemap();
+            }
             return getThis();
         }
 
         @Override
         public B enchanted(boolean value) {
             if(menuItem.enchanted != value) {
-                ItemMeta itemMeta = menuItem.bukkitItem.getItemMeta();
+                ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
                 if(value)
                     itemMeta.addEnchant(GLOWING_ENCHANTMENT, 1, true);
                 else

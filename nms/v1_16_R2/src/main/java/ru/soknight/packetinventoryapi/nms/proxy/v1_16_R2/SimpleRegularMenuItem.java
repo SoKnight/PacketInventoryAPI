@@ -34,7 +34,7 @@ public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleR
     @Override
     public ItemStack asVanillaItem() {
         if(itemRemapRequired || nmsItem == null)
-            nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
+            nmsItem = CraftItemStack.asNMSCopy(asBukkitItem());
 
         itemRemapRequired = false;
         return nmsItem;
@@ -42,7 +42,7 @@ public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleR
 
     @Override
     public int getCustomModelData() {
-        ItemMeta itemMeta = bukkitItem.getItemMeta();
+        ItemMeta itemMeta = asBukkitItem().getItemMeta();
         return itemMeta != null ? itemMeta.getCustomModelData() : 0;
     }
 
@@ -101,7 +101,7 @@ public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleR
             if(menuItem.getMaterial() != Material.PLAYER_HEAD)
                 Builder.super.material(Material.PLAYER_HEAD);
 
-            if(menuItem.assignHeadTexture(menuItem.bukkitItem, value))
+            if(menuItem.assignHeadTexture(menuItem.asBukkitItem(), value))
                 menuItem.requireItemRemap();
 
             return getThis();
@@ -109,10 +109,17 @@ public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleR
 
         @Override
         public Builder customModelData(Integer value) {
-            ItemMeta itemMeta = menuItem.bukkitItem.getItemMeta();
-            if(itemMeta != null && (!itemMeta.hasCustomModelData() || itemMeta.getCustomModelData() != value)) {
+            ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
+            if(itemMeta != null) {
+                if(itemMeta.hasCustomModelData()) {
+                    int currentData = itemMeta.getCustomModelData();
+                    if(value != null && currentData == value) {
+                        return getThis();
+                    }
+                }
+
                 itemMeta.setCustomModelData(value);
-                menuItem.bukkitItem.setItemMeta(itemMeta);
+                menuItem.asBukkitItem().setItemMeta(itemMeta);
                 menuItem.requireItemRemap();
             }
 

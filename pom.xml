@@ -34,6 +34,7 @@
         <protocollib.version>4.7.0-SNAPSHOT</protocollib.version>
         <placeholderapi.version>2.10.10</placeholderapi.version>
         <advancedskins.api.version>2.0.0</advancedskins.api.version>
+        <itemsadder.api.version>2.4.21</itemsadder.api.version>
         <jetbrains.annotations.version>22.0.0</jetbrains.annotations.version>
         <lombok.version>1.18.22</lombok.version>
 
@@ -54,6 +55,18 @@
 
     <repositories>
         <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/nexus/repository/public/</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io/</url>
+        </repository>
+        <repository>
             <id>nexus</id>
             <url>https://repo.soknight.me/repository/public/</url>
         </repository>
@@ -64,14 +77,6 @@
         <repository>
             <id>nexus-snapshots</id>
             <url>https://repo.soknight.me/repository/snapshots/</url>
-        </repository>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>dmulloy2-repo</id>
-            <url>https://repo.dmulloy2.net/nexus/repository/public/</url>
         </repository>
     </repositories>
 
@@ -113,6 +118,14 @@
                 <groupId>ru.soknight.advancedskins</groupId>
                 <artifactId>api</artifactId>
                 <version>${advancedskins.api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- ItemsAdder API -->
+            <dependency>
+                <groupId>com.github.LoneDev6</groupId>
+                <artifactId>api-itemsadder</artifactId>
+                <version>${itemsadder.api.version}</version>
                 <scope>provided</scope>
             </dependency>
 

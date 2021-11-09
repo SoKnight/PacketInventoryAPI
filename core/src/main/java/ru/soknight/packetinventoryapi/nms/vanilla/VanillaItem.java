@@ -16,23 +16,23 @@ public interface VanillaItem<I extends VanillaItem<I, B>, B extends VanillaItem.
 
     Object asVanillaItem();
 
+    Material getMaterial();
+
+    String getItemsAdderItem();
+
+    String getPlayerHead();
+
+    String getBase64Head();
+
+    int getAmount();
+
     String getName();
 
     BaseComponent getNameComponent();
 
     List<String> getLore();
 
-    Material getMaterial();
-
-    int getAmount();
-
     boolean isEnchanted();
-
-    String getPlayerHead();
-
-    String getBase64Head();
-
-    String getASkinsHead();
 
     int getCustomModelData() throws UnsupportedOperationException;
 
@@ -51,23 +51,23 @@ public interface VanillaItem<I extends VanillaItem<I, B>, B extends VanillaItem.
     interface Builder<I extends VanillaItem<I, B>, B extends VanillaItem.Builder<I, B>> {
         I build();
 
+        B material(Material value);
+
+        B itemsAdderItem(String value);
+
+        B playerHead(String value);
+
+        B base64Head(String value);
+
+        B amount(int value);
+
         B name(String value);
 
         B nameComponent(BaseComponent value);
 
         B lore(List<String> value);
 
-        B material(Material value);
-
-        B amount(int value);
-
         B enchanted(boolean value);
-
-        B playerHead(String value);
-
-        B base64Head(String value);
-
-        B aSkinsHead(String value);
 
         B customModelData(Integer value) throws UnsupportedOperationException;
     }

@@ -16,7 +16,7 @@ public final class WrappedItemStack extends ItemStack {
         this.vanillaItem = vanillaItem;
     }
 
-    private WrappedItemStack(@NotNull ItemStack itemStack, @NotNull VanillaItem<?, ?> vanillaItem) {
+    public WrappedItemStack(@NotNull ItemStack itemStack, @NotNull VanillaItem<?, ?> vanillaItem) {
         super(itemStack);
         this.vanillaItem = vanillaItem;
     }

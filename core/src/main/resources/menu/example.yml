@@ -13,6 +13,7 @@
 #   - player-head         (string)            a name of player which head will be displayed as item icon (you can use %player_name% placeholder)
 #   - base64-head         (string)            a base64 encoded value of the head texture to display
 #   - custom-model-data   (integer)           a custom model data ID (useful for custom items with resource packs)
+#   - itemsadder-item     (string)            a namespaced ID of custom item provided by ItemsAdder (e.g.: 'myplugin:example_item' or 'example_item')
 #   - pattern             (string)            a filling pattern for this item (actual for @filler): 'full' or 'frame'
 #   - enchanted           (boolean)           if enabled then item will have enchantment glowing effect
 

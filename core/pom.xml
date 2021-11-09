@@ -43,6 +43,12 @@
             <artifactId>api</artifactId>
         </dependency>
 
+        <!-- ItemsAdder API -->
+        <dependency>
+            <groupId>com.github.LoneDev6</groupId>
+            <artifactId>api-itemsadder</artifactId>
+        </dependency>
+
         <!-- Jetbrains Annotations -->
         <dependency>
             <groupId>org.jetbrains</groupId>
