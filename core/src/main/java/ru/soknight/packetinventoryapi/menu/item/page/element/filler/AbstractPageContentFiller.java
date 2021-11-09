@@ -1,23 +1,23 @@
 package ru.soknight.packetinventoryapi.menu.item.page.element.filler;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
+import ru.soknight.packetinventoryapi.api.PacketInventoryAPI;
 import ru.soknight.packetinventoryapi.item.update.content.ContentUpdateRequest;
 import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 import ru.soknight.packetinventoryapi.menu.item.page.element.renderer.SlotItemRenderer;
+import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
+import ru.soknight.packetinventoryapi.nms.vanilla.VanillaItem;
 import ru.soknight.packetinventoryapi.placeholder.container.list.ListContainer;
 import ru.soknight.packetinventoryapi.placeholder.container.string.StringContainer;
 import ru.soknight.packetinventoryapi.placeholder.element.ElementPlaceholderReplacer;
 import ru.soknight.packetinventoryapi.placeholder.element.LiteElementPlaceholderReplacer;
-import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.util.ArrayList;
@@ -101,7 +101,6 @@ public abstract class AbstractPageContentFiller<I extends DisplayableMenuItem> i
         return wrapper.getList();
     }
 
-    @SuppressWarnings("deprecation")
     protected void replacePlaceholders(Player viewer, ItemStack item, int slot, int pageIndex, int totalIndex) {
         if(item == null || !item.hasItemMeta())
             return;
@@ -120,11 +119,16 @@ public abstract class AbstractPageContentFiller<I extends DisplayableMenuItem> i
 
         if(item instanceof WrappedItemStack) {
             WrappedItemStack wrapper = (WrappedItemStack) item;
-            String playerHead = wrapper.getVanillaItem().getPlayerHead();
+            VanillaItem<?, ?> vanillaItem = wrapper.getVanillaItem();
+
+            // player head
+            String playerHead = vanillaItem.getPlayerHead();
             if(playerHead != null && !playerHead.isEmpty() && itemMeta instanceof SkullMeta) {
-                SkullMeta skullMeta = (SkullMeta) itemMeta;
-                OfflinePlayer owningPlayer = Bukkit.getOfflinePlayer(replacePlaceholders(viewer, playerHead, slot, pageIndex, totalIndex));
-                skullMeta.setOwningPlayer(owningPlayer);
+                String playerName = replacePlaceholders(viewer, playerHead, slot, pageIndex, totalIndex);
+                PacketInventoryAPI.getInstance()
+                        .skinsProvidingBus()
+                        .findPlayerSkin(playerName)
+                        .ifPresent(gameProfile -> vanillaItem.assignHeadTexture((SkullMeta) itemMeta, gameProfile));
             }
         }
 
