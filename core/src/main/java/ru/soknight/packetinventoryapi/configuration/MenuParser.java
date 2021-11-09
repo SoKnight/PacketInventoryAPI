@@ -1,7 +1,6 @@
 package ru.soknight.packetinventoryapi.configuration;
 
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
@@ -252,8 +251,7 @@ public class MenuParser {
         Integer amount = configuration.isInt("amount") ? configuration.getInt("amount") : null;
         int[] slots = parseSlots(configuration);
 
-        String nameRaw = Colorizer.colorize(configuration.getString("name"));
-        BaseComponent name = nameRaw != null ? new TextComponent(nameRaw) : null;
+        String name = Colorizer.colorize(configuration.getString("name"));
         List<String> lore = Colorizer.colorize(configuration.getStringList("lore"));
 
         String playerHead = configuration.getString("player-head");

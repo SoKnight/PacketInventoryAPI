@@ -4,16 +4,15 @@ import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_16_R2.ItemStack;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import ru.soknight.packetinventoryapi.menu.item.regular.AbstractRegularMenuItem;
-import ru.soknight.packetinventoryapi.util.Validate;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.UUID;
 
 public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleRegularMenuItem, SimpleRegularMenuItem.Builder> {
@@ -44,6 +43,12 @@ public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleR
     public int getCustomModelData() {
         ItemMeta itemMeta = asBukkitItem().getItemMeta();
         return itemMeta != null ? itemMeta.getCustomModelData() : 0;
+    }
+
+    @Override
+    public boolean hasCustomModelData() throws UnsupportedOperationException {
+        ItemMeta itemMeta = asBukkitItem().getItemMeta();
+        return itemMeta != null && itemMeta.hasCustomModelData();
     }
 
     @Override
@@ -95,34 +100,11 @@ public final class SimpleRegularMenuItem extends AbstractRegularMenuItem<SimpleR
         }
 
         @Override
-        public Builder base64Head(String value) {
-            Validate.notEmpty(value, "base64 value");
-
-            if(menuItem.getMaterial() != Material.PLAYER_HEAD)
-                Builder.super.material(Material.PLAYER_HEAD);
-
-            if(menuItem.assignHeadTexture(menuItem.asBukkitItem(), value))
-                menuItem.requireItemRemap();
-
-            return getThis();
-        }
-
-        @Override
         public Builder customModelData(Integer value) {
-            ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
-            if(itemMeta != null) {
-                if(itemMeta.hasCustomModelData()) {
-                    int currentData = itemMeta.getCustomModelData();
-                    if(value != null && currentData == value) {
-                        return getThis();
-                    }
-                }
-
-                itemMeta.setCustomModelData(value);
-                menuItem.asBukkitItem().setItemMeta(itemMeta);
-                menuItem.requireItemRemap();
+            if(!Objects.equals(menuItem.customModelData, value)) {
+                menuItem.customModelData = value;
+                menuItem.updateItemCustomModelData();
             }
-
             return getThis();
         }
     }

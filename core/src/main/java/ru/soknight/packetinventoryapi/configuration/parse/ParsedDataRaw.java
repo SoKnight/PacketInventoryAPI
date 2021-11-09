@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +34,7 @@ public final class ParsedDataRaw {
     private Integer amount;
     private int[] slots;
 
-    private BaseComponent name;
+    private String name;
     private List<String> lore;
 
     private String playerHead;
@@ -79,7 +78,7 @@ public final class ParsedDataRaw {
                 .itemsAdderItem(itemsAdderItem)
                 .amount(amount != null ? amount : 1)
                 .slots(slots)
-                .nameComponent(name)
+                .name(name)
                 .lore(lore)
                 .customModelData(customModelData)
                 .fillPattern(fillPattern)
@@ -100,7 +99,7 @@ public final class ParsedDataRaw {
                 .setMaterialRaw(materialRaw)
                 .setAmount(amount != null ? amount : 1)
                 .setSlots(Arrays.copyOf(slots, slots.length))
-                .setName(name != null ? name.duplicate() : null)
+                .setName(name)
                 .setLore(lore != null ? new ArrayList<>(lore) : null)
                 .setPlayerHead(playerHead)
                 .setBase64Head(base64Head)
@@ -187,7 +186,7 @@ public final class ParsedDataRaw {
                 ", itemsAdderItem='" + itemsAdderItem + '\'' +
                 ", amount=" + amount +
                 ", slots=" + Arrays.toString(slots) +
-                ", name=" + name +
+                ", name='" + name + '\'' +
                 ", lore=" + lore +
                 ", playerHead='" + playerHead + '\'' +
                 ", base64Head='" + base64Head + '\'' +

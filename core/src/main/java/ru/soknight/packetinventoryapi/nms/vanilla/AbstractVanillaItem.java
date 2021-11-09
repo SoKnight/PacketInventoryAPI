@@ -1,10 +1,8 @@
 package ru.soknight.packetinventoryapi.nms.vanilla;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import lombok.AccessLevel;
 import lombok.Getter;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.TranslatableComponent;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -15,33 +13,32 @@ import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.integration.Integrations;
 import ru.soknight.packetinventoryapi.integration.itemsadder.ItemsAdderService;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
-import ru.soknight.packetinventoryapi.util.Colorizer;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Getter
 public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B extends AbstractVanillaItem.Builder<I, B>> implements VanillaItem<I, B> {
 
     public static final Enchantment GLOWING_ENCHANTMENT = Enchantment.DURABILITY;
 
-    private WrappedItemStack bukkitItem;
-    protected boolean itemRemapRequired;
+    @Getter(AccessLevel.NONE) private WrappedItemStack bukkitItem;
+    @Getter(AccessLevel.NONE) protected boolean itemRemapRequired;
 
-    @Getter protected boolean enchanted;
-    @Getter protected String itemsAdderItem;
-    @Getter protected String playerHead;
-    @Getter protected String base64Head;
+    protected int amount;
+    protected String name;
+    protected List<String> lore;
+
+    protected boolean enchanted;
+    protected String itemsAdderItem;
+    protected String playerHead;
+    protected String base64Head;
+    protected Integer customModelData;
 
     protected AbstractVanillaItem() {
         this.bukkitItem = new WrappedItemStack(Material.AIR, this);
-    }
-
-    protected void addItemFlags() {
-        ItemMeta itemMeta = bukkitItem.getItemMeta();
-        if(itemMeta != null) {
-            itemMeta.addItemFlags(ItemFlag.values());
-            bukkitItem.setItemMeta(itemMeta);
-        }
     }
 
     protected abstract I getThis();
@@ -69,45 +66,107 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
     }
 
     @Override
-    public int getAmount() {
-        return bukkitItem.getAmount();
-    }
-
-    @Override
-    public String getName() {
-        ItemMeta itemMeta = bukkitItem.getItemMeta();
-        if(itemMeta != null) {
-            if(itemMeta.hasDisplayName())
-                return itemMeta.getDisplayName();
-
-            if(itemMeta.hasLocalizedName())
-                return itemMeta.getLocalizedName();
-        }
-        return "";
-    }
-
-    @Override
-    public BaseComponent getNameComponent() {
-        ItemMeta itemMeta = bukkitItem.getItemMeta();
-        if(itemMeta != null) {
-            if(itemMeta.hasDisplayName())
-                return new TextComponent(itemMeta.getDisplayName());
-
-            if(itemMeta.hasLocalizedName())
-                return new TranslatableComponent(itemMeta.getLocalizedName());
-        }
-        return new TextComponent();
-    }
-
-    @Override
-    public List<String> getLore() {
-        ItemMeta itemMeta = bukkitItem.getItemMeta();
-        return itemMeta != null ? itemMeta.getLore() : null;
-    }
-
-    @Override
     public int getCustomModelData() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("custom model data modification methods isn't implemented for your version!");
+    }
+
+    @Override
+    public boolean hasCustomModelData() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("custom model data modification methods isn't implemented for your version!");
+    }
+
+    @Override
+    public void updateItemsAdderItem() {
+        if(itemsAdderItem == null || itemsAdderItem.isEmpty())
+            return;
+
+        if(Integrations.availableItemsAdder()) {
+            ItemStack asBukkitItem = ItemsAdderService.getAsBukkitItem(itemsAdderItem);
+            if(asBukkitItem != null) {
+                changeWrappedItem(asBukkitItem);
+                updateAll(false);
+                return;
+            }
+        }
+
+        changeWrappedItem(Material.AIR);
+        requireItemRemap();
+    }
+
+    protected void updateItemAmount() {
+        bukkitItem.setAmount(Math.max(1, amount));
+        requireItemRemap();
+    }
+
+    protected void updateItemName() {
+        updateAndRefreshItemMeta(meta -> meta.setDisplayName(name));
+    }
+
+    protected void updateItemLore() {
+        updateAndRefreshItemMeta(meta -> meta.setLore(lore));
+    }
+
+    protected void updateItemFlags() {
+        updateAndRefreshItemMeta(meta -> meta.addItemFlags(ItemFlag.values()));
+    }
+
+    protected void updateItemEnchantedFlag() {
+        updateAndRefreshItemMeta(meta -> {
+            if(enchanted)
+                meta.addEnchant(GLOWING_ENCHANTMENT, 1, true);
+            else
+                meta.removeEnchant(GLOWING_ENCHANTMENT);
+        });
+    }
+
+    protected void updateItemCustomModelData() {
+        updateItemMeta(meta -> {
+            if(!hasCustomModelData() && customModelData == null) {
+                return false;
+            }
+
+            if(hasCustomModelData() && customModelData != null) {
+                int currentValue = getCustomModelData();
+                if(currentValue == customModelData) {
+                    return false;
+                }
+            }
+
+            meta.setCustomModelData(customModelData);
+            return true;
+        });
+    }
+
+    protected void updateAll(boolean updateCustomModelData) {
+        updateItemAmount();
+        updateItemName();
+        updateItemLore();
+        updateItemEnchantedFlag();
+
+        if(updateCustomModelData) {
+            try {
+                updateItemCustomModelData();
+            } catch (UnsupportedOperationException ignored) {
+            }
+        }
+    }
+
+    private void updateItemMeta(Function<ItemMeta, Boolean> action) {
+        ItemMeta itemMeta = bukkitItem.getItemMeta();
+        if(itemMeta != null) {
+            boolean somethingChanged = action.apply(itemMeta);
+            if(somethingChanged) {
+                bukkitItem.setItemMeta(itemMeta);
+                requireItemRemap();
+            }
+        }
+    }
+
+    private void updateAndRefreshItemMeta(Consumer<ItemMeta> action) {
+        updateItemMeta(meta -> {
+            action.accept(meta);
+            return true;
+        });
     }
 
     @Override
@@ -164,9 +223,11 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
 
         @Override
         public B material(Material value) {
-            menuItem.asBukkitItem().setType(value != null ? value : Material.AIR);
-            menuItem.addItemFlags();
-            menuItem.requireItemRemap();
+            if(menuItem.getMaterial() != value) {
+                menuItem.asBukkitItem().setType(value != null ? value : Material.AIR);
+                menuItem.updateItemFlags();
+                menuItem.updateAll(false);
+            }
             return getThis();
         }
 
@@ -176,16 +237,7 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
                 return getThis();
 
             menuItem.itemsAdderItem = value;
-
-            if(!Integrations.availableItemsAdder())
-                return getThis();
-
-            ItemStack asBukkitItem = ItemsAdderService.getAsBukkitItem(value);
-            if(asBukkitItem == null)
-                asBukkitItem = new ItemStack(Material.AIR);
-
-            menuItem.changeWrappedItem(asBukkitItem);
-            menuItem.requireItemRemap();
+            menuItem.updateItemsAdderItem();
             return getThis();
         }
 
@@ -194,10 +246,21 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
             if(value == null || value.isEmpty() || value.length() > 16)
                 return getThis();
 
-            if(menuItem.getMaterial() != Material.PLAYER_HEAD)
-                material(Material.PLAYER_HEAD);
+            material(Material.PLAYER_HEAD);
 
             menuItem.playerHead = value;
+            return getThis();
+        }
+
+        @Override
+        public B base64Head(String value) {
+            if(value == null || value.isEmpty())
+                return getThis();
+
+            material(Material.PLAYER_HEAD);
+
+            menuItem.assignHeadTexture(menuItem.asBukkitItem(), value);
+            menuItem.base64Head = value;
             return getThis();
         }
 
@@ -211,47 +274,25 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
             else if(amount > maxStackSize)
                 amount = maxStackSize;
 
-            menuItem.asBukkitItem().setAmount(amount);
-            menuItem.requireItemRemap();
+            menuItem.amount = amount;
+            menuItem.updateItemAmount();
             return getThis();
         }
 
         @Override
         public B name(String value) {
-            ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
-            if(itemMeta != null) {
-                itemMeta.setDisplayName(Colorizer.colorize(value));
-                menuItem.asBukkitItem().setItemMeta(itemMeta);
-                menuItem.requireItemRemap();
-            }
-            return getThis();
-        }
-
-        @Override
-        public B nameComponent(BaseComponent value) {
-            ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
-            if(itemMeta != null) {
-                if(value instanceof TextComponent) {
-                    itemMeta.setDisplayName(value != null ? value.toLegacyText() : null);
-                } else if(value instanceof TranslatableComponent) {
-                    itemMeta.setLocalizedName(value.toPlainText());
-                } else {
-                    return getThis();
-                }
-
-                menuItem.asBukkitItem().setItemMeta(itemMeta);
-                menuItem.requireItemRemap();
+            if(!Objects.equals(menuItem.name, value)) {
+                menuItem.name = value;
+                menuItem.updateItemName();
             }
             return getThis();
         }
 
         @Override
         public B lore(List<String> value) {
-            ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
-            if(itemMeta != null) {
-                itemMeta.setLore(value);
-                menuItem.asBukkitItem().setItemMeta(itemMeta);
-                menuItem.requireItemRemap();
+            if(!Objects.equals(menuItem.lore, value)) {
+                menuItem.lore = value;
+                menuItem.updateItemLore();
             }
             return getThis();
         }
@@ -259,13 +300,8 @@ public abstract class AbstractVanillaItem<I extends AbstractVanillaItem<I, B>, B
         @Override
         public B enchanted(boolean value) {
             if(menuItem.enchanted != value) {
-                ItemMeta itemMeta = menuItem.asBukkitItem().getItemMeta();
-                if(value)
-                    itemMeta.addEnchant(GLOWING_ENCHANTMENT, 1, true);
-                else
-                    itemMeta.removeEnchant(GLOWING_ENCHANTMENT);
                 menuItem.enchanted = value;
-                menuItem.requireItemRemap();
+                menuItem.updateItemEnchantedFlag();
             }
             return getThis();
         }

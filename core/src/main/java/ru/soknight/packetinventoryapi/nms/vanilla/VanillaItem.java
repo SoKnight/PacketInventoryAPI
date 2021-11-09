@@ -1,7 +1,6 @@
 package ru.soknight.packetinventoryapi.nms.vanilla;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -28,13 +27,15 @@ public interface VanillaItem<I extends VanillaItem<I, B>, B extends VanillaItem.
 
     String getName();
 
-    BaseComponent getNameComponent();
-
     List<String> getLore();
 
     boolean isEnchanted();
 
     int getCustomModelData() throws UnsupportedOperationException;
+
+    boolean hasCustomModelData() throws UnsupportedOperationException;
+
+    void updateItemsAdderItem();
 
     boolean assignHeadTexture(ItemStack item, String base64Value);
 
@@ -62,8 +63,6 @@ public interface VanillaItem<I extends VanillaItem<I, B>, B extends VanillaItem.
         B amount(int value);
 
         B name(String value);
-
-        B nameComponent(BaseComponent value);
 
         B lore(List<String> value);
 

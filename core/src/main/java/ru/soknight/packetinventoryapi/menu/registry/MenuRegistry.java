@@ -2,34 +2,40 @@ package ru.soknight.packetinventoryapi.menu.registry;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.soknight.packetinventoryapi.event.Event;
 import ru.soknight.packetinventoryapi.exception.menu.InvalidMethodStructureException;
 import ru.soknight.packetinventoryapi.exception.menu.MenuRegisteredAlreadyException;
 import ru.soknight.packetinventoryapi.exception.menu.RegistrationDeniedException;
 import ru.soknight.packetinventoryapi.menu.Menu;
 
+import java.util.Map;
+
 public interface MenuRegistry {
 
-    static MenuRegistry create() {
+    static @NotNull MenuRegistry create() {
         return new SimpleMenuRegistry();
     }
 
-    Menu<?, ?> getViewingMenu(Player player);
+    @NotNull Map<String, Menu<?, ?>> getRegisteredMenus();
 
-    void fireEvent(Menu<?, ?> menu, Event<?, ?> event);
+    @Nullable Menu<?, ?> getViewingMenu(Player player);
 
-    void register(Menu<?, ?> menu) throws InvalidMethodStructureException, RegistrationDeniedException, MenuRegisteredAlreadyException;
+    void fireEvent(@NotNull Menu<?, ?> menu, @NotNull Event<?, ?> event);
 
-    boolean isRegistered(Menu<?, ?> menu);
+    void register(@NotNull Menu<?, ?> menu) throws InvalidMethodStructureException, RegistrationDeniedException, MenuRegisteredAlreadyException;
 
-    boolean isRegistered(Plugin plugin, String name);
+    boolean isRegistered(@NotNull Menu<?, ?> menu);
 
-    boolean isRegistered(String plugin, String name);
+    boolean isRegistered(@NotNull Plugin plugin, @NotNull String menuId);
 
-    boolean unregister(Menu<?, ?> menu);
+    boolean isRegistered(@NotNull String pluginName, @NotNull String menuId);
 
-    boolean unregister(Plugin plugin, String name);
+    boolean unregister(@NotNull Menu<?, ?> menu);
 
-    boolean unregister(String plugin, String name);
+    boolean unregister(@NotNull Plugin plugin, String menuId);
+
+    boolean unregister(@NotNull String pluginName, String menuId);
 
 }

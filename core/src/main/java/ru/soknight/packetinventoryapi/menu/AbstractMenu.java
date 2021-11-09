@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
 import ru.soknight.packetinventoryapi.annotation.window.*;
 import ru.soknight.packetinventoryapi.configuration.MenuLoader;
@@ -34,7 +35,6 @@ import ru.soknight.packetinventoryapi.menu.item.page.element.PageElementMenuItem
 import ru.soknight.packetinventoryapi.menu.item.page.element.filler.PageContentFiller;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.stateable.StateSelector;
-import ru.soknight.packetinventoryapi.menu.item.stateable.StateableMenuItem;
 import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
 import ru.soknight.packetinventoryapi.placeholder.context.PlaceholderContext;
 
@@ -91,7 +91,6 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
         MenuLoader.load(this, resourcePath, outputFile, resetContent);
     }
 
-    @SuppressWarnings("unchecked")
     protected <I extends DisplayableMenuItem> void provideExtraData(ContentUpdateRequest<C, R> updateRequest) {
         Player holder = updateRequest.getContainer().getInventoryHolder();
         if(holder == null)
@@ -100,11 +99,12 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
         // --- provide stateable menu items
         Context context = () -> holder;
         for(MenuItem menuItem : menuItems.values()) {
-            if(menuItem instanceof StateableMenuItem) {
-                StateableMenuItem stateableItem = (StateableMenuItem) menuItem;
-                updateRequest.insert(stateableItem, true);
-            } else if(menuItem instanceof PageElementMenuItem && this instanceof PageableMenu<?>) {
-                PageElementMenuItem<I> pageElementItem = (PageElementMenuItem<I>) menuItem;
+            if(menuItem.isRegular()) {
+                updateRequest.insert(menuItem.asRegularItem(), true);
+            } else if(menuItem.isStateable()) {
+                updateRequest.insert(menuItem.asStateableItem(), true);
+            } else if(menuItem.isPageElement() && this instanceof PageableMenu<?>) {
+                PageElementMenuItem<I> pageElementItem = menuItem.asPageElementItem();
                 PageContentFiller<I> pageContentFiller = pageElementItem.getPageContentFiller();
                 if(pageContentFiller != null) {
                     PageableMenu<?> pageableMenu = (PageableMenu<?>) this;
@@ -153,7 +153,7 @@ public abstract class AbstractMenu<C extends Container<C, R>, R extends ContentU
     }
 
     @Override
-    public @NotNull Map<String, MenuItem> getMenuItems() {
+    public @NotNull @UnmodifiableView Map<String, MenuItem> getMenuItems() {
         return Collections.unmodifiableMap(menuItems);
     }
 

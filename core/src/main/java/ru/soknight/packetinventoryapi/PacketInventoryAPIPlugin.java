@@ -8,6 +8,8 @@ import ru.soknight.packetinventoryapi.animation.Animation;
 import ru.soknight.packetinventoryapi.api.PacketInventoryAPI;
 import ru.soknight.packetinventoryapi.exception.UnsupportedVersionException;
 import ru.soknight.packetinventoryapi.exception.packet.NoConstructorFoundException;
+import ru.soknight.packetinventoryapi.integration.Integrations;
+import ru.soknight.packetinventoryapi.integration.itemsadder.ItemsAdderListener;
 import ru.soknight.packetinventoryapi.integration.skins.SkinsProvidingBus;
 import ru.soknight.packetinventoryapi.listener.PacketsListener;
 import ru.soknight.packetinventoryapi.menu.registry.MenuRegistry;
@@ -69,6 +71,9 @@ public final class PacketInventoryAPIPlugin extends JavaPlugin {
         API_INSTANCE = new SimplePacketInventoryAPI(containerStorage, menuRegistry, skinsProvidingBus);
         
         new CommandDebug(this);
+
+        if(Integrations.availableItemsAdder())
+            new ItemsAdderListener(this, menuRegistry);
         
         getLogger().info("Ready to provide packet inventories management!");
     }

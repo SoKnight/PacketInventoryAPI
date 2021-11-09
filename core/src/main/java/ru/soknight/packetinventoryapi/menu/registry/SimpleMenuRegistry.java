@@ -2,6 +2,8 @@ package ru.soknight.packetinventoryapi.menu.registry;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 import ru.soknight.packetinventoryapi.event.Event;
 import ru.soknight.packetinventoryapi.exception.menu.InvalidMethodStructureException;
 import ru.soknight.packetinventoryapi.exception.menu.MenuRegisteredAlreadyException;
@@ -9,6 +11,7 @@ import ru.soknight.packetinventoryapi.exception.menu.RegistrationDeniedException
 import ru.soknight.packetinventoryapi.menu.Menu;
 import ru.soknight.packetinventoryapi.util.Validate;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +24,16 @@ public final class SimpleMenuRegistry implements MenuRegistry {
     public SimpleMenuRegistry() {
         this.registrations = new ConcurrentHashMap<>();
         this.available = true;
+    }
+
+    @Override
+    public @NotNull Map<String, Menu<?, ?>> getRegisteredMenus() {
+        Map<String, Menu<?, ?>> menus = new HashMap<>();
+        if(registrations.isEmpty())
+            return menus;
+
+        registrations.forEach((ticket, registration) -> menus.put(ticket.getMenuId(), registration.getMenu()));
+        return menus;
     }
 
     @Override

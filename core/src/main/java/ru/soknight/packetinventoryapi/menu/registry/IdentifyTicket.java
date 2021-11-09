@@ -2,22 +2,25 @@ package ru.soknight.packetinventoryapi.menu.registry;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import ru.soknight.packetinventoryapi.menu.Menu;
 
 import java.util.Objects;
 
+@Getter
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 final class IdentifyTicket {
 
     private final String pluginName;
-    private final String menuName;
+    private final String menuId;
 
-    static IdentifyTicket create(Menu<?, ?> menu) {
+    static @NotNull IdentifyTicket create(@NotNull Menu<?, ?> menu) {
         return create(menu.getProvidingPlugin().getName(), menu.getName());
     }
 
-    static IdentifyTicket create(String plugin, String menu) {
-        return new IdentifyTicket(plugin, menu);
+    static @NotNull IdentifyTicket create(@NotNull String pluginName, @NotNull String menuId) {
+        return new IdentifyTicket(pluginName, menuId);
     }
 
     @Override
@@ -27,19 +30,19 @@ final class IdentifyTicket {
 
         IdentifyTicket that = (IdentifyTicket) o;
         return Objects.equals(pluginName, that.pluginName) &&
-                Objects.equals(menuName, that.menuName);
+                Objects.equals(menuId, that.menuId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pluginName, menuName);
+        return Objects.hash(pluginName, menuId);
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "IdentifyTicket{" +
                 "plugin='" + pluginName + '\'' +
-                ", menu='" + menuName + '\'' +
+                ", menuId='" + menuId + '\'' +
                 '}';
     }
 
