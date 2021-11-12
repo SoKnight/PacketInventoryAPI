@@ -252,7 +252,7 @@ public class MenuParser {
         int[] slots = parseSlots(configuration);
 
         String name = Colorizer.colorize(configuration.getString("name"));
-        List<String> lore = Colorizer.colorize(configuration.getStringList("lore"));
+        List<String> lore = Colorizer.colorize(configuration.isList("lore") ? configuration.getStringList("lore") : null);
 
         String playerHead = configuration.getString("player-head");
         String base64Head = configuration.getString("base64-head");
