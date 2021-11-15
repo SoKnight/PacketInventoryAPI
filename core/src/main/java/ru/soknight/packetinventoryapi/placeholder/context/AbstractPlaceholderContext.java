@@ -10,6 +10,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import ru.soknight.packetinventoryapi.PacketInventoryAPIPlugin;
 import ru.soknight.packetinventoryapi.api.PacketInventoryAPI;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
+import ru.soknight.packetinventoryapi.nms.NMSAssistant;
 import ru.soknight.packetinventoryapi.nms.vanilla.VanillaItem;
 import ru.soknight.packetinventoryapi.placeholder.LitePlaceholderReplacer;
 import ru.soknight.packetinventoryapi.placeholder.PlaceholderReplacer;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractPlaceholderContext implements PlaceholderContext {
+
+    private static final String EMPTY_COMPONENT_JSON = "{\"text\":\"\"}";
 
     protected final Player viewer;
     protected final List<PlaceholderReplacer> placeholderReplacers;
@@ -137,7 +140,13 @@ public abstract class AbstractPlaceholderContext implements PlaceholderContext {
 
         if(itemMeta.hasDisplayName()) {
             String displayName = itemMeta.getDisplayName();
-            itemMeta.setDisplayName(replacePlaceholders(displayName, slot));
+            String value = replacePlaceholders(displayName, slot);
+
+            if(value.isEmpty()) {
+                NMSAssistant.getItemStackPatcher().setDisplayName(itemMeta, EMPTY_COMPONENT_JSON);
+            } else {
+                itemMeta.setDisplayName(value);
+            }
         }
 
         if(itemMeta.hasLore()) {
@@ -149,13 +158,19 @@ public abstract class AbstractPlaceholderContext implements PlaceholderContext {
             WrappedItemStack wrapper = (WrappedItemStack) original;
             VanillaItem<?, ?> vanillaItem = wrapper.getVanillaItem();
 
+            // empty name
+            String name = vanillaItem.getName();
+            if(name != null && name.isEmpty()) {
+                NMSAssistant.getItemStackPatcher().setDisplayName(itemMeta, EMPTY_COMPONENT_JSON);
+            }
+
             // player head
             String playerHead = vanillaItem.getPlayerHead();
             if(playerHead != null && !playerHead.isEmpty() && itemMeta instanceof SkullMeta) {
-                String playerName = replacePlaceholders(playerHead, slot);
+                String value = replacePlaceholders(playerHead, slot);
                 PacketInventoryAPI.getInstance()
                         .skinsProvidingBus()
-                        .findPlayerSkin(playerName)
+                        .findPlayerSkin(value)
                         .ifPresent(gameProfile -> vanillaItem.assignHeadTexture((SkullMeta) itemMeta, gameProfile));
             }
         }

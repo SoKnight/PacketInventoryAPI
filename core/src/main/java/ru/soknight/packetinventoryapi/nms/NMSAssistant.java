@@ -8,6 +8,7 @@ import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
 import ru.soknight.packetinventoryapi.nms.vanilla.VanillaItem;
 import ru.soknight.packetinventoryapi.util.Invoker;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -17,6 +18,7 @@ public class NMSAssistant {
     public static final String NMS_VERSION;
     public static final String PACKAGE;
 
+    private static ItemStackPatcher itemStackPatcher;
     private static Invoker<VanillaItem.Builder> vanillaItemBuilderSupplier;
     private static Invoker<RegularMenuItem.Builder> menuItemBuilderSupplier;
 
@@ -28,6 +30,7 @@ public class NMSAssistant {
     public static void init(Plugin plugin) throws UnsupportedVersionException {
         plugin.getLogger().info("Detected NMS version: " + NMS_VERSION);
 
+        itemStackPatcher = loadProxiedImplementation(ItemStackPatcher.class);
         vanillaItemBuilderSupplier = loadBuilder(VanillaItem.class, VanillaItem.Builder.class);
         menuItemBuilderSupplier = loadBuilder(RegularMenuItem.class, RegularMenuItem.Builder.class);
     }
@@ -43,6 +46,34 @@ public class NMSAssistant {
             Method method = nmsClass.getMethod("build", ConfigurationSection.class);
             return args -> invokeQuietly(method, args);
         } catch (Throwable ex) {
+            throw new UnsupportedVersionException(NMS_VERSION);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T loadProxiedImplementation(Class<T> type) throws UnsupportedVersionException {
+        ImplementedAs annotation = type.getAnnotation(ImplementedAs.class);
+        if(annotation == null)
+            throw new IllegalArgumentException("class '" + type.getName() + "' must be annotated with @ImplementedAs!");
+
+        String value = annotation.value();
+        try {
+            Class<?> nmsClass = Class.forName(PACKAGE + "." + value);
+            if(!type.isAssignableFrom(nmsClass))
+                throw new IllegalArgumentException("class '" + nmsClass.getName() + "' must inherit the '" + type.getName() + "'!");
+
+            try {
+                Constructor<?> emptyConstructor = nmsClass.getConstructor();
+                if(emptyConstructor == null)
+                    throw new IllegalArgumentException("class '" + nmsClass.getName() + "' must have an empty constructor!");
+
+                return (T) emptyConstructor.newInstance();
+            } catch (NoSuchMethodException | SecurityException | IllegalArgumentException ex) {
+                throw new IllegalArgumentException("class '" + nmsClass.getName() + "' must have an empty constructor!");
+            } catch (InvocationTargetException | InstantiationException | IllegalAccessException ex) {
+                throw new IllegalArgumentException("cannot create a new instance of '" + nmsClass.getName() + "'!");
+            }
+        } catch (ClassNotFoundException ex) {
             throw new UnsupportedVersionException(NMS_VERSION);
         }
     }
@@ -73,6 +104,13 @@ public class NMSAssistant {
             throw new IllegalStateException("menu item creation is unavailable now!");
 
         return menuItemBuilderSupplier.invoke(configuration);
+    }
+
+    public static ItemStackPatcher getItemStackPatcher() {
+        if(itemStackPatcher == null)
+            throw new IllegalStateException("item stack patcher hasn't been initialized yet!");
+
+        return itemStackPatcher;
     }
 
 }

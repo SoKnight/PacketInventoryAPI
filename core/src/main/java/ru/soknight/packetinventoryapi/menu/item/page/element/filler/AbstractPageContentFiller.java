@@ -13,6 +13,7 @@ import ru.soknight.packetinventoryapi.menu.item.DisplayableMenuItem;
 import ru.soknight.packetinventoryapi.menu.item.WrappedItemStack;
 import ru.soknight.packetinventoryapi.menu.item.page.element.renderer.SlotItemRenderer;
 import ru.soknight.packetinventoryapi.menu.item.regular.RegularMenuItem;
+import ru.soknight.packetinventoryapi.nms.NMSAssistant;
 import ru.soknight.packetinventoryapi.nms.vanilla.VanillaItem;
 import ru.soknight.packetinventoryapi.placeholder.container.list.ListContainer;
 import ru.soknight.packetinventoryapi.placeholder.container.string.StringContainer;
@@ -25,6 +26,8 @@ import java.util.List;
 
 @Getter
 public abstract class AbstractPageContentFiller<I extends DisplayableMenuItem> implements PageContentFiller<I> {
+
+    private static final String EMPTY_COMPONENT_JSON = "{\"text\":\"\"}";
 
     protected final SlotItemRenderer slotItemRenderer;
     protected final boolean replaceWithEmptyItems;
@@ -112,6 +115,17 @@ public abstract class AbstractPageContentFiller<I extends DisplayableMenuItem> i
             itemMeta.setDisplayName(replacePlaceholders(viewer, displayName, slot, pageIndex, totalIndex));
         }
 
+        if(itemMeta.hasDisplayName()) {
+            String displayName = itemMeta.getDisplayName();
+            String value = replacePlaceholders(viewer, displayName, slot, pageIndex, totalIndex);
+
+            if(value.isEmpty()) {
+                NMSAssistant.getItemStackPatcher().setDisplayName(itemMeta, EMPTY_COMPONENT_JSON);
+            } else {
+                itemMeta.setDisplayName(value);
+            }
+        }
+
         if(itemMeta.hasLore()) {
             List<String> lore = itemMeta.getLore();
             itemMeta.setLore(replacePlaceholders(viewer, lore, slot, pageIndex, totalIndex));
@@ -120,6 +134,12 @@ public abstract class AbstractPageContentFiller<I extends DisplayableMenuItem> i
         if(item instanceof WrappedItemStack) {
             WrappedItemStack wrapper = (WrappedItemStack) item;
             VanillaItem<?, ?> vanillaItem = wrapper.getVanillaItem();
+
+            // empty name
+            String name = vanillaItem.getName();
+            if(name != null && name.isEmpty()) {
+                NMSAssistant.getItemStackPatcher().setDisplayName(itemMeta, EMPTY_COMPONENT_JSON);
+            }
 
             // player head
             String playerHead = vanillaItem.getPlayerHead();
@@ -133,6 +153,10 @@ public abstract class AbstractPageContentFiller<I extends DisplayableMenuItem> i
         }
 
         item.setItemMeta(itemMeta);
+    }
+
+    private void setEmptyDisplayName(@NotNull ItemMeta itemMeta) {
+
     }
 
     @Override
