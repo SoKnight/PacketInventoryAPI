@@ -8,42 +8,45 @@
 
     <modules>
         <module>core</module>
-        <module>magenta</module>
-        <module>purple</module>
-        <module>nms/v1_13_R1</module>
-        <module>nms/v1_13_R2</module>
-        <module>nms/v1_14_R1</module>
-        <module>nms/v1_15_R1</module>
-        <module>nms/v1_16_R1</module>
-        <module>nms/v1_16_R2</module>
-        <module>nms/v1_16_R3</module>
-        <module>nms/v1_17_R1</module>
+        <module>nms</module>
+        <module>plugin</module>
     </modules>
 
-    <name>PacketInventoryAPI</name>
+    <name>Packet Inventory API - Parent</name>
     <description>The API for all in-game inventory types based on the ProtocolLib</description>
     <url>https://github.com/SoKnight/PacketInventoryAPI</url>
 
     <properties>
         <!-- Building -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
+        <java.version>8</java.version>
+
+        <!-- Manifest -->
+        <manifest.developer.contact>https://vk.me/soknight</manifest.developer.contact>
+        <manifest.developer.name>SoKnight</manifest.developer.name>
+        <manifest.github>https://github.com/SoKnight/PacketInventoryAPI/</manifest.github>
+
+        <!-- Plugin properties -->
+        <plugin.name>PacketInventoryAPI</plugin.name>
+        <plugin.description>${project.description}</plugin.description>
+        <plugin.version>${project.version}</plugin.version>
 
         <!-- Additional libs versions -->
-        <spigot.api.version>1.16.5-R0.1-SNAPSHOT</spigot.api.version>
-        <protocollib.version>4.7.0-SNAPSHOT</protocollib.version>
-        <placeholderapi.version>2.10.10</placeholderapi.version>
-        <advancedskins.api.version>2.0.0</advancedskins.api.version>
+        <spigot.api.version>1.15.2-R0.1-SNAPSHOT</spigot.api.version>
+        <protocollib.version>4.8.0-SNAPSHOT</protocollib.version>
+        <placeholderapi.version>2.11.1</placeholderapi.version>
+        <advancedskins.api.version>2.1.0</advancedskins.api.version>
         <itemsadder.api.version>2.4.21</itemsadder.api.version>
         <jetbrains.annotations.version>22.0.0</jetbrains.annotations.version>
         <lombok.version>1.18.22</lombok.version>
 
         <!-- Maven plugins -->
-        <maven.compiler.plugin.version>3.9.0-SNAPSHOT</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
+        <maven.shade.plugin.version>3.3.0-SNAPSHOT</maven.shade.plugin.version>
         <maven.jar.plugin.version>3.2.0</maven.jar.plugin.version>
         <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
-        <maven.shade.plugin.version>3.2.4</maven.shade.plugin.version>
         <maven.deploy.plugin.version>3.0.0-M1</maven.deploy.plugin.version>
+        <maven.toolchains.plugin.version>3.0.0</maven.toolchains.plugin.version>
     </properties>
 
     <distributionManagement>
@@ -63,8 +66,16 @@
             <url>https://repo.dmulloy2.net/nexus/repository/public/</url>
         </repository>
         <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io/</url>
+        </repository>
+        <repository>
+            <id>minecraft-libraries</id>
+            <url>https://libraries.minecraft.net/</url>
         </repository>
         <repository>
             <id>nexus</id>
@@ -89,6 +100,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Core module -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <!-- Spigot API -->
             <dependency>
                 <groupId>org.spigotmc</groupId>
@@ -115,7 +134,7 @@
 
             <!-- AdvancedSkins API -->
             <dependency>
-                <groupId>ru.soknight.advancedskins</groupId>
+                <groupId>me.soknight.advancedskins</groupId>
                 <artifactId>api</artifactId>
                 <version>${advancedskins.api.version}</version>
                 <scope>provided</scope>
@@ -144,10 +163,134 @@
                 <version>${lombok.version}</version>
                 <scope>provided</scope>
             </dependency>
+
+            <!-- All NMS implementations from 1.13.R1 to 1.18.R2 -->
+
+            <!-- NMS 1.13.R1 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_13_R1</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- NMS 1.13.R2 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_13_R2</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- NMS 1.14.R1 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_14_R1</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- NMS 1.15.R1 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_15_R1</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- NMS 1.16.R1 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_16_R1</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- NMS 1.16.R2 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_16_R2</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- NMS 1.16.R3 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_16_R3</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- NMS 1.17.R1 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_17_R1</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- NMS 1.18.R1 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_18_R1</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- NMS 1.18.R2 -->
+            <dependency>
+                <groupId>ru.soknight.packetinventoryapi</groupId>
+                <artifactId>v1_18_R2</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.spigotmc</groupId>
+                        <artifactId>spigot</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     
     <build>
+        <finalName>${plugin.name}-${project.artifactId}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -179,6 +322,14 @@
                     <configuration>
                         <archive>
                             <addMavenDescriptor>false</addMavenDescriptor>
+                            <manifest>
+                                <addDefaultEntries>false</addDefaultEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Developer-Contact>${manifest.developer.contact}</Developer-Contact>
+                                <Developer-Name>${manifest.developer.name}</Developer-Name>
+                                <GitHub>${manifest.github}</GitHub>
+                            </manifestEntries>
                         </archive>
                     </configuration>
                 </plugin>
@@ -210,17 +361,55 @@
                     <version>${maven.shade.plugin.version}</version>
                     <configuration>
                         <createDependencyReducedPom>false</createDependencyReducedPom>
-                        <shadedArtifactAttached>false</shadedArtifactAttached>
+                        <createSourcesJar>true</createSourcesJar>
+                        <shadedArtifactAttached>true</shadedArtifactAttached>
+                        <shadedClassifierName>full</shadedClassifierName>
+                        <finalName>${plugin.name}-${project.artifactId}-full</finalName>
                         <filters>
                             <filter>
                                 <artifact>*:*</artifact>
                                 <excludes>
                                     <exclude>module-info.class</exclude>
-                                    <exclude>META-INF/versions/9/module-info.class</exclude>
-                                    <exclude>META-INF/*.MF</exclude>
+                                    <exclude>META-INF/maven/</exclude>
+                                    <exclude>META-INF/versions/</exclude>
+                                    <exclude>META-INF/LICENSE</exclude>
+                                    <exclude>META-INF/LICENSE.txt</exclude>
+                                    <exclude>META-INF/NOTICE</exclude>
+                                    <exclude>META-INF/NOTICE.txt</exclude>
+                                    <exclude>META-INF/*.SF</exclude>
+                                    <exclude>META-INF/*.DSA</exclude>
+                                    <exclude>META-INF/*.RSA</exclude>
+                                </excludes>
+                            </filter>
+                            <filter>
+                                <artifact>ru.soknight.packetinventoryapi:core</artifact>
+                                <excludes>
+                                    <exclude>META-INF/MANIFEST.MF</exclude>
+                                </excludes>
+                            </filter>
+                            <filter>
+                                <artifact>ru.soknight.packetinventoryapi:v1_*</artifact>
+                                <excludes>
+                                    <exclude>META-INF/MANIFEST.MF</exclude>
+                                </excludes>
+                            </filter>
+                            <filter>
+                                <artifact>org.*:*</artifact>
+                                <excludes>
+                                    <exclude>META-INF/MANIFEST.MF</exclude>
                                 </excludes>
                             </filter>
                         </filters>
+                        <relocations>
+                            <relocation>
+                                <pattern>org.jetbrains.annotations</pattern>
+                                <shadedPattern>ru.soknight.packetinventoryapi.libs.intellij.annotations</shadedPattern>
+                            </relocation>
+                            <relocation>
+                                <pattern>org.intellij.lang.annotations</pattern>
+                                <shadedPattern>ru.soknight.packetinventoryapi.libs.intellij.annotations</shadedPattern>
+                            </relocation>
+                        </relocations>
                     </configuration>
                     <executions>
                         <execution>
@@ -246,6 +435,33 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+
+                <!-- Maven toolchains plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-toolchains-plugin</artifactId>
+                    <version>${maven.toolchains.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>toolchain</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <toolchains>
+                            <jdk>
+                                <version>8</version>
+                            </jdk>
+                            <jdk>
+                                <version>16</version>
+                            </jdk>
+                            <jdk>
+                                <version>17</version>
+                            </jdk>
+                        </toolchains>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

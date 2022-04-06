@@ -4,8 +4,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import ru.soknight.packetinventoryapi.animation.Animation;
 import ru.soknight.packetinventoryapi.api.PacketInventoryAPI;
+import ru.soknight.packetinventoryapi.animation.Animation;
 import ru.soknight.packetinventoryapi.exception.UnsupportedVersionException;
 import ru.soknight.packetinventoryapi.exception.packet.NoConstructorFoundException;
 import ru.soknight.packetinventoryapi.integration.Integrations;
@@ -34,8 +34,6 @@ public final class PacketInventoryAPIPlugin extends JavaPlugin {
     private SimpleMenuRegistry menuRegistry;
     private PacketsListener packetsListener;
 
-    private SkinsProvidingBus skinsProvidingBus;
-
     private PlaceholderReplacer papiPlaceholderReplacer;
     private ExecutorService asyncSingleExecutorService;
     private ExecutorService asyncMultiExecutorService;
@@ -62,7 +60,7 @@ public final class PacketInventoryAPIPlugin extends JavaPlugin {
         this.menuRegistry = new SimpleMenuRegistry();
         this.packetsListener = new PacketsListener(this, containerStorage);
 
-        this.skinsProvidingBus = new SkinsProvidingBus(this);
+        SkinsProvidingBus skinsProvidingBus = new SkinsProvidingBus(this);
 
         resolvePlaceholderReplacer();
         this.asyncSingleExecutorService = Executors.newSingleThreadExecutor();

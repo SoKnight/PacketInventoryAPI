@@ -2,125 +2,103 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>ru.soknight.packetinventoryapi</groupId>
         <artifactId>parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>magenta</artifactId>
-    <name>PacketInventoryAPI - Magenta</name>
-
-    <properties>
-        <java.version>8</java.version>
-    </properties>
+    <artifactId>plugin</artifactId>
+    <name>Packet Inventory API - Plugin</name>
 
     <dependencies>
         <!-- Core module -->
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>core</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jetbrains</groupId>
-                    <artifactId>annotations</artifactId>
-                </exclusion>
-            </exclusions>
+            <scope>compile</scope>
         </dependency>
 
-        <!-- All NMS implementations from 1.13.R1 to 1.16.R3 -->
+        <!-- Spigot API -->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+        </dependency>
+
+        <!-- ProtocoLib -->
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- All NMS implementations from 1.13.R1 to 1.18.R2 -->
 
         <!-- NMS 1.13.R1 -->
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>v1_13_R1</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spigotmc</groupId>
-                    <artifactId>spigot</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- NMS 1.13.R2 -->
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>v1_13_R2</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spigotmc</groupId>
-                    <artifactId>spigot</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- NMS 1.14.R1 -->
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>v1_14_R1</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spigotmc</groupId>
-                    <artifactId>spigot</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- NMS 1.15.R1 -->
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>v1_15_R1</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spigotmc</groupId>
-                    <artifactId>spigot</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- NMS 1.16.R1 -->
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>v1_16_R1</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spigotmc</groupId>
-                    <artifactId>spigot</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- NMS 1.16.R2 -->
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>v1_16_R2</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spigotmc</groupId>
-                    <artifactId>spigot</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- NMS 1.16.R3 -->
         <dependency>
             <groupId>ru.soknight.packetinventoryapi</groupId>
             <artifactId>v1_16_R3</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spigotmc</groupId>
-                    <artifactId>spigot</artifactId>
-                </exclusion>
-            </exclusions>
+        </dependency>
+        <!-- NMS 1.17.R1 -->
+        <dependency>
+            <groupId>ru.soknight.packetinventoryapi</groupId>
+            <artifactId>v1_17_R1</artifactId>
+        </dependency>
+        <!-- NMS 1.18.R1 -->
+        <dependency>
+            <groupId>ru.soknight.packetinventoryapi</groupId>
+            <artifactId>v1_18_R1</artifactId>
+        </dependency>
+        <!-- NMS 1.18.R2 -->
+        <dependency>
+            <groupId>ru.soknight.packetinventoryapi</groupId>
+            <artifactId>v1_18_R2</artifactId>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -135,7 +113,7 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
+                <artifactId>maven-toolchains-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

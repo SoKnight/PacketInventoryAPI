@@ -2,12 +2,12 @@ package ru.soknight.packetinventoryapi.integration.skins;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
+import me.soknight.advancedskins.api.AdvancedSkinsApi;
+import me.soknight.advancedskins.api.exception.FeatureUnavailableException;
+import me.soknight.advancedskins.api.profile.PlayerProfile;
+import me.soknight.advancedskins.api.profile.ProfileCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.soknight.advancedskins.api.AdvancedSkinsApi;
-import ru.soknight.advancedskins.api.exception.FeatureUnavailableException;
-import ru.soknight.advancedskins.api.profile.PlayerProfile;
-import ru.soknight.advancedskins.api.profile.ProfileCache;
 
 import java.util.UUID;
 

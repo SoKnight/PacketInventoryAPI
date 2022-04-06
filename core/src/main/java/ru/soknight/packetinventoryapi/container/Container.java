@@ -324,7 +324,7 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         if(!reopened && isViewing())
             close();
 
-        PacketInventoryAPI apiInstance = PacketInventoryAPIPlugin.getApiInstance();
+        PacketInventoryAPI apiInstance = PacketInventoryAPI.getInstance();
         SimpleContainerStorage storage = (SimpleContainerStorage) apiInstance.containerStorage();
         storage.open(this, reopened);
         return getThis();

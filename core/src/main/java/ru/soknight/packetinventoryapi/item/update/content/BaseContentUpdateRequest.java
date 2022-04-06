@@ -472,7 +472,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         for(int i = 0; i < 27; i++) {
             int index = firstIndex + i;
             ItemStack item = inventory[i];
-            if(item != null && !item.getType().isAir() && slotData.get(index) == EMPTY_ITEM)
+            if(item != null && item.getType() != Material.AIR && slotData.get(index) == EMPTY_ITEM)
                 slotData.set(index, item);
         }
     }
@@ -490,7 +490,7 @@ public class BaseContentUpdateRequest<C extends Container<C, R>, R extends Conte
         for(int i = 0; i < 9; i++) {
             int index = firstIndex + i;
             ItemStack item = hotbar[i];
-            if(item != null && !item.getType().isAir() && slotData.get(index) == EMPTY_ITEM)
+            if(item != null && item.getType() != Material.AIR && slotData.get(index) == EMPTY_ITEM)
                 slotData.set(index, item);
         }
     }
