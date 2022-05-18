@@ -20,26 +20,30 @@ import ru.soknight.packetinventoryapi.packet.server.PacketServerCloseWindow;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerOpenWindow;
 import ru.soknight.packetinventoryapi.packet.server.PacketServerSetSlot;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class SimpleContainerStorage implements ContainerStorage {
 
-    private final Map<String, Container<?, ?>> containers = new LinkedHashMap<>();
+    private final Lock containersLock = new ReentrantLock();
+    private final Map<String, Container<?, ?>> containers = new ConcurrentHashMap<>();
+
+    @Override
+    public Container<?, ?> getOpened(@NotNull String holderName) {
+        return containers.get(holderName);
+    }
 
     @Override
     public boolean isViewing(@NotNull String holderName) {
-        synchronized (this) {
-            return containers.containsKey(holderName);
-        }
+        return containers.containsKey(holderName);
     }
 
     @Override
     public boolean isViewing(@NotNull Container<?, ?> container) {
-        synchronized (this) {
-            return containers.get(container.getInventoryHolder().getName()) == container;
-        }
+        return getOpened(container.getHolderName()) == container;
     }
 
     @Override
@@ -48,8 +52,10 @@ public final class SimpleContainerStorage implements ContainerStorage {
     }
 
     public void open(@NotNull Container<?, ?> container, boolean reopened) {
-        synchronized (this) {
-            Container<?, ?> currentContainer = containers.remove(container.getInventoryHolder().getName());
+        try {
+            containersLock.lock();
+
+            Container<?, ?> currentContainer = containers.remove(container.getHolderName());
             if(currentContainer != null) {
                 if(currentContainer == container) {
                     container.onOpen(true);
@@ -58,10 +64,12 @@ public final class SimpleContainerStorage implements ContainerStorage {
                 }
             }
 
-            containers.put(container.getInventoryHolder().getName(), container);
+            containers.put(container.getHolderName(), container);
 
             sendOpenPacket(container);
             container.onOpen(reopened);
+        } finally {
+            containersLock.unlock();
         }
     }
 
@@ -93,16 +101,19 @@ public final class SimpleContainerStorage implements ContainerStorage {
     public void close(@NotNull Container<?, ?> container, boolean requestedByHolder) {
         boolean closedActually = false;
 
-        synchronized (this) {
-            Container<?, ?> currentContainer = containers.get(container.getInventoryHolder().getName());
-            if(currentContainer != container)
-                return;
+        try {
+            containersLock.lock();
 
-            if(container.onClose(requestedByHolder)) {
-                sendClosePacket(container);
-                containers.remove(container.getInventoryHolder().getName());
-                closedActually = true;
+            Container<?, ?> currentContainer = containers.get(container.getHolderName());
+            if(currentContainer == container) {
+                if (container.onClose(requestedByHolder)) {
+                    sendClosePacket(container);
+                    containers.remove(container.getHolderName());
+                    closedActually = true;
+                }
             }
+        } finally {
+            containersLock.unlock();
         }
 
         container.onPostClose(requestedByHolder, closedActually);

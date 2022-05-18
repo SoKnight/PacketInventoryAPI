@@ -19,7 +19,7 @@ public abstract class Animation<A extends Animation<A>> {
 
     public static final List<Animation<?>> PLAYING_ANIMATIONS = new CopyOnWriteArrayList<>();
     private static final AtomicInteger COUNTER = new AtomicInteger(1);
-    private static final long FINISH_TIMEOUT = 5000L;
+    public static final long FINISH_TIMEOUT = 5000L;
 
     protected static final int DEFAULT_STEPS_AMOUNT = 1;
     protected static final boolean DEFAULT_VIEW_REQUIRED_FLAG = true;
@@ -77,7 +77,7 @@ public abstract class Animation<A extends Animation<A>> {
         CompletableFuture<?>[] futures = new ArrayList<>(PLAYING_ANIMATIONS)
                 .stream()
                 .filter(a -> a.isPlayingIn(container))
-                .map(a -> a.finishAsync(FINISH_TIMEOUT))
+                .map(a -> a.finishAsync(getRelevantFinishTimeout(container)))
                 .toArray(CompletableFuture<?>[]::new);
 
         CompletableFuture.allOf(futures).join();
@@ -89,11 +89,18 @@ public abstract class Animation<A extends Animation<A>> {
                 .stream()
                 .filter(a -> a.isPlayingIn(container))
                 .filter(a -> a.getClass() == animationType)
-                .map(a -> a.finishAsync(FINISH_TIMEOUT))
+                .map(a -> a.finishAsync(getRelevantFinishTimeout(container)))
                 .toArray(CompletableFuture<?>[]::new);
 
         CompletableFuture.allOf(futures).join();
         return futures.length;
+    }
+
+    public static long getRelevantFinishTimeout(Container<?, ?> container) {
+        if (container.isFinishAnimationsImmediately())
+            return 0L;
+        else
+            return Math.max(0L, container.getAnimationFinishTimeout());
     }
 
     protected abstract A getThis();

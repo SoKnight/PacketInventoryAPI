@@ -63,9 +63,11 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
     protected @Nullable ExtraDataProvider<C, R> extraDataProvider;
     private boolean viewing;
 
+    protected long animationFinishTimeout = Animation.FINISH_TIMEOUT;
     protected boolean viewingPlayerInventory;
     protected boolean viewingHotbarContent;
     protected boolean finishAnimationsOnClose = true;
+    protected boolean finishAnimationsImmediately = true;
     protected boolean updateInventoryOnClose = true;
     protected boolean closeable = true;
     protected boolean interactable;
@@ -133,6 +135,10 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         synchronized (this) {
             task.run();
         }
+    }
+
+    public @NotNull String getHolderName() {
+        return inventoryHolder.getName();
     }
 
     public @NotNull @UnmodifiableView Map<Integer, ItemStack> getContentData() {
@@ -251,6 +257,11 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
         return getThis();
     }
 
+    public @NotNull C setAnimationFinishTimeout(long millis) {
+        this.animationFinishTimeout = millis;
+        return getThis();
+    }
+
     public @NotNull C setViewingPlayerInventory(boolean value) {
         this.viewingPlayerInventory = value;
         return getThis();
@@ -263,6 +274,11 @@ public abstract class Container<C extends Container<C, R>, R extends ContentUpda
 
     public @NotNull C setFinishAnimationsOnClose(boolean value) {
         this.finishAnimationsOnClose = value;
+        return getThis();
+    }
+
+    public @NotNull C setFinishAnimationsImmediately(boolean value) {
+        this.finishAnimationsImmediately = value;
         return getThis();
     }
 

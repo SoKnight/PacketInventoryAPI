@@ -15,6 +15,8 @@ public interface ContainerStorage {
     int INVENTORY_ID = 112;
     ItemStack EMPTY_ITEM = new ItemStack(Material.AIR);
 
+    Container<?, ?> getOpened(@NotNull String holderName);
+
     boolean isViewing(@NotNull String holderName);
 
     boolean isViewing(@NotNull Container<?, ?> container);
